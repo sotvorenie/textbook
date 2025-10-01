@@ -1,0 +1,22 @@
+@use '../helpers/index' as *;
+@use '../variables' as *;
+
+.modal {
+  inset: 0;
+  backdrop-filter: blur(3px) brightness(0.75);
+
+  &__close {
+    @include square($button-size);
+    
+    background: $color-dark;
+    top: rem(-25);
+    right: rem(-25);
+  }
+
+  &__content {
+    background: $color-dark;
+    padding: rem(20);
+    border-radius: $radius-medium;
+    border: $border-light-alt;
+  }
+}

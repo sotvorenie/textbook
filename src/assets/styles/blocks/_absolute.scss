@@ -1,0 +1,23 @@
+@use '../helpers/index' as *;
+@use '../variables' as *;
+
+.absolute {
+  position: relative;
+
+  &__content {
+    @include abs-x;
+
+    position: absolute;
+    z-index: 1001;
+    background-color: color-mix(in srgb, var(--color-dark) 60%, transparent);
+    backdrop-filter: blur(3px);
+    border-radius: $radius-regular;
+    padding: rem(20);
+
+    &-item {
+      &:not(:last-child) {
+        margin-bottom: rem(10);
+      }
+    }
+  }
+}

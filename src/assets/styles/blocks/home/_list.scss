@@ -1,0 +1,91 @@
+@use '../../helpers/index' as *;
+@use '../../variables' as *;
+
+.list {
+  --gap: 30px;
+
+  margin-bottom: rem(30);
+
+  &__item {
+    padding: rem(20);
+    border: $border-light-alt;
+    border-radius: $radius-medium;
+    transition-duration: $transition-duration;
+
+    @include hover {
+      border-color: $color-accent;
+    }
+  }
+
+  &__like {
+    @include square(30);
+
+    top: rem(10);
+    right: rem(10);
+
+    @include hover {
+      scale: 1.2;
+    }
+  }
+
+  &__title {
+    padding-bottom: rem(5);
+    margin-bottom: rem(10);
+    border-bottom: $border-light-alt;
+
+    .is-active {
+      color: $color-accent;
+    }
+  }
+
+  &__date {
+    margin-bottom: rem(10);
+  }
+
+  &__name.is-active {
+    border-color: $color-accent;
+  }
+
+  .absolute__content {
+    width: 100%;
+  }
+
+  &__tech {
+
+    &-title {
+      margin-bottom: rem(10);
+      column-gap: rem(5);
+
+      button {
+        padding: rem(4);
+        border: $border-light-alt;
+        border-radius: $radius-regular;
+      }
+    }
+
+    &-content {
+      max-height: rem(200);
+      overflow-y: auto;
+      gap: rem(10);
+      top: 0;
+
+      p {
+        padding: rem(5);
+        border: $border-light-alt;
+        border-radius: $radius-regular;
+        height: fit-content;
+      }
+    }
+  }
+
+  &__technologies {
+    gap: rem(10);
+
+    &-item {
+      width: fit-content;
+      padding: rem(5);
+      border: $border-light-alt;
+      border-radius: $radius-regular;
+    }
+  }
+}

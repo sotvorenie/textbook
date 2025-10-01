@@ -1,0 +1,93 @@
+@use 'helpers/index' as *;
+@use 'variables' as *;
+
+.container {
+  max-width: calc($container-width + $container-padding-x * 2);
+  margin-inline: auto;
+  padding-inline: $container-padding-x;
+}
+
+.visually-hidden {
+  @include visually-hidden;
+}
+
+.hidden-mobile {
+  @include mobile {
+    display: none !important;
+  }
+}
+
+.recolor-svg {
+  svg {
+    &[stroke]:not([stroke="none"]),
+    *[stroke]:not([stroke="none"]) {
+      stroke: currentColor !important;
+    }
+
+    &[fill]:not([fill="none"]),
+    *[fill]:not([fill="none"]) {
+      fill: currentColor !important;
+    }
+
+    path,
+    circle,
+    rect,
+    polygon,
+    polyline,
+    line,
+    ellipse {
+      &[stroke]:not([stroke="none"]) {
+        stroke: currentColor !important;
+      }
+      &[fill]:not([fill="none"]) {
+        fill: currentColor !important;
+      }
+    }
+  }
+}
+
+.img-container {
+  overflow: hidden;
+  user-select: none;
+
+  @include hover {
+    img {
+      scale: 1.05;
+    }
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    transition-duration: $transition-duration;
+    object-fit: cover;
+  }
+}
+
+.i-svg {
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.swiper-right-no-padding {
+  width: calc(100vw - $container-padding-x);
+  padding-right: $container-padding-x !important;
+}
+
+.hover-color-accent {
+  @include hover {
+    color: $color-accent;
+    border-color: $color-accent;
+  }
+}
+
+.button-width-svg {
+
+  svg {
+    width: 80%;
+    height: auto;
+  }
+}

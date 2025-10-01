@@ -1,0 +1,86 @@
+@use '../../helpers/index' as *;
+@use '../../variables' as *;
+
+.menu {
+  --padding: #{$container-padding-x};
+
+  border-right: $border-light-alt;
+  padding-bottom: rem(10);
+
+  &.closed {
+    --padding: rem(10);
+
+    .menu__btn.menu__logo {
+      padding-left: rem(15);
+    }
+
+    .menu__btn {
+      column-gap: 0;
+    }
+
+    .menu__name {
+      width: 0;
+    }
+  }
+
+  &__btn {
+    column-gap: rem(10);
+    width: 100%;
+    padding: rem(15);
+    transition-duration: $transition-duration;
+
+    &:not(.menu__logo) {
+      @include hover {
+        color: $color-accent;
+      }
+    }
+
+    &.menu__logo {
+      width: 100%;
+      padding-inline: var(--padding);
+
+      svg {
+        @include hover {
+          color: $color-accent;
+        }
+      }
+    }
+
+    svg {
+      @include square(30);
+    }
+  }
+
+  &__name {
+    transform-origin: left;
+  }
+
+  &__list {
+    transition: padding-inline $transition-duration  ease;
+    padding-inline: calc(#{var(--padding)} - rem(15));
+    flex-grow: 1;
+  }
+
+  &__item {
+    border-radius: $radius-regular;
+    transition-duration: $transition-duration;
+
+    &:not(:last-child) {
+      margin-bottom: rem(10);
+    }
+
+    &.is-active {
+      pointer-events: none;
+      color: $color-accent;
+      background-color: color-mix(in srgb, var(--color-light) 10%, transparent);
+    }
+
+    @include hover {
+      background-color: color-mix(in srgb, var(--color-light) 10%, transparent);
+    }
+  }
+
+  &__bottom {
+    width: calc(100% - #{var(--padding)});
+  }
+}

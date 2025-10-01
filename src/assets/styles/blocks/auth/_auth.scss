@@ -1,0 +1,42 @@
+@use '../../helpers/index' as *;
+@use '../../variables' as *;
+
+.auth {
+  height: 100vh;
+
+  &__inner {
+    width: clamp(#{rem(500)}, 40%, #{rem(600)});
+    border: $border-light-alt;
+    border-radius: $radius;
+  }
+
+  &__header {
+    border-bottom: $border-light-alt;
+    padding: fluid(40, 20) rem(40) rem(20);
+  }
+
+  &__title {
+    @include fluid-text(32, 22);
+
+    &:not(.is-active) {
+      @include hover {
+        color: $color-accent;
+        scale: 1.05;
+      }
+    }
+
+    &.is-active {
+      color: $color-accent;
+      pointer-events: none;
+      border-bottom: $border-accent;
+    }
+  }
+
+  .swiper-wrapper {
+    align-items: center;
+  }
+
+  &__form {
+    padding: fluid(40, 20) fluid(60, 40);
+  }
+}

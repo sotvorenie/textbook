@@ -1,0 +1,19 @@
+@use '../helpers/index' as *;
+@use '../variables' as *;
+
+.checkbox-list {
+  gap: rem(20);
+
+  &__item {
+    padding: rem(15);
+    background: $color-dark-alt;
+    border-radius: $radius-medium;
+
+    label {
+      @include fluid-text(24, 20);
+
+      column-gap: rem(10);
+      line-height: 1;
+    }
+  }
+}

@@ -1,0 +1,36 @@
+@use '../../helpers/index' as *;
+@use '../../variables' as *;
+
+.settings {
+  column-gap: rem(10);
+
+  &__btn-bar {
+    column-gap: rem(10);
+  }
+
+  &__btn {
+    @include flex-center();
+
+    padding: rem(5) rem(15);
+    border-radius: $radius-regular;
+    border: $border-light-alt;
+    background-color: color-mix(in srgb, var(--color-light) 10%, transparent);
+
+    @include hover {
+      filter: brightness(0.8);
+    }
+
+    &.is-active {
+      pointer-events: none;
+      border-color: $color-accent;
+    }
+
+    &-transparent {
+      padding: rem(5);
+
+      svg {
+        @include square(25)
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+@use '../helpers/index' as *;
+@use '../variables' as *;
+
+.input, textarea {
+  border: $border-light-alt;
+  width: 100%;
+  padding: rem(15);
+  border-radius: $radius-medium;
+
+  &:focus {
+    outline: none;
+    border-color: $color-accent;
+  }
+
+  @include hover {
+    border-color: $color-accent;
+  }
+
+  &-small {
+    padding-block: rem(5);
+  }
+}

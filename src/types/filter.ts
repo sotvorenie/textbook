@@ -1,0 +1,1 @@
+export type FilterList = {id: number, name: string, checked: boolean, icon: string}[];

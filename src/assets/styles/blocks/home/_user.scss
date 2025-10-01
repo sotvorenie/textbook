@@ -1,0 +1,18 @@
+@use '../../helpers/index' as *;
+@use '../../variables' as *;
+
+.user {
+  column-gap: rem(10);
+  cursor: pointer;
+  transition-duration: $transition-duration;
+
+  &__ava {
+    @include square(40);
+
+    border-radius: 50%;
+  }
+
+  &__name {
+    @include fluid-text(18, 16);
+  }
+}

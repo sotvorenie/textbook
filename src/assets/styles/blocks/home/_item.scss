@@ -1,0 +1,25 @@
+@use '../../helpers/index' as *;
+@use '../../variables' as *;
+
+.item {
+
+  &__title {
+    margin-bottom: rem(20);
+  }
+
+  &__text {
+    line-height: 180%;
+  }
+
+  &__code {
+    @include fluid-text(22, 20);
+
+    background: $color-dark;
+    padding: rem(10);
+    border-radius: $radius-regular;
+  }
+
+  &__comment {
+    color: $color-accent;
+  }
+}

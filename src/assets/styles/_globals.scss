@@ -1,0 +1,100 @@
+@use 'helpers/index' as *;
+@use 'variables' as *;
+
+html {
+  &.is-lock {
+    overflow: hidden;
+  }
+}
+
+[data-theme="light"] {
+  $color-light: #3d4b56;
+  $color-light-alt: #5f6d78;
+  $color-dark: #ebeced;
+  $color-dark-alt: #cccfd2;
+}
+
+body {
+  @include fluid-text(18, 14);
+
+  display: flex;
+  flex-direction: column;
+  font-family: $font-family-base;
+  color: $color-light;
+  background: $color-dark-alt;
+  font-weight: 500;
+  overflow-x: hidden;
+}
+
+#app {
+  height: 100vh;
+  overflow: hidden;
+  //height: 100%;
+}
+
+main {
+  flex-grow: 1;
+}
+
+h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
+  font-weight: 600;
+}
+
+h1, .h1 {
+  @include fluid-text(72, 32);
+}
+
+h2, .h2 {
+  @include fluid-text(56, 24);
+}
+
+h3, .h3 {
+  @include fluid-text(40, 18);
+}
+
+h4, .h4 {
+  @include fluid-text(32, 18);
+}
+
+h5, .h5 {
+  @include fluid-text(24, 16);
+}
+
+h6, .h6 {
+  @include fluid-text(18, 14);
+}
+
+a,
+button,
+label,
+input,
+textarea,
+select,
+svg * {
+  transition-duration: var(--transition-duration);
+  color: currentColor;
+}
+
+button, input, textarea {
+  transition-duration: $transition-duration;
+}
+
+button, input, textarea {
+  @include reset_button;
+}
+
+input::placeholder, textarea::placeholder {
+  color: $color-light-alt;
+}
+
+a {
+  color: inherit;
+
+  @include hover {
+    color: $color-accent !important;
+  }
+
+  &[class] {
+    text-decoration: none;
+  }
+}

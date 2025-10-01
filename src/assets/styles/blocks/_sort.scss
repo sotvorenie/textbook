@@ -1,0 +1,13 @@
+@use '../helpers/index' as *;
+@use '../variables' as *;
+
+.sort {
+  background: transparent;
+  border: $border-light-alt;
+  border-radius: $radius-regular;
+  padding-inline: rem(10);
+
+  option {
+    background: $color-dark;
+  }
+}

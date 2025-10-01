@@ -1,0 +1,46 @@
+@use '../helpers/index' as *;
+@use '../variables' as *;
+
+.checkbox {
+  @include square(20);
+
+  color: $color-accent;
+
+  input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+
+    width: 100%;
+    height: 100%;
+    border: $border-light-alt;
+    border-radius: $radius-small;
+    cursor: pointer;
+    transition-duration: $transition-duration;
+    margin: 0;
+
+    @include hover {
+      border-color: inherit;
+    }
+
+    &:checked {
+      border-color: $color-accent;
+
+      & ~ svg {
+        scale: 1;
+      }
+    }
+
+    &:disabled {
+      filter: brightness(.7);
+    }
+  }
+
+  svg {
+    @include square(15);
+    @include abs-center;
+
+    z-index: -1;
+    transition-duration: $transition-duration;
+    scale: 0;
+  }
+}

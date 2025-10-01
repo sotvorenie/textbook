@@ -1,0 +1,38 @@
+@use '../helpers/index' as *;
+@use '../variables' as *;
+
+.navigation {
+  top: $position-size;
+  left: $position-size;
+  column-gap: rem(20);
+
+  &__btn {
+
+    &.back, &.reload {
+      svg {
+        @include square(30);
+      }
+
+      @include hover {
+        color: $color-accent;
+      }
+    }
+
+    &.back {
+      @include fluid-text(20, 18);
+
+      column-gap: rem(5);
+    }
+
+    &.reload {
+      display: inline-flex;
+    }
+
+    &.theme {
+
+      svg {
+        @include square(30);
+      }
+    }
+  }
+}

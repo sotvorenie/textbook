@@ -1,0 +1,36 @@
+@use '../../helpers/index' as *;
+@use '../../variables' as *;
+
+.create {
+  padding-top: rem(10);
+
+  &__btn-bar {
+    column-gap: rem(20);
+    margin-bottom: rem(20);
+    margin-top: rem(50);
+
+    &.position-sticky {
+      top: 0;
+      margin-bottom: rem(40);
+      background: $color-dark-alt;
+    }
+  }
+
+  &__block {
+    margin-block: rem(50);
+  }
+
+  &__textarea {
+    resize: none;
+    height: auto;
+  }
+
+  &__technologies {
+
+    &-list {
+      height: rem(400);
+      overflow-y: auto;
+    }
+  }
+
+}

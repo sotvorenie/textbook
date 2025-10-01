@@ -1,0 +1,21 @@
+@use '../helpers/index' as *;
+@use '../variables' as *;
+
+.toggle-button {
+  width: rem(70);
+  height: rem(40);
+  border: $border-light-alt;
+  border-radius: $radius;
+  padding-inline: rem(2);
+
+  &__btn {
+    aspect-ratio: 1;
+    height: 90%;
+    background: $color-light;
+    border-radius: 50%;
+
+    &.is-active {
+      margin-left: auto;
+    }
+  }
+}

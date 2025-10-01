@@ -1,0 +1,46 @@
+@use '../helpers/index' as *;
+@use '../variables' as *;
+
+.button {
+  @include fluid-text(20, 18);
+
+  display: block;
+  padding-inline: rem(20);
+  height: rem(70);
+  border: $border-light-alt;
+  border-radius: $radius-medium;
+
+  &:not([disabled]) {
+    @include hover {
+      border: $border-accent;
+      background: $color-accent;
+    }
+  }
+
+  &[disabled] {
+    cursor: not-allowed;
+  }
+
+  span {
+    @include flex-center();
+  }
+
+  i {
+    @include abs-center;
+  }
+
+  &-big-radius {
+    border-radius: $radius;
+  }
+
+  &-ball {
+    @include flex-center();
+
+    border: $border-light-alt;
+    border-radius: 50%;
+  }
+
+  &-small {
+    height: rem(40);
+  }
+}

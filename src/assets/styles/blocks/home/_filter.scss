@@ -1,0 +1,12 @@
+@use '../../helpers/index' as *;
+@use '../../variables' as *;
+
+.filter {
+  width: rem(250);
+
+  &__title {
+    margin-bottom: rem(10);
+    padding-bottom: rem(5);
+    border-bottom: $border-light-alt;
+  }
+}

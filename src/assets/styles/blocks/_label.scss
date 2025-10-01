@@ -1,0 +1,46 @@
+@use '../helpers/index' as *;
+@use '../variables' as *;
+
+.label {
+  display: flex;
+
+  &:not(:last-child) {
+    margin-bottom: rem(40);
+  }
+
+  &__text {
+    left: rem(12);
+    transform: translateY(-50%);
+    background: $color-dark-alt;
+    padding: rem(5);
+    transition-property: top;
+    transition-duration: $transition-duration-fast;
+
+    &:not(.is-active) {
+      top: 50%;
+    }
+
+    &.is-active {
+      top: 0;
+    }
+
+    @include hover {
+      & ~ input {
+        border-color: $color-accent;
+      }
+    }
+  }
+
+  &__error {
+    left: rem(5);
+    top: 105%;
+    color: $color-accent;
+  }
+
+  &__counter {
+    top: 70%;
+    background: $color-dark-alt;
+    padding: rem(5);
+    right: rem(15);
+  }
+}

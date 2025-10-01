@@ -1,0 +1,10 @@
+@use '../helpers/index' as *;
+@use '../variables' as *;
+
+.heart {
+  color: $color-accent;
+
+  &.fill {
+    fill: $color-accent;
+  }
+}

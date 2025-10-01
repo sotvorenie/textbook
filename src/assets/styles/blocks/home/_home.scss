@@ -1,0 +1,32 @@
+@use '../../helpers/index' as *;
+@use '../../variables' as *;
+
+.home {
+
+  &__header {
+    height: fluid(80, 60);
+    min-height: fluid(80, 60);
+    border-bottom: $border-light-alt;
+    margin-bottom: fluid(40, 20);
+  }
+
+  &__user {
+    @include square($button-size);
+  }
+
+  &__content-header, &__main {
+    padding-inline: $container-padding-x;
+  }
+
+  &__content {
+    width: 100%;
+    height: 100vh;
+  }
+
+  &__main {
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-bottom: rem(20);
+    height: 100%;
+  }
+}

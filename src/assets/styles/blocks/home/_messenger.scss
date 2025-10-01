@@ -1,0 +1,23 @@
+@use '../../helpers/index' as *;
+@use '../../variables' as *;
+
+.messenger {
+
+  &__user {
+
+    &-time {
+      @include fluid-text(16, 12);
+
+      color: $color-light-alt;
+    }
+  }
+
+  &__online {
+    @include square(12);
+
+    background: $color-success;
+    border-radius: 50%;
+    bottom: rem(2);
+    left: rem(30);
+  }
+}
