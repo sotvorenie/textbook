@@ -1,23 +1,23 @@
 <script setup lang="ts">
 import {computed, ref} from "vue";
 
+import {FilterList} from "../../../types/filter.ts";
+
 import HomeSettingsMyOther from "./HomeSettingsMyOther.vue";
+
 import Filter from "../../common/Filter.vue";
 import Sort from "../../common/Sort.vue";
 import Search from "../../common/Search.vue";
 import Back from "../../ui/Back.vue";
 import Btn from "../../ui/Btn.vue";
 
-import {FilterList} from "../../../types/filter.ts";
-
 import useBlocksStore from "../../../store/blocksStore.ts";
-import useSearchStore from "../../../store/searchStore.ts";
-import useSettingsStore from "../../../store/settingsStore.ts";
-import useUserStore from "../../../store/userStore.ts";
-
 const blocksStore = useBlocksStore();
+import useSearchStore from "../../../store/searchStore.ts";
 const searchStore = useSearchStore();
+import useSettingsStore from "../../../store/settingsStore.ts";
 const settingsStore = useSettingsStore();
+import useUserStore from "../../../store/userStore.ts";
 const userStore = useUserStore();
 
 const props = defineProps({

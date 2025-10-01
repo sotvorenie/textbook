@@ -1,23 +1,27 @@
 <script setup lang="ts">
 import {computed, ref} from "vue";
 
-import HomeEmpty from "./HomeEmpty.vue";
-import Hints from "./HomeMenuItems/Hints.vue";
-import Skeleton from "../../../App.vue";
 import {roundedButtonStyle} from "../../../data/styles.ts";
-import UserIcon from "../../../assets/icons/UserIcon.vue";
-import HomeUserCard from "./HomeUserCard.vue";
-import Modal from "../../common/Modal.vue";
+
+import Hints from "./HomeMenuItems/Hints.vue";
 import Advices from "./HomeMenuItems/Advices.vue";
 import Textbooks from "./HomeMenuItems/Textbooks.vue";
 import Projects from "./HomeMenuItems/Projects.vue";
 import Messenger from "./HomeMenuItems/Messenger.vue";
 import Blog from "./HomeMenuItems/Blog.vue";
 
-import useUserStore from "../../../store/userStore.ts";
 import HomeDefaultSettings from "./HomeDefaultSettings.vue";
 import MessengerSettings from "./HomeSettingsItems/MessengerSettings.vue";
 import BlogSettings from "./HomeSettingsItems/BlogSettings.vue";
+
+import HomeUserCard from "./HomeUserCard.vue";
+import HomeEmpty from "./HomeEmpty.vue";
+
+import Skeleton from "../../../App.vue";
+import UserIcon from "../../../assets/icons/UserIcon.vue";
+import Modal from "../../common/Modal.vue";
+
+import useUserStore from "../../../store/userStore.ts";
 const userStore = useUserStore();
 
 defineProps({

@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import {menuItems} from "../../../data/asideLinks.ts";
-import Menu from "../../../assets/icons/Menu.vue";
 import {ref} from "vue";
+
+import {menuItems} from "../../../data/asideLinks.ts";
+
+import Menu from "../../../assets/icons/Menu.vue";
 
 const activeIndex = defineModel();
 

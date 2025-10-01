@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import useUserStore from '../../../store/userStore';
-import Navigation from "../../common/Navigation.vue";
-import Btn from "../../ui/Btn.vue";
-import {showConfirm, showError} from "../../../utils/modals.ts";
-import {authToken} from "../../../utils/auth.ts";
-import router from "../../../router";
-import Edit from "../../../assets/icons/Edit.vue";
 import {ref} from "vue";
-import {deletePredLastFile, postAva, postFile} from "../../../api/users/users.ts";
-import UserIcon from "../../../assets/icons/UserIcon.vue";
+import router from "../../../router";
+
+import {authToken} from "../../../utils/auth.ts";
+import {showConfirm, showError} from "../../../utils/modals.ts";
 import {userAva} from "../../../utils/ava.ts";
+
+import {deletePredLastFile, postAva, postFile} from "../../../api/users/users.ts";
 import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.ts";
 
+import Navigation from "../../common/Navigation.vue";
+import Btn from "../../ui/Btn.vue";
+import Edit from "../../../assets/icons/Edit.vue";
+import UserIcon from "../../../assets/icons/UserIcon.vue";
+
+import useUserStore from '../../../store/userStore';
 const userStore = useUserStore();
 
 const exit = async () => {
@@ -33,12 +36,14 @@ const uploadFile = async (event: Event) => {
   try {
     const target = event.target as HTMLInputElement
 
-    if (!target || target.files.length === 0) {
+    if (!target || target.files?.length === 0) {
       await showError('Файл не выбран', 'Пожалуйста, выберите фото для загрузки')
       return
     }
 
-    const file = target.files[0]
+    const file = target.files?.[0]
+
+    if (!file) return
 
     if (file.size > 5 * 1024 * 1024) {
       await showError('Файл слишком большой', 'Максимальный размер фото - 5 Мб')

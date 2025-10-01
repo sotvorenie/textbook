@@ -1,22 +1,24 @@
 <script setup lang="ts">
 import {computed, ref, watch} from "vue";
 
-import useSearchStore from "../../../store/searchStore.ts";
-import useSettingsStore from "../../../store/settingsStore.ts";
-import useUserStore from "../../../store/userStore.ts";
+import {debounce} from "../../../utils/debounce.ts";
+
 import {getList} from "../../../api/posts/posts.ts";
+import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.ts";
+import {like} from "../../../api/liked/liked.ts";
+
+import {Meta} from "../../../types/meta.ts";
 
 import {List} from "../../../types/list.ts";
 import Like from "../../ui/Like.vue";
 import Absolute from "../../common/Absolute.vue";
-import {like} from "../../../api/liked/liked.ts";
 import Btn from "../../ui/Btn.vue";
-import {Meta} from "../../../types/meta.ts";
-import {debounce} from "../../../utils/debounce.ts";
-import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.ts";
 
+import useSearchStore from "../../../store/searchStore.ts";
 const searchStore = useSearchStore();
+import useSettingsStore from "../../../store/settingsStore.ts";
 const settingsStore = useSettingsStore();
+import useUserStore from "../../../store/userStore.ts";
 const userStore = useUserStore();
 
 const props = defineProps({

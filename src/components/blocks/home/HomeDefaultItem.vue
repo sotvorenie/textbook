@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import {computed, onMounted, ref} from "vue";
 
+import {getItem} from "../../../api/posts/posts.ts";
+
+import {Item} from "../../../types/item.ts";
+
 import useIdStore from "../../../store/idStore.ts";
 const idStore = useIdStore();
 import useSettingsStore from "../../../store/settingsStore.ts";
 const settingsStore = useSettingsStore();
 import useItemMemoStore from "../../../store/itemMemoStore.ts";
 const itemMemoStore = useItemMemoStore();
-
-import {Item} from "../../../types/item.ts";
-import {getItem} from "../../../api/posts/posts.ts";
 
 const props = defineProps({
   apiUrl: {
@@ -29,6 +30,7 @@ const item = ref<Item>({
   languages_and_technologies: [],
   text: '',
   date: '',
+  sort_date: '',
   time: '',
 })
 
