@@ -3,5 +3,9 @@
 </script>
 
 <template>
-  проверка токена...
+
 </template>
+
+<style scoped>
+
+</style>

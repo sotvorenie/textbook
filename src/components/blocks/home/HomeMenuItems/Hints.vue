@@ -5,11 +5,11 @@ import HomeDefaultList from "../HomeDefaultList.vue";
 import HomeDefaultItem from "../HomeDefaultItem.vue";
 import HomeDefaultCreate from "../HomeDefaultCreate.vue";
 
-import Skeleton from "../../../../App.vue";
-
 import useBlocksStore from "../../../../store/blocksStore.ts";
 const blocksStore = useBlocksStore();
 import useIdStore from "../../../../store/idStore.ts";
+import DefaultListSkeleton from "../../../ui/loading/DefaulListSkeleton.vue";
+import DefaultItemSkeleton from "../../../ui/loading/DefaultItemSkeleton.vue";
 const idStore = useIdStore();
 
 const activeComponent = computed(() => {
@@ -38,6 +38,14 @@ const changeItem = (id: number) => {
   idStore.idValues.hints = id;
 }
 
+const activeSkeleton = computed(() => {
+  if (blocksStore.activeBlock.hints === 'list') {
+    return DefaultListSkeleton;
+  } else if (blocksStore.activeBlock.hints === 'item') {
+    return DefaultItemSkeleton;
+  }
+})
+
 </script>
 
 <template>
@@ -50,7 +58,7 @@ const changeItem = (id: number) => {
       />
 
       <template #fallback>
-        <Skeleton/>
+        <Component :is="activeSkeleton"/>
       </template>
     </Suspense>
   </KeepAlive>

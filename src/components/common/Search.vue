@@ -44,7 +44,7 @@ watch(isVisible, () => {
   } else {
     setTimeout(() => {
       createVisible.value = true;
-    }, 100);
+    }, 200);
   }
 });
 </script>

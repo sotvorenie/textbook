@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, ref, watch} from "vue";
+import {computed, ref, watch, nextTick} from "vue";
 
 import {debounce} from "../../../utils/debounce.ts";
 
@@ -38,6 +38,8 @@ const emits = defineEmits(['changeItem']);
 const searchTechnologies = computed(() => {
   return searchStore.filterTechnologies[props.searchName] ?? []
 });
+
+//await new Promise(resolve => setTimeout(resolve, 3000000));
 
 // Метод для подсветки текста
 const highlightText = (text: string) => {
@@ -99,6 +101,8 @@ const getPosts = async(push: boolean = true) => {
       }
 
       meta.value = response.meta
+
+      await nextTick();
     }
 
     loadingVisible.value = false

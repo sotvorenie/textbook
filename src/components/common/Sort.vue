@@ -13,7 +13,10 @@ const handleSort = () => {
 
 <template>
 
-  <select class="sort overflow-hidden" @change="handleSort" v-model="selectedValue">
+  <select class="sort overflow-hidden cursor-pointer"
+          @change="handleSort"
+          v-model="selectedValue"
+  >
     <option class="sort__item" selected value="-sort_date">Сначала новые</option>
     <option class="sort__item" value="sort_date">Сначала старые</option>
   </select>

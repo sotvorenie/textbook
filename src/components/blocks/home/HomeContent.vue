@@ -17,7 +17,7 @@ import BlogSettings from "./HomeSettingsItems/BlogSettings.vue";
 import HomeUserCard from "./HomeUserCard.vue";
 import HomeEmpty from "./HomeEmpty.vue";
 
-import Skeleton from "../../../App.vue";
+import AppSkeleton from "../../ui/loading/AppSkeleton.vue";
 import UserIcon from "../../../assets/icons/UserIcon.vue";
 import Modal from "../../common/Modal.vue";
 
@@ -132,13 +132,7 @@ const modalVisible = ref<boolean>(false);
 
     <div class="home__main">
       <KeepAlive>
-        <Suspense>
-          <Component :is="contentComponents[activeIndex]"/>
-
-          <template #fallback>
-            <Skeleton/>
-          </template>
-        </Suspense>
+        <Component :is="contentComponents[activeIndex]"/>
       </KeepAlive>
     </div>
   </div>

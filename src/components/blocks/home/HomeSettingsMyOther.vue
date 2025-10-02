@@ -5,8 +5,12 @@ const index = defineModel();
 defineProps({
   secondTitle: {
     type: String,
-    default: 'Мои'
-  }
+    default: 'Мои',
+  },
+  myVisible: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const handleIndex = (value: string) => {
@@ -20,13 +24,20 @@ const handleIndex = (value: string) => {
     <button :class="{
               'settings__btn': true,
               'is-active': index === 'all'
-            }" class="settings__btn"
+            }"
             @click="handleIndex('all')"
     >Все</button>
     <button :class="{
               'settings__btn': true,
+              'is-active': index === 'likes'
+            }"
+            @click="handleIndex('likes')"
+    >Избранные</button>
+    <button :class="{
+              'settings__btn': true,
               'is-active': index === 'my'
-            }" class="settings__btn"
+            }"
+            v-if="myVisible"
             @click="handleIndex('my')"
     >{{secondTitle}}</button>
   </div>

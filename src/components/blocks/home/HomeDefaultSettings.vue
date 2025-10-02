@@ -56,7 +56,7 @@ const createVisible = computed(() => {
 
 const createBtnVisible = ref(true)
 
-const myOtherVisible = computed(() => {
+const myBtnVisible = computed(() => {
   if (props.blockName === 'textbooks') {
     return userStore.isFullAdmin
   }
@@ -75,16 +75,19 @@ const myOtherVisible = computed(() => {
             v-model:create-visible="createBtnVisible"
     />
 
-    <Filter @change="handleFilterChange"/>
+    <Filter v-show="createBtnVisible" @change="handleFilterChange"/>
 
-    <HomeSettingsMyOther v-if="myOtherVisible"
+
+
+    <HomeSettingsMyOther v-if="createBtnVisible"
                          v-model="searchStore.myOtherFilter[blockName]"
                          :block-name="blockName"
+                         :my-visible="myBtnVisible"
     />
 
-    <Sort @search="handleSort"/>
+    <Sort @search="handleSort" v-show="createBtnVisible"/>
 
-    <Btn class="settings__create button button-small"
+    <Btn class="settings__create button button-small text-nowrap"
          v-show="createBtnVisible"
          v-if="createVisible"
          @click="handleCreate"
