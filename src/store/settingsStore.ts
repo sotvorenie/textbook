@@ -11,8 +11,17 @@ const useSettingsStore = defineStore('settingsStore', () => {
         textbooks: 'list'
     })
 
+    const resetStore = () => {
+        settingsVisible.hints = 'list'
+        settingsVisible.advices = 'list'
+        settingsVisible.projects = 'list'
+        settingsVisible.textbooks = 'list'
+    }
+
     return {
         settingsVisible,
+
+        resetStore,
     }
 })
 

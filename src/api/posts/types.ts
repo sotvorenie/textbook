@@ -5,5 +5,6 @@ export interface GetList {
     user_id: number | null,
     sortBy: string,
     title?: string,
-    'languages_and_technologies[]'?: string[];
+    'languages_and_technologies[]'?: string[],
+    'id[]'?: number[],
 }

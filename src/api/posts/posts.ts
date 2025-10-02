@@ -10,6 +10,7 @@ export const getList = async (
     languages: string[],
     user_id: number | null,
     sortBy: string = '-sort_date',
+    id: number[] = []
 ): Promise<{meta: any, items: List[] | []}> => {
 
     const params: GetList = {
@@ -25,12 +26,11 @@ export const getList = async (
     }
 
     if (languages?.length > 0) {
-        languages.forEach(lang => {
-            if (!params['languages_and_technologies[]']) {
-                params['languages_and_technologies[]'] = [];
-            }
-            params['languages_and_technologies[]'].push(lang);
-        });
+        params['languages_and_technologies[]'] = languages;
+    }
+
+    if (id?.length > 0) {
+        params['id[]'] = id;
     }
 
     return await get(`/${name}`, params);

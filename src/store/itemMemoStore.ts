@@ -19,11 +19,20 @@ const useItemMemoStore = defineStore('itemMemoStore', () => {
         items[name].set(id, value);
     }
 
+    const resetStore = () => {
+        items.hints = new Map()
+        items.advices = new Map()
+        items.projects = new Map()
+        items.textbooks = new Map()
+    }
+
     return {
         items,
 
         getItem,
         setItem,
+
+        resetStore,
     }
 })
 

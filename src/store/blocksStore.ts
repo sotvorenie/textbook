@@ -10,8 +10,17 @@ const useBlocksStore = defineStore('blocksStore', () => {
         textbooks: 'list'
     })
 
+    const resetStore = () => {
+        activeBlock.hints = 'list'
+        activeBlock.advices = 'list'
+        activeBlock.projects = 'list'
+        activeBlock.textbooks = 'list'
+    }
+
     return {
-        activeBlock
+        activeBlock,
+
+        resetStore,
     }
 })
 

@@ -10,8 +10,17 @@ const useIdStore = defineStore('idStore', () => {
         textbooks: 0
     })
 
+    const resetStore = () => {
+        idValues.hints = 0
+        idValues.advices = 0
+        idValues.projects = 0
+        idValues.textbooks = 0
+    }
+
     return {
-        idValues
+        idValues,
+
+        resetStore,
     }
 })
 

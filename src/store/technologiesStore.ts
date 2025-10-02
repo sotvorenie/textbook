@@ -5,8 +5,14 @@ const useTechnologiesStore = defineStore('technologiesStore', () => {
 
     const technologies = ref<string[]>([])
 
+    const resetStore = () => {
+        technologies.value = []
+    }
+
     return {
         technologies,
+
+        resetStore,
     }
 })
 

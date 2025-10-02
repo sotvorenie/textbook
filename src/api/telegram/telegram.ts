@@ -19,10 +19,12 @@ export enum TelegramEventType {
 
 export const sendToTelegram = async (eventType: TelegramEventType, title?: string): Promise<void> => {
     try {
+        if (!userStore.isViewer) return
+
         const messages = {
             [TelegramEventType.NEW_SESSION]: `🚪 Пользователь "${userStore.user.name}" зашел в приложение`,
-            [TelegramEventType.LOGIN]: `🔐 Пользователь "${userStore.user.name}" авторизовался в приложении`,
-            [TelegramEventType.REGISTER]: `🔑 Пользователь "${userStore.user.name}" зарегистрировался в приложении`,
+            [TelegramEventType.LOGIN]: `🔐 Пользователь "${title}" авторизовался в приложении`,
+            [TelegramEventType.REGISTER]: `🔑 Пользователь "${title}" зарегистрировался в приложении`,
             [TelegramEventType.CREATE_HINTS]: `❕ Пользователь "${userStore.user.name}" создал подсказку - "${title}"`,
             [TelegramEventType.CREATE_TEXTBOOKS]: `📙 Пользователь "${userStore.user.name}" создал учебник - "${title}"`,
             [TelegramEventType.CREATE_PROJECTS]: `🌐 Пользователь "${userStore.user.name}" создал проект - "${title}"`,

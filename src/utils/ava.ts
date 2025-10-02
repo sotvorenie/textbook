@@ -15,5 +15,8 @@ export const userAva = {
         } catch (error) {
             return {};
         }
+    },
+    remove() {
+        localStorage.setItem('ava', '{}')
     }
 }

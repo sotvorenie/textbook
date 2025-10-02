@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {onBeforeMount, ref} from "vue";
+import {onMounted, ref} from "vue";
 
 import {User} from "../types/user";
 
@@ -25,13 +25,13 @@ const isLoading = ref<boolean>(true);
 
 const activeMenuIndex = ref<number>(0);
 
-onBeforeMount(async () => {
+onMounted(async () => {
   const user = await check();
   userStore.setUser(user as User);
 
   const getAdmins = async () => {
     try {
-      const response: {id:number, full: boolean}[] =
+      const response: {id:number, full: boolean, viewer: boolean}[] =
           await get(`/admins?id=${userStore.user.id}`);
 
       let user
@@ -41,6 +41,7 @@ onBeforeMount(async () => {
 
       userStore.isAdmin = !!user;
       userStore.isFullAdmin = user?.full ?? false
+      userStore.isViewer = user?.viewer ?? false
     } catch (_) {}
   }
   await getAdmins()
@@ -59,7 +60,10 @@ onBeforeMount(async () => {
   const getLiked = async () => {
     try {
       const response: any = await get(`/user_liked?user_id=${userStore.user.id}`);
-      userStore.userLiked = response[0];
+
+      if (response?.length) {
+        userStore.userLiked = response[0];
+      }
     } catch (_) {}
   }
   await getLiked()

@@ -80,8 +80,11 @@ const getPosts = async(push: boolean = true) => {
     }
 
     let user_id: number | null = null
+    let likes: number[] = []
     if (searchStore.myOtherFilter[props?.searchName] === 'my') {
       user_id = userStore.user.id
+    } else if (searchStore.myOtherFilter[props?.searchName] === 'likes') {
+      likes = likedItems.value
     }
 
     const response: {meta: any, items: List[]} = await getList(
@@ -90,7 +93,8 @@ const getPosts = async(push: boolean = true) => {
         searchStore.searchNames[props?.searchName],
         searchStore.filterTechnologies[props?.searchName],
         user_id,
-        searchStore.sortBy[props?.searchName]
+        searchStore.sortBy[props?.searchName],
+        likes
     );
 
     if (response) {
@@ -113,7 +117,7 @@ const getPosts = async(push: boolean = true) => {
 await getPosts();
 
 const likedItems = computed(() => {
-  return userStore.userLiked.items[props.searchName];
+  return userStore.userLiked?.items[props.searchName];
 })
 
 const handleLike = async (id: number) => {
@@ -122,17 +126,25 @@ const handleLike = async (id: number) => {
 
     let isLike: boolean = false
 
-    if (userStore.userLiked.items[props.searchName].includes(id)) {
-      userStore.userLiked.items[props.searchName] = userStore.userLiked.items[props.searchName]?.filter((item: number) => item !== id)
+    if (userStore.userLiked?.items[props.searchName].includes(id)) {
+      userStore.userLiked.items[props.searchName] =
+          userStore.userLiked.items[props.searchName]
+          ?.filter((item: number) => item !== id)
     } else {
-      userStore.userLiked.items[props.searchName].push(id)
+      userStore.userLiked?.items[props.searchName].push(id)
       isLike = true
     }
 
-    await like('hints')
+    const response = await like('hints')
 
-    isLike ? await sendToTelegram(TelegramEventType.LIKE, element.title)
-        : await sendToTelegram(TelegramEventType.UNLIKE, element.title)
+    if (response) {
+      isLike ? await sendToTelegram(TelegramEventType.LIKE, element.title)
+          : await sendToTelegram(TelegramEventType.UNLIKE, element.title)
+
+      if (userStore.userLiked.id < 0) {
+        userStore.userLiked.id = response.id
+      }
+    }
   } catch (_) {}
 }
 

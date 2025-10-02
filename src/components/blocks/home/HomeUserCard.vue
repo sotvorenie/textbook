@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import router from "../../../router";
 
 import {authToken} from "../../../utils/auth.ts";
-import {showConfirm, showError} from "../../../utils/modals.ts";
+import {showConfirm, showError, showWarning} from "../../../utils/modals.ts";
 import {userAva} from "../../../utils/ava.ts";
+import { resetAllStores } from "../../../utils/resetAllStores";
 
 import {deletePredLastFile, postAva, postFile} from "../../../api/users/users.ts";
 import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.ts";
@@ -14,21 +15,34 @@ import Btn from "../../ui/Btn.vue";
 import Edit from "../../../assets/icons/Edit.vue";
 import UserIcon from "../../../assets/icons/UserIcon.vue";
 
-import useUserStore from '../../../store/userStore';
+import useUserStore from "../../../store/userStore.ts";
 const userStore = useUserStore();
 
 const exit = async () => {
   const confirmed: boolean = await showConfirm('Выход из профиля', 'Вы действительно хотите выйти из профиля?');
 
   if (confirmed) {
-    authToken.remove();
-    router.push('/').catch(() => {});
+    authToken.remove()
+    userAva.remove()
+
+    resetAllStores()
+
+    router.push('/').catch(() => {})
   }
 }
 
 const input = ref<HTMLInputElement | null>(null)
 
-const triggerInput = () => {
+const triggerInput = async () => {
+  if (!userStore.isAdmin) {
+    await showWarning(
+        'Замена аватарки невозможна!!',
+        'Вы не являетесь Админом'
+    )
+
+    return
+  }
+
   input.value?.click()
 }
 
@@ -69,6 +83,15 @@ const uploadFile = async (event: Event) => {
   } catch (_) {}
 }
 
+const role = computed(() => {
+  if (userStore.isFullAdmin
+      && userStore.user.email === 'vitalikabrosimov00@gmail.com'
+  ) return 'Владелец'
+  if (userStore.isFullAdmin) return 'Совладелец'
+  if (userStore.isAdmin) return 'Админ'
+  return 'Пользователь'
+})
+
 </script>
 
 <template>
@@ -100,7 +123,7 @@ const uploadFile = async (event: Event) => {
       <div class="user-card__info flex flex-column flex-between">
         <div>
           <p class="user-card__name">Имя: {{userStore.user?.name}}</p>
-          <p class="user-card__name">Класс: разработчик</p>
+          <p class="user-card__name">Статус: {{role}}</p>
           <p class="user-card__name">Последний сеанс: {{userStore.lastSession}}</p>
         </div>
 

@@ -2,14 +2,14 @@
 import {reactive, ref} from "vue";
 import router from "../router";
 import {Swiper, SwiperSlide} from "swiper/vue";
-import type { Swiper as ISwiper } from 'swiper/types'
+import type {Swiper as ISwiper} from 'swiper/types'
 import 'swiper/css';
 
 import {onBlur, onInput, onSubmit} from "../composables/useFormValidation.ts";
 import {addLabelText, removeLabelText} from "../composables/useLabelText.ts";
 
 import {login, register} from "../api/auth/auth.ts";
-import {AuthResponse, RegisterData, LoginData} from "../api/auth/types.ts";
+import {AuthResponse, LoginData, RegisterData} from "../api/auth/types.ts";
 
 import {showWarning} from "../utils/modals.ts";
 
@@ -19,6 +19,7 @@ import Btn from "../components/ui/Btn.vue";
 import Navigation from "../components/common/Navigation.vue";
 import Message from "../components/common/Message.vue";
 import Loading from "../components/ui/Loading.vue";
+import {sendToTelegram, TelegramEventType} from "../api/telegram/telegram.ts";
 
 //=========================================================//
 
@@ -38,7 +39,9 @@ const loginUser = async () => {
   let response: AuthResponse = await login(data);
 
   if (response.token) {
-    router.push('/main').catch(() => {});
+    await sendToTelegram(TelegramEventType.LOGIN, response.data.name)
+
+    await router.push('/main').catch(() => {});
   } else {
     await showWarning('Ошибка входа','Пользователя с таким логином/паролем не существует!!')
   }
@@ -58,6 +61,8 @@ const registerUser = async () => {
   let response: AuthResponse = await register(data);
 
   if (response.token) {
+    await sendToTelegram(TelegramEventType.REGISTER, response.data.name)
+
     successRegister();
   } else {
     await showWarning('Ошибка регистрации','Пользователь с таким email уже существует!!');

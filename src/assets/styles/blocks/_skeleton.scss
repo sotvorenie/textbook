@@ -5,6 +5,25 @@
   width: 100%;
   overflow: hidden;
   height: 100%;
+  position: relative;
+
+  .line {
+    position: relative;
+    overflow: hidden;
+
+    &__background {
+      border-radius: $radius-medium;
+      background: $color-dark;
+    }
+  }
+
+  .h-20 {
+    height: rem(20);
+  }
+
+  .h-30 {
+    height: rem(30);
+  }
 }
 
 .skeleton-app {
@@ -40,6 +59,28 @@
     border: $border-light-alt;
     border-radius: $radius-medium;
     height: fit-content;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      height: 100%;
+      top: 0;
+      background: $color-light-alt;
+      box-shadow: 0 0 rem(20) rem(10) $color-light-alt;
+      animation: loadSkeleton 1.5s infinite linear;
+      z-index: 1;
+    }
+
+    @keyframes loadSkeleton {
+      0% {
+        left: -10%;
+      }
+      100% {
+        left: 110%;
+      }
+    }
   }
 
   &__like {
@@ -58,33 +99,23 @@
 
     div {
       width: 70%;
-      height: rem(30);
-      border-radius: $radius-medium;
-      background: $color-dark;
     }
   }
 
   &__date {
     margin-bottom: rem(10);
     width: 100%;
-    height: rem(20);
-    border-radius: $radius-medium;
-    background: $color-dark;
   }
 
   &__tech-title {
     margin-bottom: rem(10);
     width: 60%;
-    height: rem(20);
-    border-radius: $radius-medium;
-    background: $color-dark;
   }
 
   &__technologies {
     --gap: 10px;
 
     li {
-      height: rem(30);
       border-radius: $radius-regular;
       background: $color-dark;
     }

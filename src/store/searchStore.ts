@@ -31,11 +31,35 @@ const useSearchStore = defineStore('searchStore', () => {
         textbooks: '-sort_date',
     })
 
+    const resetStore = () => {
+        searchNames.hints = ''
+        searchNames.advices = ''
+        searchNames.projects = ''
+        searchNames.textbooks = ''
+
+        filterTechnologies.hints = []
+        filterTechnologies.advices = []
+        filterTechnologies.projects = []
+        filterTechnologies.textbooks = []
+
+        myOtherFilter.hints = 'all'
+        myOtherFilter.advices = 'all'
+        myOtherFilter.projects = 'all'
+        myOtherFilter.textbooks = 'all'
+
+        sortBy.hints = '-sort_date'
+        sortBy.advices = '-sort_date'
+        sortBy.projects = '-sort_date'
+        sortBy.textbooks = '-sort_date'
+    }
+
     return {
         searchNames,
         filterTechnologies,
         myOtherFilter,
         sortBy,
+
+        resetStore,
     }
 })
 
