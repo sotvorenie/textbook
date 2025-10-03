@@ -3,11 +3,38 @@
 
 .sort {
   background: transparent;
-  border: $border-light-alt;
   border-radius: $radius-regular;
-  padding-inline: rem(10);
+  overflow: hidden;
 
-  option {
-    background: $color-dark;
+  &::-webkit-scrollbar { display: none; }
+  &::-ms-scrollbar { display: none; }
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  select {
+    height: 100%;
+    width: 100%;
+    padding-inline: rem(10) rem(30);
+    border: $border-light-alt;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    &:focus {
+      outline: none;
+      border-color: $color-accent;
+    }
+
+    option {
+      background: $color-dark;
+    }
+  }
+
+  i {
+    @include square(20);
+    @include abs-y;
+
+    right: rem(8);
+    z-index: -1;
   }
 }

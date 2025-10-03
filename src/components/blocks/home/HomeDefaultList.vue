@@ -19,6 +19,7 @@ const searchStore = useSearchStore();
 import useSettingsStore from "../../../store/settingsStore.ts";
 const settingsStore = useSettingsStore();
 import useUserStore from "../../../store/userStore.ts";
+import DefaulListSkeleton from "../../ui/loading/DefaulListSkeleton.vue";
 const userStore = useUserStore();
 
 const props = defineProps({
@@ -34,6 +35,8 @@ const props = defineProps({
 })
 
 const emits = defineEmits(['changeItem']);
+
+const isLoading = ref<boolean>(false)
 
 const searchTechnologies = computed(() => {
   return searchStore.filterTechnologies[props.searchName] ?? []
@@ -169,12 +172,11 @@ watch(
     () => searchStore.sortBy[props?.searchName],
     () => debouncedGetPosts()
 )
-
 </script>
 
 <template>
 
-  <ul class="list flex row">
+  <ul class="list flex row" ref="listRef">
     <li class="list__item cursor-pointer col-4 position-relative"
         v-for="item in items"
         :key="item.id"

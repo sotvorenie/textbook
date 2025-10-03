@@ -1,15 +1,17 @@
 <script setup lang="ts">
-import {computed} from "vue";
+import {computed, onMounted, onActivated, onDeactivated} from "vue";
+
+import {useSaveScroll} from "../../../../composables/useSaveScroll.ts";
 
 import HomeDefaultList from "../HomeDefaultList.vue";
 import HomeDefaultItem from "../HomeDefaultItem.vue";
 import HomeDefaultCreate from "../HomeDefaultCreate.vue";
 
+import DefaultListSkeleton from "../../../ui/loading/DefaulListSkeleton.vue";
+
 import useBlocksStore from "../../../../store/blocksStore.ts";
 const blocksStore = useBlocksStore();
 import useIdStore from "../../../../store/idStore.ts";
-import DefaultListSkeleton from "../../../ui/loading/DefaulListSkeleton.vue";
-import DefaultItemSkeleton from "../../../ui/loading/DefaultItemSkeleton.vue";
 const idStore = useIdStore();
 
 const activeComponent = computed(() => {
@@ -38,27 +40,34 @@ const changeItem = (id: number) => {
   idStore.idValues.hints = id;
 }
 
-const activeSkeleton = computed(() => {
-  if (blocksStore.activeBlock.hints === 'list') {
-    return DefaultListSkeleton;
-  } else if (blocksStore.activeBlock.hints === 'item') {
-    return DefaultItemSkeleton;
-  }
-})
+// для сохранения скролла
+const scrollManager = useSaveScroll('hints')
 
+onMounted(() => {
+  scrollManager.setup();
+});
+
+onActivated(() => {
+  scrollManager.restoreScroll();
+});
+
+onDeactivated(() => {
+  scrollManager.destroy();
+});
 </script>
 
 <template>
 
-  <KeepAlive :include="['HomeDefaultList', 'HomeDefaultCreate']">
+  <KeepAlive>
     <Suspense>
-      <Component :is="activeComponent"
-                 v-bind="componentProps"
-                 @change-item="changeItem"
+      <Component
+          :is="activeComponent"
+          v-bind="componentProps"
+          @change-item="changeItem"
       />
 
       <template #fallback>
-        <Component :is="activeSkeleton"/>
+        <DefaultListSkeleton/>
       </template>
     </Suspense>
   </KeepAlive>

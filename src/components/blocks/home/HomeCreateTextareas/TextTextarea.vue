@@ -3,12 +3,29 @@
 import {onBlur, onInput} from "../../../../composables/useFormValidation.ts";
 import {removeLabelText} from "../../../../composables/useLabelText.ts";
 import {addLabelText} from "../../../../composables/useLabelText.ts";
+import {ref} from "vue";
 
 const text = defineModel({type: String, required: true});
 
 const blurInput = (event: Event) => {
   onBlur(event);
   removeLabelText(event);
+}
+
+const textareaRef = ref<HTMLTextAreaElement | null>(null)
+
+const autoResize = () => {
+  const textarea = textareaRef.value
+  if (textarea) {
+    textarea.style.height = 'auto'
+    textarea.style.height = textarea.scrollHeight + 'px'
+  }
+}
+
+const handleInput = (event: Event) => {
+  onInput(event)
+
+  autoResize()
 }
 
 </script>
@@ -24,10 +41,11 @@ const blurInput = (event: Event) => {
     <textarea class="create__textarea"
               aria-describedby="text-error"
               @blur="blurInput"
-              @input="onInput"
+              @input="handleInput"
               @focus="addLabelText"
               v-model="text"
               required
+              ref="textareaRef"
     />
     <span class="create__error fields_error label__error position-absolute"
           id="text-error"

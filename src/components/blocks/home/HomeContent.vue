@@ -17,7 +17,6 @@ import BlogSettings from "./HomeSettingsItems/BlogSettings.vue";
 import HomeUserCard from "./HomeUserCard.vue";
 import HomeEmpty from "./HomeEmpty.vue";
 
-import AppSkeleton from "../../ui/loading/AppSkeleton.vue";
 import UserIcon from "../../../assets/icons/UserIcon.vue";
 import Modal from "../../common/Modal.vue";
 
@@ -92,7 +91,6 @@ const userIconVisible = computed(() => {
 })
 
 const modalVisible = ref<boolean>(false);
-
 </script>
 
 <template>
@@ -132,7 +130,9 @@ const modalVisible = ref<boolean>(false);
 
     <div class="home__main">
       <KeepAlive>
-        <Component :is="contentComponents[activeIndex]"/>
+        <Component :is="contentComponents[activeIndex]"
+                   :key="`content-${activeIndex - 1}`"
+        />
       </KeepAlive>
     </div>
   </div>

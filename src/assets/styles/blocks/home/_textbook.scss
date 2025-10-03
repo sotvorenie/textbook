@@ -1,0 +1,46 @@
+@use '../../helpers/index' as *;
+@use '../../variables' as *;
+
+.textbook {
+
+  &__title {
+    margin-bottom: rem(10);
+  }
+
+  &__tabs {
+    top: 0;
+    column-gap: rem(20);
+    margin-bottom: rem(10);
+    background: $color-dark-alt;
+    padding-bottom: rem(10);
+
+    &-item {
+      border-radius: $radius-regular;
+      line-height: 1;
+      width: auto !important;
+
+      button {
+        user-select: none;
+
+        &.is-active {
+          pointer-events: none;
+          border-color: $color-accent;
+          color: $color-accent;
+        }
+      }
+    }
+  }
+
+  &__btn {
+    @include square(40);
+
+    &:disabled {
+      filter: opacity(0.5);
+      pointer-events: none;
+    }
+
+    &.textbook__next {
+      rotate: 180deg;
+    }
+  }
+}

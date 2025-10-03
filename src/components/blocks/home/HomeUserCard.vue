@@ -92,6 +92,13 @@ const role = computed(() => {
   return 'Пользователь'
 })
 
+const handleRemoveUser = async () => {
+  await showWarning(
+      'Невозможно удалить страницу!!',
+      'Ты в системе и никуда теперь отсюда не денешься))'
+  )
+}
+
 </script>
 
 <template>
@@ -132,7 +139,7 @@ const role = computed(() => {
     </div>
     <div class="user-card__btn-bar flex">
       <Btn class="user-card__btn" @click="exit">Выйти</Btn>
-      <Btn class="user-card__btn">Удалить профиль</Btn>
+      <Btn class="user-card__btn" @click="handleRemoveUser">Удалить профиль</Btn>
     </div>
   </div>
 </template>

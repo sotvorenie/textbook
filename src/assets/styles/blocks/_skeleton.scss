@@ -26,6 +26,15 @@
   }
 }
 
+@keyframes loadSkeleton {
+  0% {
+    left: -10%;
+  }
+  100% {
+    left: 110%;
+  }
+}
+
 .skeleton-app {
   @include flex-center();
 
@@ -72,15 +81,6 @@
       animation: loadSkeleton 1.5s infinite linear;
       z-index: 1;
     }
-
-    @keyframes loadSkeleton {
-      0% {
-        left: -10%;
-      }
-      100% {
-        left: 110%;
-      }
-    }
   }
 
   &__like {
@@ -119,5 +119,35 @@
       border-radius: $radius-regular;
       background: $color-dark;
     }
+  }
+}
+
+.skeleton-default-item {
+
+  .line {
+
+    &::before {
+      content: '';
+      position: absolute;
+      height: 100%;
+      top: 0;
+      background: $color-light-alt;
+      box-shadow: 0 0 rem(20) rem(10) $color-light-alt;
+      animation: loadSkeleton 1.5s infinite linear;
+      z-index: 1;
+    }
+  }
+
+  &__title {
+    margin-bottom: rem(20);
+  }
+
+  &__text {
+    margin-bottom: rem(10);
+  }
+
+  &__code {
+    height: rem(200);
+    margin-bottom: rem(10);
   }
 }

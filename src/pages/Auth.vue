@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {reactive, ref} from "vue";
+import {reactive, ref, onUnmounted} from "vue";
 import router from "../router";
 import {Swiper, SwiperSlide} from "swiper/vue";
 import type {Swiper as ISwiper} from 'swiper/types'
@@ -75,9 +75,11 @@ const successRegister = () => {
   messageText.value = 'Регистрация прошла успешно!!';
   messageVisible.value = true;
 
-  setTimeout(() => {
+  const timer = setTimeout(() => {
     router.push('/main');
-  }, 2000)
+  }, 2000);
+
+  onUnmounted(() => clearTimeout(timer));
 }
 //=========================================================//
 

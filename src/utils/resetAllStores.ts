@@ -5,6 +5,7 @@ import useSearchStore from "../store/searchStore.ts";
 import useSettingsStore from "../store/settingsStore.ts";
 import useTechnologiesStore from "../store/technologiesStore.ts";
 import useUserStore from "../store/userStore.ts";
+import useScrollStore from "../store/useScrollStore.ts";
 
 export const resetAllStores = (): void => {
     const userStore = useUserStore();
@@ -14,6 +15,7 @@ export const resetAllStores = (): void => {
     const searchStore = useSearchStore();
     const settingsStore = useSettingsStore();
     const technologiesStore = useTechnologiesStore();
+    const scrollStore = useScrollStore();
 
     userStore.resetStore();
     blocksStore.resetStore();
@@ -22,4 +24,5 @@ export const resetAllStores = (): void => {
     searchStore.resetStore();
     settingsStore.resetStore();
     technologiesStore.resetStore();
+    scrollStore.resetStore();
 };
