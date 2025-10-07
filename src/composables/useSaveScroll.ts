@@ -12,10 +12,10 @@ export const useSaveScroll = (pageName: string) => {
         document.querySelector('.home__main') as HTMLDivElement;
 
     const saveScroll = () => {
-        scrollStore.scrolls.hints[blocksStore.activeBlock[pageName]] = mainElement.scrollTop;
+        scrollStore.scrolls[pageName][blocksStore.activeBlock[pageName]] = mainElement.scrollTop;
     };
 
-    const debouncedSaveScroll = debounce(saveScroll, 500);
+    const debouncedSaveScroll = debounce(saveScroll, 200);
 
     const setup = () => {
         mainElement.addEventListener('scroll', debouncedSaveScroll);
@@ -23,11 +23,11 @@ export const useSaveScroll = (pageName: string) => {
         watch(() => blocksStore.activeBlock[pageName], () => {
             nextTick(() => {
                 const savedPosition =
-                    scrollStore.scrolls.hints[blocksStore.activeBlock[pageName]];
+                    scrollStore.scrolls[pageName][blocksStore.activeBlock[pageName]];
                 if (savedPosition > 0) {
                     mainElement.scrollTop = savedPosition;
                 }
-            });
+            })
         });
     };
 
@@ -42,7 +42,7 @@ export const useSaveScroll = (pageName: string) => {
         restoreScroll: () => {
             nextTick(() => {
                 const savedPosition =
-                    scrollStore.scrolls.hints[blocksStore.activeBlock[pageName]];
+                    scrollStore.scrolls[pageName][blocksStore.activeBlock[pageName]];
                 if (savedPosition > 0) {
                     mainElement.scrollTop = savedPosition;
                 }

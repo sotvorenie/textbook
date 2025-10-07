@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {onMounted, reactive, ref, watch} from "vue";
+import {onMounted, reactive, ref} from "vue";
 
 import {showAsk, showConfirm} from "../../../utils/modals.ts";
 import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.ts";
@@ -162,12 +162,6 @@ const sendRequest = async () => {
 
   back()
 }
-
-watch(() => blocksStore.activeBlock.hints, (newVal) => {
-  if (newVal === 'create') {
-    settingsStore.settingsVisible.hints = 'create'
-  }
-})
 
 onMounted(() => {
   technologiesStore.technologies?.forEach(el => {

@@ -39,6 +39,7 @@ const handleSort = (value: string): void => {
 
 const handleCreate = () => {
   blocksStore.activeBlock[props.blockName] = 'create'
+  settingsStore.settingsVisible[props?.blockName] = 'create'
 }
 
 const handleBack = () => {

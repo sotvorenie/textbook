@@ -70,7 +70,7 @@ onMounted(async () => {
 
   const ava = userAva.get()
   if (!ava?.url) {
-    getAva()
+    await getAva()
   } else {
     userStore.user.ava = ava
   }
@@ -80,7 +80,7 @@ onMounted(async () => {
 
   const date = getCurrentDateTime()
   if (date.date !== userStore.lastSession) {
-    sendToTelegram(TelegramEventType.NEW_SESSION)
+    await sendToTelegram(TelegramEventType.NEW_SESSION)
   }
 
   isLoading.value = false

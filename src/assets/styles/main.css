@@ -1303,6 +1303,7 @@ a[class] {
 }
 .button[disabled] {
   cursor: not-allowed;
+  filter: opacity(0.5);
 }
 .button span {
   display: flex;
@@ -1643,7 +1644,6 @@ a[class] {
 .home__content {
   width: 100%;
   height: 100vh;
-  overflow-x: hidden;
 }
 .home__main {
   overflow-x: hidden;

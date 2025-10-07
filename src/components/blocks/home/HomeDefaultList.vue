@@ -19,7 +19,6 @@ const searchStore = useSearchStore();
 import useSettingsStore from "../../../store/settingsStore.ts";
 const settingsStore = useSettingsStore();
 import useUserStore from "../../../store/userStore.ts";
-import DefaulListSkeleton from "../../ui/loading/DefaulListSkeleton.vue";
 const userStore = useUserStore();
 
 const props = defineProps({
@@ -35,8 +34,6 @@ const props = defineProps({
 })
 
 const emits = defineEmits(['changeItem']);
-
-const isLoading = ref<boolean>(false)
 
 const searchTechnologies = computed(() => {
   return searchStore.filterTechnologies[props.searchName] ?? []
@@ -65,7 +62,7 @@ const handleItem = (id: number) => {
   emits('changeItem', id);
 }
 
-const items = ref<List[] | []>([]);
+const items = ref<List[]>([]);
 
 const meta = ref<Meta>();
 
@@ -129,16 +126,20 @@ const handleLike = async (id: number) => {
 
     let isLike: boolean = false
 
-    if (userStore.userLiked?.items[props.searchName].includes(id)) {
+    const userLikes = userStore.userLiked.items[props.searchName]
+
+    if (userLikes && userLikes?.includes(id)) {
       userStore.userLiked.items[props.searchName] =
-          userStore.userLiked.items[props.searchName]
-          ?.filter((item: number) => item !== id)
+          userLikes?.filter((item: number) => item !== id)
     } else {
+      if (!userLikes) {
+        userStore.userLiked.items[props.searchName] = []
+      }
       userStore.userLiked?.items[props.searchName].push(id)
       isLike = true
     }
 
-    const response = await like('hints')
+    const response = await like(props.searchName)
 
     if (response) {
       isLike ? await sendToTelegram(TelegramEventType.LIKE, element.title)
@@ -176,69 +177,71 @@ watch(
 
 <template>
 
-  <ul class="list flex row" ref="listRef">
-    <li class="list__item cursor-pointer col-4 position-relative"
-        v-for="item in items"
-        :key="item.id"
-        @click="handleItem(item.id)"
-    >
-      <button class="list__like recolor-svg button-width-svg position-absolute"
-              type="button"
+  <div class="list-wrapper">
+    <ul class="list flex row" ref="listRef">
+      <li class="list__item cursor-pointer col-4 position-relative"
+          v-for="item in items"
+          :key="item.id"
+          @click="handleItem(item.id)"
       >
-        <Like :liked="likedItems?.includes(item.id)"
-              @click.stop="handleLike(item.id)"
-        />
-      </button>
+        <button class="list__like recolor-svg button-width-svg position-absolute"
+                type="button"
+        >
+          <Like :liked="likedItems?.includes(item.id)"
+                @click.stop="handleLike(item.id)"
+          />
+        </button>
 
-      <p class="list__title h5" v-html="highlightText(item.title)"></p>
+        <p class="list__title h5" v-html="highlightText(item.title)"></p>
 
-      <div class="list__info">
-        <p class="list__date">Дата: {{item?.date}}</p>
+        <div class="list__info">
+          <p class="list__date">Дата: {{item?.date}}</p>
 
-        <Absolute :is-visible="item?.languages_and_technologies?.length > 3">
-          <template #activator>
-            <div class="list__tech">
-              <div class="list__tech-title flex flex-align-center">
-                <p>Технологии:</p>
-                <button class="hover-color-accent"
-                        type="button"
-                        v-if="item?.languages_and_technologies?.length > 3"
-                >
-                  Смотреть все
-                </button>
+          <Absolute :is-visible="item?.languages_and_technologies?.length > 3">
+            <template #activator>
+              <div class="list__tech">
+                <div class="list__tech-title flex flex-align-center">
+                  <p>Технологии:</p>
+                  <button class="hover-color-accent"
+                          type="button"
+                          v-if="item?.languages_and_technologies?.length > 3"
+                  >
+                    Смотреть все
+                  </button>
+                </div>
+
+                <ul class="list__technologies flex flex-wrap">
+                  <li :class="['list__technologies-item list__name', {'is-active': searchTechnologies.includes(technology)}]"
+                      v-for="technology in item?.languages_and_technologies?.slice(0, 3)"
+                  >
+                    {{technology}}
+                  </li>
+                </ul>
               </div>
+            </template>
 
-              <ul class="list__technologies flex flex-wrap">
-                <li :class="['list__technologies-item list__name', {'is-active': searchTechnologies.includes(technology)}]"
-                    v-for="technology in item?.languages_and_technologies?.slice(0, 3)"
+            <template #default>
+              <div class="list__tech-content flex flex-wrap">
+                <p v-for="technology in item?.languages_and_technologies"
+                   :class="['list__name absolute__content-item', {'is-active': searchTechnologies.includes(technology)}]"
                 >
                   {{technology}}
-                </li>
-              </ul>
-            </div>
-          </template>
+                </p>
+              </div>
+            </template>
 
-          <template #default>
-            <div class="list__tech-content flex flex-wrap">
-              <p v-for="technology in item?.languages_and_technologies"
-                 :class="['list__name absolute__content-item', {'is-active': searchTechnologies.includes(technology)}]"
-              >
-                {{technology}}
-              </p>
-            </div>
-          </template>
+          </Absolute>
+        </div>
+      </li>
+    </ul>
 
-        </Absolute>
-      </div>
-    </li>
-  </ul>
-
-  <Btn class="list__load-more m-auto"
-       :is-disabled="meta?.remaining_count! === 0 || loadingVisible"
-       :is-loading="loadingVisible"
-       @click="getPosts"
-  >
-    Загрузить ещё
-  </Btn>
+    <Btn class="list__load-more m-auto"
+         :is-disabled="meta?.remaining_count! === 0 || loadingVisible"
+         :is-loading="loadingVisible"
+         @click="getPosts"
+    >
+      Загрузить ещё
+    </Btn>
+  </div>
 
 </template>

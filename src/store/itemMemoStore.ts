@@ -1,33 +1,103 @@
 import {defineStore} from "pinia";
-import {reactive} from "vue";
+
+import {LRUCache} from "lru-cache";
+
 import {Item} from "../types/item.ts";
+
+const MAX_ITEMS = 10;
+const MAX_BYTES = 1024 * 1024 // ~ 1 Мб
+
+function roughSizeOfObject(object: any): number {
+    const objectList = new WeakSet();
+    const stack = [object];
+    let bytes = 0;
+
+    while (stack.length) {
+        const value = stack.pop();
+
+        if (value === null || value === undefined) continue;
+
+        const type = typeof value;
+
+        if (type === 'boolean') bytes += 4;
+        else if (type === 'number') bytes += 8;
+        else if (type === 'string') bytes += value.length * 2;
+        else if (type === 'object') {
+            if (objectList.has(value)) continue;
+            objectList.add(value);
+
+            for (const i in value) {
+                stack.push(value[i]);
+            }
+        }
+    }
+
+    return bytes;
+}
 
 const useItemMemoStore = defineStore('itemMemoStore', () => {
 
-    const items = reactive<Record<string, Map<number, Item>>>({
-        hints: new Map(),
-        advices: new Map(),
-        projects: new Map(),
-        textbooks: new Map(),
-    })
+    // const items = reactive<Record<string, Map<number, Item>>>({
+    //     hints: new Map(),
+    //     advices: new Map(),
+    //     projects: new Map(),
+    //     textbooks: new Map(),
+    // })
+
+    // const getItem = (name: string, id: number): Item | undefined => {
+    //     return items[name].get(id);
+    // }
+    //
+    // const setItem = (name: string, id: number, value: Item): void => {
+    //     items[name].set(id, value);
+    // }
+
+    const caches: Record<string, LRUCache<number, Item>> = {
+        hints: new LRUCache({
+            max: MAX_ITEMS,
+            maxSize: MAX_BYTES,
+            sizeCalculation: roughSizeOfObject
+        }),
+        advices: new LRUCache({
+            max: MAX_ITEMS,
+            maxSize: MAX_BYTES,
+            sizeCalculation: roughSizeOfObject
+        }),
+        projects: new LRUCache({
+            max: MAX_ITEMS,
+            maxSize: MAX_BYTES,
+            sizeCalculation: roughSizeOfObject
+        }),
+        textbooks: new LRUCache({
+            max: MAX_ITEMS,
+            maxSize: MAX_BYTES,
+            sizeCalculation: roughSizeOfObject
+        }),
+    };
 
     const getItem = (name: string, id: number): Item | undefined => {
-        return items[name].get(id);
+        return caches[name].get(id);
     }
 
     const setItem = (name: string, id: number, value: Item): void => {
-        items[name].set(id, value);
+        caches[name].set(id, value);
     }
 
     const resetStore = () => {
-        items.hints = new Map()
-        items.advices = new Map()
-        items.projects = new Map()
-        items.textbooks = new Map()
+        for (const key of Object.keys(caches)) {
+            caches[key].clear();
+        }
     }
 
+    // const resetStore = () => {
+    //     items.hints = new Map()
+    //     items.advices = new Map()
+    //     items.projects = new Map()
+    //     items.textbooks = new Map()
+    // }
+
     return {
-        items,
+        caches,
 
         getItem,
         setItem,

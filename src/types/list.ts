@@ -1,5 +1,5 @@
 export interface List {
-    id?: number,
+    id: number,
     title: string,
     date: string,
     languages_and_technologies: string[],
