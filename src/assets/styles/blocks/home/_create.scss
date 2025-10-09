@@ -27,6 +27,12 @@
     overflow: hidden;
   }
 
+  &__remove {
+    background: $color-dark-alt;
+    top: rem(-30);
+    right: rem(15);
+  }
+
   &__technologies {
 
     &-list {

@@ -10,6 +10,8 @@ import useItemMemoStore from "../store/itemMemoStore.ts";
 const itemMemoStore = useItemMemoStore();
 import useSettingsStore from "../store/settingsStore.ts";
 const settingsStore = useSettingsStore();
+import useUserStore from "../store/userStore.ts";
+const userStore = useUserStore();
 
 export const useItem = (
     loading: Ref<boolean>,
@@ -111,6 +113,10 @@ export const useItem = (
                 name,
                 idStore.idValues[name], item.value
             )
+        }
+
+        if (item.value.user_id === userStore.user.id) {
+            userStore.isUserPost[name] = true
         }
 
         loading.value = false

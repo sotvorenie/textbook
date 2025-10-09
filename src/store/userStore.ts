@@ -30,6 +30,13 @@ const useUserStore = defineStore('userStore', () => {
     const isFullAdmin = ref<boolean>(false)
     const isViewer = ref<boolean>(true)
 
+    const isUserPost = reactive<Record<string, boolean>>({
+        hints: false,
+        advices: false,
+        projects: false,
+        textbooks: false,
+    })
+
     const lastSession = ref<string>('')
 
     const setUser = (value: User): void => {
@@ -58,6 +65,11 @@ const useUserStore = defineStore('userStore', () => {
         isViewer.value = true
 
         lastSession.value = ''
+
+        isUserPost.hints = false
+        isUserPost.advices = false
+        isUserPost.projects = false
+        isUserPost.textbooks = false
     }
 
     return {
@@ -67,6 +79,7 @@ const useUserStore = defineStore('userStore', () => {
         isFullAdmin,
         lastSession,
         isViewer,
+        isUserPost,
 
         setUser,
 

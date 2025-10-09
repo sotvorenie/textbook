@@ -1,4 +1,4 @@
-import {get, post} from "../base.ts";
+import {del, get, patch, post} from "../base.ts";
 import {List} from "../../types/list.ts";
 import {Item} from "../../types/item.ts";
 import {GetList} from "./types.ts";
@@ -40,6 +40,14 @@ export const getItem = async (name: string,  id: number): Promise<Item> => {
     return await get(`/${name}/${id}`)
 }
 
-export const createItem = async (name: string, item: Item): Promise<any> => {
-    await post(`/${name}`, item)
+export const createItem = async (name: string, item: Item): Promise<Item> => {
+    return await post(`/${name}`, item)
+}
+
+export const redactItem = async (name: string, item: Item, id: number): Promise<any> => {
+    return await patch(`/${name}/${id}`, item)
+}
+
+export const removeItem = async (name: string, id: number): Promise<any> => {
+    await del(`/${name}/${id}`)
 }

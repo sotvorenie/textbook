@@ -2,7 +2,10 @@
 import {onMounted, reactive, ref} from "vue";
 
 import {showAsk, showConfirm} from "../../../utils/modals.ts";
+
 import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.ts";
+import {createItem, redactItem} from "../../../api/posts/posts.ts";
+import {getCurrentDateTime} from "../../../composables/useDate.ts";
 
 import {addLabelText, removeLabelText} from "../../../composables/useLabelText.ts";
 import {onBlur, onInput, onSubmit} from "../../../composables/useFormValidation.ts";
@@ -10,23 +13,21 @@ import {onBlur, onInput, onSubmit} from "../../../composables/useFormValidation.
 import {Item} from "../../../types/item.ts";
 import Btn from "../../ui/Btn.vue";
 
-import TextTextarea from "./HomeCreateTextareas/TextTextarea.vue";
-import CodeTextarea from "./HomeCreateTextareas/CodeTextarea.vue";
+import HomeCreateTextarea from "./HomeCreateTextareas/HomeCreateTextarea.vue";
 
 import Modal from "../../common/Modal.vue";
 import CheckboxList from "../../ui/CheckboxList.vue";
 
 import useBlocksStore from "../../../store/blocksStore.ts";
-import {createItem} from "../../../api/posts/posts.ts";
-import useSettingsStore from "../../../store/settingsStore.ts";
-import {getCurrentDateTime} from "../../../composables/useDate.ts";
-import useTechnologiesStore from "../../../store/technologiesStore.ts";
-
-const technologiesStore = useTechnologiesStore();
-
-const settingsStore = useSettingsStore();
-
 const blocksStore = useBlocksStore();
+import useSettingsStore from "../../../store/settingsStore.ts";
+const settingsStore = useSettingsStore();
+import useTechnologiesStore from "../../../store/technologiesStore.ts";
+const technologiesStore = useTechnologiesStore();
+import useCreateStore from "../../../store/useCreateStore.ts";
+const createStore = useCreateStore();
+import useUserStore from "../../../store/userStore.ts";
+const userStore = useUserStore();
 
 const props = defineProps({
   apiUrl: {
@@ -42,17 +43,18 @@ const props = defineProps({
 
 defineOptions({
   components: {
-    TextTextarea,
-    CodeTextarea
+    HomeCreateTextarea
   }
 })
+
+const emits = defineEmits(['createItem'])
 
 const technologies = ref<{title: string, checked: boolean}[]>([]);
 
 settingsStore.settingsVisible.hints = 'create'
 
 const newItem = reactive<Item>({
-  user_id: 10,
+  user_id: userStore.user.id,
   title: '',
   languages_and_technologies: [],
   text: '',
@@ -61,7 +63,7 @@ const newItem = reactive<Item>({
   time: ''
 })
 
-const newItemText = ref<Record<number, {type: string, text: string}>>({})
+const newItemText = ref<{type: string, text: string}[]>([])
 
 const blurInput = (event: Event) => {
   onBlur(event);
@@ -70,20 +72,32 @@ const blurInput = (event: Event) => {
 
 const textBlock = ref<string[]>([])
 
-const textareaItems: Record<string, string> = {
-  text: 'TextTextarea',
-  code: 'CodeTextarea'
+const textareaAttributesList: Record<string, { name: string, code: string }> = {
+  code: {
+    name: 'Код',
+    code: 'code',
+  },
+  text: {
+    name: 'Текст',
+    code: 'text',
+  }
 }
+const textareaAttributes = ref<{ name: string, code: string }[]>([])
 
 const createTextarea = (type: string): void => {
-  let index: number = textBlock.value.length;
-
-  newItemText.value[index] = {
+  newItemText.value.push({
     type,
     text: ''
-  }
+  })
 
- textBlock.value.push(textareaItems[type]);
+  textBlock.value.push('HomeCreateTextarea');
+  textareaAttributes.value.push(textareaAttributesList[type])
+}
+
+const removeTextarea = (index: number) => {
+  newItemText.value.splice(index, 1)
+  textBlock.value.splice(index, 1)
+  textareaAttributes.value.splice(index, 1)
 }
 
 const back = () => {
@@ -113,6 +127,74 @@ const save = async (event: Event) => {
   if (ask) await sendRequest()
 }
 
+const convertTextToBlocks = (str: string): {type: string, text: string}[] => {
+  if (!str) return [];
+
+  const blocks: {type: string, text: string}[] = [];
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = str;
+
+  for (const child of Array.from(tempDiv.children)) {
+    if (child.tagName === 'PRE' && child.querySelector('code')) {
+      const codeElement = child.querySelector('code');
+      if (codeElement) {
+        let codeText = codeElement.innerHTML;
+
+        codeText = codeText
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'");
+
+        blocks.push({
+          type: 'code',
+          text: codeText
+        });
+      }
+    } else if (child.tagName === 'P') {
+      let text = child.innerHTML;
+
+      text = text
+          .replace(/<br\s*\/?>/gi, '\n')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&amp;/g, '&')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'");
+
+      blocks.push({
+        type: 'text',
+        text: text
+      });
+    }
+  }
+
+  return blocks;
+}
+
+const initializeFromStore = () => {
+  const storedText = createStore.createData[props.name].text;
+
+  newItem.title = createStore.createData[props.name].title
+
+  if (storedText) {
+    const blocks = convertTextToBlocks(storedText);
+
+    blocks.forEach(block => {
+      textBlock.value.push('HomeCreateTextarea');
+      textareaAttributes.value.push(textareaAttributesList[block.type])
+      newItemText.value.push({
+        type: block.type,
+        text: block.text
+      });
+    });
+  }
+};
+
 const convertBlocksToText = (blocks: {type: string, text: string}[]): string => {
   return blocks?.map(block => {
     const lines = block.text.split('\n');
@@ -132,9 +214,7 @@ const convertBlocksToText = (blocks: {type: string, text: string}[]): string => 
 };
 
 const sendRequest = async () => {
-  const blockArray = Object.values(newItemText.value)
-
-  newItem.text = convertBlocksToText(blockArray)
+  newItem.text = convertBlocksToText(newItemText.value)
 
   const dateTime = getCurrentDateTime()
 
@@ -146,7 +226,17 @@ const sendRequest = async () => {
       ?.filter(item => item.checked)
       ?.map(item => item.title)
 
-  await createItem(props.apiUrl, newItem)
+  if (!createStore.createData[props.name].title.length) {
+    const response: Item = await createItem(props.apiUrl, newItem)
+
+    emits('createItem', response)
+  } else {
+    await redactItem(
+        props.apiUrl,
+        newItem,
+        createStore.createData[props.name].id
+    )
+  }
 
   const blockNameToEventType: Record<string, TelegramEventType> = {
     'hints': TelegramEventType.CREATE_HINTS,
@@ -158,7 +248,8 @@ const sendRequest = async () => {
   await sendToTelegram(blockNameToEventType[props.name], newItem.title)
 
   textBlock.value = []
-  newItemText.value = {}
+  newItemText.value = []
+  textareaAttributes.value = []
 
   back()
 }
@@ -170,12 +261,16 @@ onMounted(() => {
       checked: false
     })
   })
+
+  initializeFromStore()
 })
 </script>
 
 <template>
 
   <div class="create">
+
+    {{newItem.text}}
     <form class="create__form"
           novalidate
           method="post"
@@ -192,6 +287,7 @@ onMounted(() => {
                maxlength="100"
                required
                v-model="newItem.title"
+               v-autofocus
         >
         <span class="create__error fields_error label__error position-absolute"
               id="title-error"
@@ -208,11 +304,17 @@ onMounted(() => {
           <Btn @click="createTextarea('text')">Текст</Btn>
         </div>
 
-        <template v-if="textBlock.length">
-          <template v-for="(textarea, index) in textBlock">
-            <Component :is="textarea"  v-model="newItemText[index].text"/>
-          </template>
-        </template>
+        <TransitionGroup name="textarea"
+                         tag="div"
+        >
+          <Component v-for="(textarea, index) in textBlock"
+                     :key="index"
+                     :is="textarea"
+                     v-model="newItemText[index].text"
+                     v-bind="textareaAttributes[index]"
+                     @remove-textarea="removeTextarea(index)"
+          />
+        </TransitionGroup>
       </div>
 
       <div class="create__technologies">

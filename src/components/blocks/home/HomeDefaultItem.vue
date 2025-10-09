@@ -45,13 +45,20 @@ const parsedText = useItem(
     <DefaultItemSkeleton v-if="isLoading"/>
 
     <div class="item" v-else>
-      <p class="item__title h2">{{item?.title}}</p>
+      <Transition name="item-title" appear>
+        <p class="item__title h2">{{item?.title}}</p>
+      </Transition>
 
       <div>
-        <template v-for="part in parsedText">
-          <p class="item__text" v-if="part.type === 'text'">{{part.content}}</p>
-          <pre class="item__code" v-else v-html="part.content"></pre>
-        </template>
+        <TransitionGroup name="item-list" appear>
+          <div v-for="(part, index) in parsedText"
+               :key="index"
+               :style="{'--index': index}"
+          >
+            <p class="item__text" v-if="part.type === 'text'">{{part.content}}</p>
+            <pre class="item__code" v-else v-html="part.content"></pre>
+          </div>
+        </TransitionGroup>
       </div>
     </div>
   </div>

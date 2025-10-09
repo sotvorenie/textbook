@@ -1,12 +1,8 @@
 <script setup lang="ts">
-import {computed, ref} from "vue";
+import {computed, ref, watch} from "vue";
 
 import {roundedButtonStyle} from "../../../data/styles.ts";
 
-import Hints from "./HomeMenuItems/Hints.vue";
-import Advices from "./HomeMenuItems/Advices.vue";
-import Textbooks from "./HomeMenuItems/Textbooks.vue";
-import Projects from "./HomeMenuItems/Projects.vue";
 import Messenger from "./HomeMenuItems/Messenger.vue";
 import Blog from "./HomeMenuItems/Blog.vue";
 
@@ -15,15 +11,16 @@ import MessengerSettings from "./HomeSettingsItems/MessengerSettings.vue";
 import BlogSettings from "./HomeSettingsItems/BlogSettings.vue";
 
 import HomeUserCard from "./HomeUserCard.vue";
-import HomeEmpty from "./HomeEmpty.vue";
+import HomeEmpty from "./HomeEmpty/HomeEmpty.vue";
 
 import UserIcon from "../../../assets/icons/UserIcon.vue";
 import Modal from "../../common/Modal.vue";
 
 import useUserStore from "../../../store/userStore.ts";
+import HomeDefaultContentItem from "./HomeDefaultContentItem.vue";
 const userStore = useUserStore();
 
-defineProps({
+const props = defineProps({
   activeIndex: {
     type: Number,
     request: true,
@@ -31,15 +28,62 @@ defineProps({
   }
 })
 
-const contentComponents = [
-    HomeEmpty,
-    Hints,
-    Textbooks,
-    Projects,
-    Advices,
-    Messenger,
-    Blog
-]
+interface ContentComponent {
+  component: any;
+  props: {
+    name?: string;
+    apiUrl?: string;
+    removedItemsId?: number[];
+    [key: string]: any; // для других возможных props
+  };
+}
+
+const contentComponents = ref<ContentComponent[]>([
+  {
+    component: HomeEmpty,
+    props: {},
+  },
+  {
+    component: HomeDefaultContentItem,
+    props: {
+      name: 'hints',
+      apiUrl: 'posts',
+      removedItemsId: [],
+    },
+  },
+  {
+    component: HomeDefaultContentItem,
+    props: {
+      name: 'textbooks',
+      apiUrl: 'textbooks',
+      removedItemsId: [],
+    },
+  },
+  {
+    component: HomeDefaultContentItem,
+    props: {
+      name: 'textbooks',
+      apiUrl: 'textbooks',
+      removedItemsId: [],
+    },
+  },
+  {
+    component: HomeDefaultContentItem,
+    props: {
+      name: 'textbooks',
+      apiUrl: 'textbooks',
+      removedItemsId: [],
+    },
+  },
+  {
+    component: Messenger,
+    props: {},
+  },
+  {
+    component: Blog,
+    props: {},
+  },
+])
 
 const settingsComponentsAttributes = [
   {
@@ -47,6 +91,7 @@ const settingsComponentsAttributes = [
     props: {
       createName: 'подсказку',
       blockName: 'hints',
+      apiName: 'posts',
     }
   },
   {
@@ -54,6 +99,7 @@ const settingsComponentsAttributes = [
     props: {
       createName: 'учебник',
       blockName: 'textbooks',
+      apiName: 'textbooks',
     }
   },
   {
@@ -61,6 +107,7 @@ const settingsComponentsAttributes = [
     props: {
       createName: 'проект',
       blockName: 'projects',
+      apiName: 'projects',
     }
   },
   {
@@ -68,6 +115,7 @@ const settingsComponentsAttributes = [
     props: {
       createName: 'совет',
       blockName: 'advices',
+      apiName: 'advices',
     }
   },
   {
@@ -91,6 +139,28 @@ const userIconVisible = computed(() => {
 })
 
 const modalVisible = ref<boolean>(false);
+
+const handleItemRemoved = ({blockName, id}: { blockName: string, id: number }) => {
+  contentComponents.value.forEach(el => {
+    if (el.props.name === blockName) {
+      if (!el.props.removedItemsId) {
+        el.props.removedItemsId = []
+      }
+      el.props.removedItemsId.push(id)
+    }
+  })
+}
+
+const transitionName = ref<string>('')
+watch(() => props.activeIndex,
+    (newVal, prevVal) => {
+          if (newVal > prevVal) {
+            transitionName.value = 'top'
+          } else {
+            transitionName.value = 'bottom'
+          }
+    }
+)
 </script>
 
 <template>
@@ -104,22 +174,25 @@ const modalVisible = ref<boolean>(false);
         <Component :key="`settings-${activeIndex - 1}`"
                    :is="settingsComponentsAttributes[activeIndex - 1]?.component"
                    v-bind="settingsComponentsAttributes[activeIndex - 1]?.props || {}"
+                   @remove-item="handleItemRemoved"
         />
       </KeepAlive>
 
       <Modal v-model="modalVisible" :size="600">
         <template #activator="{open}">
-          <button :class="['home__user', 'img-container', ...roundedButtonStyle]"
-                  :title="userName"
-                  aria-label="Пользователь"
-                  type="button"
-                  @click="open">
-            <img :src="userStore.user.ava?.url"
-                 :alt="userName"
-                 v-if="userIconVisible"
-            />
-            <UserIcon v-else/>
-          </button>
+          <Transition name="avatar" appear>
+            <button :class="['home__user', 'img-container', ...roundedButtonStyle]"
+                    :title="userName"
+                    aria-label="Пользователь"
+                    type="button"
+                    @click="open">
+              <img :src="userStore.user.ava?.url"
+                   :alt="userName"
+                   v-if="userIconVisible"
+              />
+              <UserIcon v-else/>
+            </button>
+          </Transition>
         </template>
 
         <template #default>
@@ -130,8 +203,10 @@ const modalVisible = ref<boolean>(false);
 
     <div class="home__main">
       <KeepAlive>
-        <Component :is="contentComponents[activeIndex]"
-                   :key="`content-${activeIndex - 1}`"
+        <Component :is="contentComponents[activeIndex].component"
+                   :key="`content-${activeIndex}`"
+                   v-bind="contentComponents[activeIndex].props"
+                   :transition-name="transitionName"
         />
       </KeepAlive>
     </div>

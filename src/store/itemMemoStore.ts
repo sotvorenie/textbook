@@ -76,11 +76,19 @@ const useItemMemoStore = defineStore('itemMemoStore', () => {
     };
 
     const getItem = (name: string, id: number): Item | undefined => {
-        return caches[name].get(id);
+        const cache = caches[name];
+        if (!cache) return undefined;
+
+        const item = cache.get(id);
+        if (item) {
+            cache.set(id, item);
+        }
+
+        return item;
     }
 
     const setItem = (name: string, id: number, value: Item): void => {
-        caches[name].set(id, value);
+        caches[name]?.set(id, value);
     }
 
     const resetStore = () => {
@@ -88,6 +96,25 @@ const useItemMemoStore = defineStore('itemMemoStore', () => {
             caches[key].clear();
         }
     }
+
+    const getLastFromCache = (cacheName: string): { key: number; value: Item } | null => {
+        const cache = caches[cacheName];
+        if (!cache) return null;
+
+        const entries = Array.from(cache.entries());
+        if (entries.length === 0) return null;
+
+        const [key, value] = entries[0];
+        return { key, value };
+    };
+
+    const updateLastItemInCache = (cacheName: string, newValue: Partial<Item>) => {
+        const last = getLastFromCache(cacheName);
+        if (!last) return;
+
+        const updated = { ...last.value, ...newValue };
+        caches[cacheName].set(last.key, updated);
+    };
 
     // const resetStore = () => {
     //     items.hints = new Map()
@@ -101,6 +128,8 @@ const useItemMemoStore = defineStore('itemMemoStore', () => {
 
         getItem,
         setItem,
+        getLastFromCache,
+        updateLastItemInCache,
 
         resetStore,
     }

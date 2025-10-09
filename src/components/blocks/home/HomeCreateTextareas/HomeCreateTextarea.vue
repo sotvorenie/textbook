@@ -4,6 +4,14 @@ import {ref} from "vue";
 import {onBlur, onInput} from "../../../../composables/useFormValidation.ts";
 import {removeLabelText} from "../../../../composables/useLabelText.ts";
 import {addLabelText} from "../../../../composables/useLabelText.ts";
+import Btn from "../../../ui/Btn.vue";
+
+defineProps({
+  name: String,
+  code: String,
+})
+
+const emits = defineEmits(['removeTextarea'])
 
 const text = defineModel({type: String, required: true});
 
@@ -36,10 +44,10 @@ const handleInput = (event: Event) => {
         <span class="label__text is-active position-absolute cursor-text user-select-none"
               @click.stop
         >
-          Код
+          {{ name }}
         </span>
     <textarea class="create__textarea"
-              aria-describedby="text-error"
+              :aria-describedby="`text-${code}`"
               @blur="blurInput"
               @input="handleInput"
               @focus="addLabelText"
@@ -47,11 +55,15 @@ const handleInput = (event: Event) => {
               required
               ref="textareaRef"
     />
-    <span class="create__error fields_error label__error position-absolute"
-          id="text-error"
+    <span :class="`create__${code} fields_${code} label__${code} position-absolute`"
+          :id="`text-${code}`"
           data-js-form-field-errors
           @click.stop>
-        </span>
+    </span>
+
+    <Btn class="create__remove button-small position-absolute"
+         @click="emits('removeTextarea')"
+    >Удалить</Btn>
   </label>
 
 </template>

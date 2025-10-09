@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {empty} from "../../../data/base64/sleepFox.ts";
+import {empty} from "../../../../data/base64/sleepFox.ts";
 
 </script>
 

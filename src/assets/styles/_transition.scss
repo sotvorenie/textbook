@@ -11,7 +11,6 @@
 .fade-top-leave-to {
   backdrop-filter: blur(3px);
 }
-
 .fade-top-enter-active, .fade-top-leave-active {
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
@@ -26,7 +25,6 @@
 .fade-bottom-leave-to {
   backdrop-filter: blur(3px);
 }
-
 .fade-bottom-enter-active, .fade-bottom-leave-active {
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
@@ -41,4 +39,90 @@
 }
 .scale-left-enter-from, .scale-left-leave-to {
   transform: scaleX(0);
+}
+
+.textarea-move, .textarea-enter-active, .textarea-leave-active {
+  transition: all 0.4s ease;
+}
+.textarea-enter-from, .textarea-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+.textarea-active {
+  position: absolute;
+}
+
+.item-title-enter-active, .item-title-leave-active {
+  transition: all 0.4s ease;
+}
+.item-title-enter-from, .item-title-leave-to {
+  opacity: 0;
+  transform: translateY(-15px);
+}
+
+.item-list-move, .item-list-enter-active, .item-list-leave-active {
+  transition: all 0.4s ease;
+  transition-delay: calc(var(--index) * 0.1s);
+}
+.item-list-enter-from, .item-list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+.item-list-leave-active {
+  position: absolute;
+}
+
+.menu-top-enter-from, .menu-top-leave-to {
+  transform: translateY(-30px);
+}
+
+.menu-move, .menu-enter-active, .menu-leave-active {
+  transition: all 0.4s ease;
+  transition-delay: calc(var(--index) * 0.075s);
+}
+.menu-enter-from, .menu-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+.menu-leave-active {
+  position: absolute;
+}
+
+.menu-bottom-enter-from, .menu-bottom-leave-to {
+  transform: translateY(30px);
+}
+
+.avatar-enter-from, .avatar-leave-to {
+  transform: scale(0);
+}
+
+.menu-item-top-enter-active,
+.menu-item-top-leave-active,
+.menu-item-bottom-enter-active,
+.menu-item-bottom-leave-active{
+  transition: all 0.7s ease;
+}
+.menu-item-top-enter-from {
+  opacity: 0;
+  position: absolute;
+  overflow: hidden;
+  transform: translateY(100%);
+}
+.menu-item-bottom-enter-from {
+  opacity: 0;
+  position: absolute;
+  overflow: hidden;
+  transform: translateY(-100%);
+}
+.menu-item-top-leave-to {
+  opacity: 0;
+  position: absolute;
+  overflow: hidden;
+  transform: translateY(-100%);
+}
+.menu-item-bottom-leave-to {
+  opacity: 0;
+  position: absolute;
+  overflow: hidden;
+  transform: translateY(100%);
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, ref, watch, nextTick} from "vue";
+import {computed, ref, watch, nextTick, PropType} from "vue";
 
 import {debounce} from "../../../utils/debounce.ts";
 
@@ -19,6 +19,7 @@ const searchStore = useSearchStore();
 import useSettingsStore from "../../../store/settingsStore.ts";
 const settingsStore = useSettingsStore();
 import useUserStore from "../../../store/userStore.ts";
+import HomeEmptyList from "./HomeEmpty/HomeEmptyList.vue";
 const userStore = useUserStore();
 
 const props = defineProps({
@@ -27,10 +28,12 @@ const props = defineProps({
     required: true
   },
   apiUrl: {
-    typer: String,
+    type: String,
     required: true,
     default: ''
-  }
+  },
+  removedItemsId: Array as PropType<number[]>,
+  createdItems: Array as PropType<List[]>
 })
 
 const emits = defineEmits(['changeItem']);
@@ -63,20 +66,32 @@ const handleItem = (id: number) => {
 }
 
 const items = ref<List[]>([]);
+const filteredItems = computed(() => {
+  return [
+      ...props.createdItems?.filter(el => !props.removedItemsId?.includes(el.id)) ?? [],
+    ...items.value?.filter(el => !props.removedItemsId?.includes(el.id))
+  ]
+})
+
+const loadMoreVisible = computed(() => {
+  return filteredItems.value?.length > 0
+      && (page.value >= 1 && meta.value?.remaining_count! > 0)
+})
 
 const meta = ref<Meta>();
 
 const loadingVisible = ref(true);
 
+const page = ref<number>(1)
+
 const getPosts = async(push: boolean = true) => {
   try {
     loadingVisible.value = true
 
-    let page: number
     if (!push || !meta.value?.current_page) {
-      page = 1
+      page.value = 1
     } else {
-      page = meta.value?.current_page + 1
+      page.value = meta.value?.current_page + 1
     }
 
     let user_id: number | null = null
@@ -89,7 +104,7 @@ const getPosts = async(push: boolean = true) => {
 
     const response: {meta: any, items: List[]} = await getList(
         props.apiUrl,
-        page,
+        page.value,
         searchStore.searchNames[props?.searchName],
         searchStore.filterTechnologies[props?.searchName],
         user_id,
@@ -178,11 +193,12 @@ watch(
 <template>
 
   <div class="list-wrapper">
-    <ul class="list flex row" ref="listRef">
+    <ul class="list flex row" v-if="filteredItems?.length">
       <li class="list__item cursor-pointer col-4 position-relative"
-          v-for="item in items"
+          v-for="(item, index) in filteredItems"
           :key="item.id"
           @click="handleItem(item.id)"
+          :style="{'--index': index}"
       >
         <button class="list__like recolor-svg button-width-svg position-absolute"
                 type="button"
@@ -236,12 +252,15 @@ watch(
     </ul>
 
     <Btn class="list__load-more m-auto"
-         :is-disabled="meta?.remaining_count! === 0 || loadingVisible"
+         :is-disabled="loadingVisible"
          :is-loading="loadingVisible"
          @click="getPosts"
+         v-if="loadMoreVisible"
     >
       Загрузить ещё
     </Btn>
+
+    <HomeEmptyList v-if="!filteredItems?.length"/>
   </div>
 
 </template>

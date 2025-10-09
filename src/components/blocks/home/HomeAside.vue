@@ -27,24 +27,32 @@ const changeActiveIndex = (number: number): void => {
   >
 
     <div class="menu__top home__header flex-center">
-      <button class="menu__btn menu__logo flex flex-align-center recolor-svg"
-              :title="isClosed ? 'Открыть' : 'Закрыть'"
-              type="button"
-      >
-        <Menu @click="changeClosed"/>
-        <Transition name="scale-left">
-          <span class="menu__name" v-show="!isClosed">Textbook</span>
-        </Transition>
-      </button>
+      <Transition name="menu-top" appear>
+        <button class="menu__btn menu__logo flex flex-align-center recolor-svg"
+                :title="isClosed ? 'Открыть' : 'Закрыть'"
+                type="button"
+        >
+          <Menu @click="changeClosed"/>
+          <Transition name="menu-top" :delay="500">
+            <span class="menu__name" v-show="!isClosed">Textbook</span>
+          </Transition>
+        </button>
+      </Transition>
     </div>
 
-    <ul class="menu__list">
+    <TransitionGroup class="menu__list"
+                     name="menu"
+                     tag="ul"
+                     appear
+                     :delay="1000"
+    >
       <li :class="{
             'menu__item': true,
             'is-active': activeIndex === index + 1,
           }"
           v-for="(item, index) in menuItems"
           :key="item.id"
+          :style="{'--index': index}"
       >
         <button class="menu__btn hover-color-accent recolor-svg flex flex-align-center"
                 :title="isClosed ? item.name : ''"
@@ -57,12 +65,14 @@ const changeActiveIndex = (number: number): void => {
           </Transition>
         </button>
       </li>
-    </ul>
+    </TransitionGroup>
 
-    <button class="menu__bottom button button-small m-auto"
-            type="button"
-            v-if="!isClosed"
-    >Подробнее</button>
+    <Transition name="menu-bottom" appear :delay="500">
+      <button class="menu__bottom button button-small m-auto"
+              type="button"
+              v-if="!isClosed"
+      >Подробнее</button>
+    </Transition>
   </aside>
 
 </template>

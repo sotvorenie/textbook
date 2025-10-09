@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import {computed, ref} from "vue";
+import {computed, ref, watch} from "vue";
 
 import {FilterList} from "../../../types/filter.ts";
+
+import {showConfirm} from "../../../utils/modals.ts";
+
+import {removeItem} from "../../../api/posts/posts.ts";
 
 import HomeSettingsMyOther from "./HomeSettingsMyOther.vue";
 
@@ -12,21 +16,34 @@ import Back from "../../ui/Back.vue";
 import Btn from "../../ui/Btn.vue";
 
 import useBlocksStore from "../../../store/blocksStore.ts";
-const blocksStore = useBlocksStore();
 import useSearchStore from "../../../store/searchStore.ts";
-const searchStore = useSearchStore();
 import useSettingsStore from "../../../store/settingsStore.ts";
-const settingsStore = useSettingsStore();
 import useUserStore from "../../../store/userStore.ts";
+import useCreateStore from "../../../store/useCreateStore.ts";
+import useItemMemoStore from "../../../store/itemMemoStore.ts";
+import useIdStore from "../../../store/idStore.ts";
+
+const blocksStore = useBlocksStore();
+const searchStore = useSearchStore();
+const settingsStore = useSettingsStore();
 const userStore = useUserStore();
+const createStore = useCreateStore();
+const itemMemoStore = useItemMemoStore();
+const idStore = useIdStore();
 
 const props = defineProps({
   createName: String,
   blockName: {
     type: String,
     required: true,
-  }
+  },
+  apiName: {
+    type: String,
+    required: true,
+  },
 })
+
+const emits = defineEmits(['removeItem'])
 
 const handleFilterChange = (list: FilterList): void => {
   let checkedItems = list?.filter(item => item.checked)
@@ -42,9 +59,27 @@ const handleCreate = () => {
   settingsStore.settingsVisible[props?.blockName] = 'create'
 }
 
-const handleBack = () => {
+const goToList = () => {
   blocksStore.activeBlock[props.blockName]= 'list'
   settingsStore.settingsVisible[props.blockName] = 'list'
+}
+
+const handleBack = () => {
+  if (userStore.isUserPost[props.blockName]
+      && blocksStore.activeBlock[props.blockName] === 'create') {
+
+    blocksStore.activeBlock[props.blockName] = 'item'
+
+    createStore.createData[props.blockName] = {
+      title: '',
+      text: '',
+      id: -1,
+    }
+  } else {
+    goToList()
+
+    userStore.isUserPost[props.blockName] = false
+  }
 }
 
 const createVisible = computed(() => {
@@ -64,6 +99,40 @@ const myBtnVisible = computed(() => {
 
   return userStore.isAdmin
 })
+
+const handleRedact = () => {
+  blocksStore.activeBlock[props.blockName] = 'create'
+
+  let item = itemMemoStore.getLastFromCache(props.blockName)?.value
+
+  createStore.createData[props.blockName] = {
+    title: item?.title ?? '',
+    text: item?.text ?? '',
+    id: item?.id ?? -1,
+  }
+}
+
+const handleRemove = async () => {
+  const confirm = await showConfirm(
+      'Удаление записи',
+      `Вы действительно хотите удалить ${props.createName}?`
+  )
+  if (confirm) {
+    await removeItem(props.apiName, idStore.idValues[props.blockName])
+
+    emits('removeItem', {
+      blockName: props.blockName,
+      id: idStore.idValues[props.blockName]
+    })
+
+    goToList()
+  }
+}
+
+watch(
+    () => blocksStore.activeBlock[props.blockName],
+    () => createBtnVisible.value = true
+)
 
 </script>
 
@@ -97,6 +166,22 @@ const myBtnVisible = computed(() => {
     </Btn>
   </div>
 
-  <Back @click="handleBack" v-else/>
+  <div class="settings__back flex flex-align-center" v-else>
+    <Back @click="handleBack"/>
+
+    <Btn class="button-small"
+         v-if="userStore.isUserPost[blockName]"
+         @click="handleRedact"
+    >
+      Редактировать
+    </Btn>
+
+    <Btn class="button-small"
+         v-if="userStore.isUserPost[blockName]"
+         @click="handleRemove"
+    >
+      Удалить
+    </Btn>
+  </div>
 
 </template>

@@ -6,6 +6,10 @@
 
   margin-bottom: rem(30);
 
+  &-wrapper {
+    width: 100%;
+  }
+
   &__item {
     padding: rem(20);
     border: $border-light-alt;
