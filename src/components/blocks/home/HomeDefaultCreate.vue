@@ -28,6 +28,8 @@ import useCreateStore from "../../../store/useCreateStore.ts";
 const createStore = useCreateStore();
 import useUserStore from "../../../store/userStore.ts";
 const userStore = useUserStore();
+import useItemMemoStore from "../../../store/itemMemoStore.ts";
+const itemMemoStore = useItemMemoStore();
 
 const props = defineProps({
   apiUrl: {
@@ -236,6 +238,8 @@ const sendRequest = async () => {
         newItem,
         createStore.createData[props.name].id
     )
+
+    itemMemoStore.updateLastItemInCache(props.name, newItem)
   }
 
   const blockNameToEventType: Record<string, TelegramEventType> = {
