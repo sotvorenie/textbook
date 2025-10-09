@@ -39,10 +39,6 @@ const props = defineProps({
     default: HomeDefaultCreate,
   },
   removedItemsId: Array as PropType<number[]>,
-  transitionName: {
-    type: String,
-    default: 'top',
-  },
 })
 
 const activeComponent = computed(() => {

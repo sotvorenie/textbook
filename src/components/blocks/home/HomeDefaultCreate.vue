@@ -306,6 +306,7 @@ onMounted(() => {
         <div class="create__btn-bar position-sticky z-1000 flex">
           <Btn @click="createTextarea('code')">Код <></Btn>
           <Btn @click="createTextarea('text')">Текст</Btn>
+          <Btn @click="createTextarea('text')" v-if="name === 'textbooks'">Подзаголовок</Btn>
         </div>
 
         <TransitionGroup name="textarea"

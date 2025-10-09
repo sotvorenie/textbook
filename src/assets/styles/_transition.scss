@@ -95,34 +95,3 @@
 .avatar-enter-from, .avatar-leave-to {
   transform: scale(0);
 }
-
-.menu-item-top-enter-active,
-.menu-item-top-leave-active,
-.menu-item-bottom-enter-active,
-.menu-item-bottom-leave-active{
-  transition: all 0.7s ease;
-}
-.menu-item-top-enter-from {
-  opacity: 0;
-  position: absolute;
-  overflow: hidden;
-  transform: translateY(100%);
-}
-.menu-item-bottom-enter-from {
-  opacity: 0;
-  position: absolute;
-  overflow: hidden;
-  transform: translateY(-100%);
-}
-.menu-item-top-leave-to {
-  opacity: 0;
-  position: absolute;
-  overflow: hidden;
-  transform: translateY(-100%);
-}
-.menu-item-bottom-leave-to {
-  opacity: 0;
-  position: absolute;
-  overflow: hidden;
-  transform: translateY(100%);
-}

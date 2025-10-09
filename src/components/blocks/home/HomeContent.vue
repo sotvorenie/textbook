@@ -10,6 +10,8 @@ import HomeDefaultSettings from "./HomeDefaultSettings.vue";
 import MessengerSettings from "./HomeSettingsItems/MessengerSettings.vue";
 import BlogSettings from "./HomeSettingsItems/BlogSettings.vue";
 
+import HomeDefaultContentItem from "./HomeDefaultContentItem.vue";
+
 import HomeUserCard from "./HomeUserCard.vue";
 import HomeEmpty from "./HomeEmpty/HomeEmpty.vue";
 
@@ -17,8 +19,11 @@ import UserIcon from "../../../assets/icons/UserIcon.vue";
 import Modal from "../../common/Modal.vue";
 
 import useUserStore from "../../../store/userStore.ts";
-import HomeDefaultContentItem from "./HomeDefaultContentItem.vue";
 const userStore = useUserStore();
+import useSettingsStore from "../../../store/settingsStore.ts";
+const settingsStore = useSettingsStore();
+import useBlocksStore from "../../../store/blocksStore.ts";
+const blocksStore = useBlocksStore();
 
 const props = defineProps({
   activeIndex: {
@@ -151,14 +156,11 @@ const handleItemRemoved = ({blockName, id}: { blockName: string, id: number }) =
   })
 }
 
-const transitionName = ref<string>('')
-watch(() => props.activeIndex,
-    (newVal, prevVal) => {
-          if (newVal > prevVal) {
-            transitionName.value = 'top'
-          } else {
-            transitionName.value = 'bottom'
-          }
+watch(
+    () => props.activeIndex,
+    () => {
+      const name: string = settingsComponentsAttributes[props.activeIndex - 1].props.blockName!
+      settingsStore.settingsVisible[name] = blocksStore.activeBlock[name]
     }
 )
 </script>
@@ -206,7 +208,6 @@ watch(() => props.activeIndex,
         <Component :is="contentComponents[activeIndex].component"
                    :key="`content-${activeIndex}`"
                    v-bind="contentComponents[activeIndex].props"
-                   :transition-name="transitionName"
         />
       </KeepAlive>
     </div>

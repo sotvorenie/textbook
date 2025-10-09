@@ -15,8 +15,8 @@
   @include hover {
     border-color: $color-accent;
   }
+}
 
-  &-small {
-    padding-block: rem(5);
-  }
+.input-small {
+  padding-block: rem(5);
 }
