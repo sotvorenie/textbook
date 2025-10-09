@@ -7,6 +7,7 @@ import useTechnologiesStore from "../store/technologiesStore.ts";
 import useUserStore from "../store/userStore.ts";
 import useScrollStore from "../store/useScrollStore.ts";
 import useCreateStore from "../store/useCreateStore.ts";
+import useItemsStore from "../store/useItemsStore.ts";
 
 export const resetAllStores = (): void => {
     const userStore = useUserStore();
@@ -18,6 +19,7 @@ export const resetAllStores = (): void => {
     const technologiesStore = useTechnologiesStore();
     const scrollStore = useScrollStore();
     const createStore = useCreateStore();
+    const createdDeletedItemStore = useItemsStore();
 
     userStore.resetStore();
     blocksStore.resetStore();
@@ -28,4 +30,5 @@ export const resetAllStores = (): void => {
     technologiesStore.resetStore();
     scrollStore.resetStore();
     createStore.resetStore();
+    createdDeletedItemStore.resetStore();
 };

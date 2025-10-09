@@ -37,21 +37,6 @@ function roughSizeOfObject(object: any): number {
 
 const useItemMemoStore = defineStore('itemMemoStore', () => {
 
-    // const items = reactive<Record<string, Map<number, Item>>>({
-    //     hints: new Map(),
-    //     advices: new Map(),
-    //     projects: new Map(),
-    //     textbooks: new Map(),
-    // })
-
-    // const getItem = (name: string, id: number): Item | undefined => {
-    //     return items[name].get(id);
-    // }
-    //
-    // const setItem = (name: string, id: number, value: Item): void => {
-    //     items[name].set(id, value);
-    // }
-
     const caches: Record<string, LRUCache<number, Item>> = {
         hints: new LRUCache({
             max: MAX_ITEMS,
@@ -116,12 +101,25 @@ const useItemMemoStore = defineStore('itemMemoStore', () => {
         caches[cacheName].set(last.key, updated);
     };
 
-    // const resetStore = () => {
-    //     items.hints = new Map()
-    //     items.advices = new Map()
-    //     items.projects = new Map()
-    //     items.textbooks = new Map()
-    // }
+    const findItemById = (id: number): { cacheName: string, item: Item } | null => {
+        for (const [cacheName, cache] of Object.entries(caches)) {
+            const item = cache.get(id);
+            if (item) return { cacheName, item };
+        }
+        return null;
+    };
+
+    const updateItemInCacheById = (cacheName: string, id: number, newValue: Partial<Item>) => {
+        const cache = caches[cacheName];
+        if (!cache) return;
+
+        const existing = cache.get(id);
+        if (!existing) return;
+
+        const updated = { ...existing, ...newValue };
+
+        cache.set(id, updated);
+    };
 
     return {
         caches,
@@ -130,6 +128,8 @@ const useItemMemoStore = defineStore('itemMemoStore', () => {
         setItem,
         getLastFromCache,
         updateLastItemInCache,
+        findItemById,
+        updateItemInCacheById,
 
         resetStore,
     }

@@ -22,6 +22,7 @@ import useUserStore from "../../../store/userStore.ts";
 import useCreateStore from "../../../store/useCreateStore.ts";
 import useItemMemoStore from "../../../store/itemMemoStore.ts";
 import useIdStore from "../../../store/idStore.ts";
+import useItemsStore from "../../../store/useItemsStore.ts";
 
 const blocksStore = useBlocksStore();
 const searchStore = useSearchStore();
@@ -30,6 +31,7 @@ const userStore = useUserStore();
 const createStore = useCreateStore();
 const itemMemoStore = useItemMemoStore();
 const idStore = useIdStore();
+const itemsStore = useItemsStore();
 
 const props = defineProps({
   createName: String,
@@ -42,8 +44,6 @@ const props = defineProps({
     required: true,
   },
 })
-
-const emits = defineEmits(['removeItem'])
 
 const handleFilterChange = (list: FilterList): void => {
   let checkedItems = list?.filter(item => item.checked)
@@ -120,10 +120,9 @@ const handleRemove = async () => {
   if (confirm) {
     await removeItem(props.apiName, idStore.idValues[props.blockName])
 
-    emits('removeItem', {
-      blockName: props.blockName,
-      id: idStore.idValues[props.blockName]
-    })
+    const arr = itemsStore.items[props.blockName];
+    const index = arr.findIndex(el => el.id === idStore.idValues[props.blockName]);
+    if (index !== -1) arr.splice(index, 1);
 
     goToList()
   }

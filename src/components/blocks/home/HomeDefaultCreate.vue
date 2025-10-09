@@ -30,6 +30,8 @@ import useUserStore from "../../../store/userStore.ts";
 const userStore = useUserStore();
 import useItemMemoStore from "../../../store/itemMemoStore.ts";
 const itemMemoStore = useItemMemoStore();
+import useItemsStore from "../../../store/useItemsStore.ts";
+const itemsStore = useItemsStore();
 
 const props = defineProps({
   apiUrl: {
@@ -49,11 +51,9 @@ defineOptions({
   }
 })
 
-const emits = defineEmits(['createItem'])
-
 const technologies = ref<{title: string, checked: boolean}[]>([]);
 
-settingsStore.settingsVisible.hints = 'create'
+settingsStore.settingsVisible[props.name] = 'create'
 
 const newItem = reactive<Item>({
   user_id: userStore.user.id,
@@ -82,7 +82,11 @@ const textareaAttributesList: Record<string, { name: string, code: string }> = {
   text: {
     name: 'Текст',
     code: 'text',
-  }
+  },
+  title: {
+    name: 'Подзаголовок',
+    code: 'title',
+  },
 }
 const textareaAttributes = ref<{ name: string, code: string }[]>([])
 
@@ -103,8 +107,8 @@ const removeTextarea = (index: number) => {
 }
 
 const back = () => {
-  blocksStore.activeBlock.hints = 'list';
-  settingsStore.settingsVisible.hints = 'list'
+  blocksStore.activeBlock[props.name] = 'list';
+  settingsStore.settingsVisible[props.name] = 'list'
 }
 
 const cancel = async () => {
@@ -129,20 +133,29 @@ const save = async (event: Event) => {
   if (ask) await sendRequest()
 }
 
-const convertTextToBlocks = (str: string): {type: string, text: string}[] => {
+const convertTextToBlocks = (str: string): { type: string, text: string }[] => {
   if (!str) return [];
 
-  const blocks: {type: string, text: string}[] = [];
+  const blocks: { type: string, text: string }[] = [];
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = str;
 
   for (const child of Array.from(tempDiv.children)) {
+    let text = child.innerHTML;
+
+    text = text
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+
     if (child.tagName === 'PRE' && child.querySelector('code')) {
       const codeElement = child.querySelector('code');
       if (codeElement) {
-        let codeText = codeElement.innerHTML;
-
-        codeText = codeText
+        let codeText = codeElement.innerHTML
             .replace(/<br\s*\/?>/gi, '\n')
             .replace(/&nbsp;/g, ' ')
             .replace(/&lt;/g, '<')
@@ -156,27 +169,21 @@ const convertTextToBlocks = (str: string): {type: string, text: string}[] => {
           text: codeText
         });
       }
+    } else if (child.tagName === 'H3') {
+      blocks.push({
+        type: 'title',
+        text
+      });
     } else if (child.tagName === 'P') {
-      let text = child.innerHTML;
-
-      text = text
-          .replace(/<br\s*\/?>/gi, '\n')
-          .replace(/&nbsp;/g, ' ')
-          .replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>')
-          .replace(/&amp;/g, '&')
-          .replace(/&quot;/g, '"')
-          .replace(/&#39;/g, "'");
-
       blocks.push({
         type: 'text',
-        text: text
+        text
       });
     }
   }
 
   return blocks;
-}
+};
 
 const initializeFromStore = () => {
   const storedText = createStore.createData[props.name].text;
@@ -197,18 +204,17 @@ const initializeFromStore = () => {
   }
 };
 
-const convertBlocksToText = (blocks: {type: string, text: string}[]): string => {
+const convertBlocksToText = (blocks: { type: string, text: string }[]): string => {
   return blocks?.map(block => {
     const lines = block.text.split('\n');
 
-    const processedLines = lines.map(line => {
-      return line.replace(/ /g, '&nbsp;');
-    });
-
+    const processedLines = lines.map(line => line.replace(/ /g, '&nbsp;'));
     const formattedText = processedLines.join('<br>');
 
     if (block.type === 'code') {
       return `<pre><code>${formattedText}</code></pre>`;
+    } else if (block.type === 'title') {
+      return `<h3>${formattedText}</h3>`;
     } else {
       return `<p>${formattedText}</p>`;
     }
@@ -231,15 +237,39 @@ const sendRequest = async () => {
   if (!createStore.createData[props.name].title.length) {
     const response: Item = await createItem(props.apiUrl, newItem)
 
-    emits('createItem', response)
+    if (response && response.id) {
+      itemsStore.items[props.name].unshift({
+        id: response.id,
+        title: response.title,
+        date: response.date,
+        languages_and_technologies: response.languages_and_technologies,
+      })
+
+      const cacheElement = itemMemoStore.findItemById(response.id)
+
+      if (cacheElement) itemMemoStore.updateItemInCacheById(props.name, response.id, newItem)
+    }
   } else {
-    await redactItem(
+    const response = await redactItem(
         props.apiUrl,
         newItem,
         createStore.createData[props.name].id
     )
 
-    itemMemoStore.updateLastItemInCache(props.name, newItem)
+    if (response && response.id) {
+      itemsStore.items[props.name] = itemsStore.items[props.name]?.map(el => {
+        if (el.id === response.id) {
+          return {
+            ...el,
+            title: response.title,
+          }
+        }
+
+        return el
+      })
+
+      itemMemoStore.updateLastItemInCache(props.name, newItem)
+    }
   }
 
   const blockNameToEventType: Record<string, TelegramEventType> = {
@@ -274,7 +304,6 @@ onMounted(() => {
 
   <div class="create">
 
-    {{newItem.text}}
     <form class="create__form"
           novalidate
           method="post"
@@ -282,7 +311,11 @@ onMounted(() => {
           data-js-form
     >
       <label class="create__label label position-relative" @click.stop>
-        <span class="label__text position-absolute cursor-text user-select-none" @click.stop>Заголовок</span>
+        <span class="label__text position-absolute cursor-text user-select-none"
+              @click.stop
+        >
+          Заголовок
+        </span>
         <input class="create__input input"
                aria-describedby="title-error"
                @blur="blurInput"
@@ -306,7 +339,11 @@ onMounted(() => {
         <div class="create__btn-bar position-sticky z-1000 flex">
           <Btn @click="createTextarea('code')">Код <></Btn>
           <Btn @click="createTextarea('text')">Текст</Btn>
-          <Btn @click="createTextarea('text')" v-if="name === 'textbooks'">Подзаголовок</Btn>
+          <Btn @click="createTextarea('title')"
+               v-if="name === 'textbooks'"
+          >
+            Подзаголовок
+          </Btn>
         </div>
 
         <TransitionGroup name="textarea"

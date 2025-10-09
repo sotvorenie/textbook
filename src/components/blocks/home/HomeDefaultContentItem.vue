@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import {computed, onMounted, onActivated, onDeactivated, VueElement, PropType, ref} from "vue";
-
-import {List} from "../../../types/list.ts";
+import {computed, onMounted, onActivated, onDeactivated, VueElement} from "vue";
 
 import {useSaveScroll} from "../../../composables/useSaveScroll.ts";
 
@@ -14,7 +12,6 @@ import DefaultListSkeleton from "../../ui/loading/DefaulListSkeleton.vue";
 import useBlocksStore from "../../../store/blocksStore.ts";
 const blocksStore = useBlocksStore();
 import useIdStore from "../../../store/idStore.ts";
-import {Item} from "../../../types/item.ts";
 const idStore = useIdStore();
 
 const props = defineProps({
@@ -38,7 +35,6 @@ const props = defineProps({
     type: VueElement,
     default: HomeDefaultCreate,
   },
-  removedItemsId: Array as PropType<number[]>,
 })
 
 const activeComponent = computed(() => {
@@ -54,14 +50,12 @@ const activeComponent = computed(() => {
 const componentProps = computed(() => {
   switch (blocksStore.activeBlock[props.name]) {
     case "item":
-      return { apiUrl: props.apiUrl, idName: [props.name] };
+      return { apiUrl: props.apiUrl, idName: props.name };
     case "create":
-      return { apiUrl: props.apiUrl, name: [props.name] };
+      return { apiUrl: props.apiUrl, name: props.name };
     default:
       return { apiUrl: props.apiUrl,
-        searchName: [props.name],
-        removedItemsId: props.removedItemsId,
-        createdItems: createdItems.value
+        searchName: props.name,
       };
   }
 })
@@ -69,16 +63,6 @@ const componentProps = computed(() => {
 const changeItem = (id: number): void => {
   blocksStore.activeBlock[props.name] = 'item';
   idStore.idValues[props.name] = id;
-}
-
-const createdItems = ref<List[]>([])
-const createItem = (response: Item): void => {
-  createdItems.value.push({
-    id: response.id!,
-    title: response.title,
-    date: response.date,
-    languages_and_technologies: response.languages_and_technologies
-  });
 }
 
 // для сохранения скролла
@@ -105,7 +89,6 @@ onDeactivated(() => {
           :is="activeComponent"
           v-bind="componentProps"
           @change-item="changeItem"
-          @create-item="createItem"
       />
 
       <template #fallback>

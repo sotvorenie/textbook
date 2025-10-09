@@ -145,17 +145,6 @@ const userIconVisible = computed(() => {
 
 const modalVisible = ref<boolean>(false);
 
-const handleItemRemoved = ({blockName, id}: { blockName: string, id: number }) => {
-  contentComponents.value.forEach(el => {
-    if (el.props.name === blockName) {
-      if (!el.props.removedItemsId) {
-        el.props.removedItemsId = []
-      }
-      el.props.removedItemsId.push(id)
-    }
-  })
-}
-
 watch(
     () => props.activeIndex,
     () => {
@@ -176,7 +165,6 @@ watch(
         <Component :key="`settings-${activeIndex - 1}`"
                    :is="settingsComponentsAttributes[activeIndex - 1]?.component"
                    v-bind="settingsComponentsAttributes[activeIndex - 1]?.props || {}"
-                   @remove-item="handleItemRemoved"
         />
       </KeepAlive>
 

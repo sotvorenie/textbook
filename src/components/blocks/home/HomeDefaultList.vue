@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, ref, watch, nextTick, PropType} from "vue";
+import {computed, ref, watch, nextTick} from "vue";
 
 import {debounce} from "../../../utils/debounce.ts";
 
@@ -8,6 +8,8 @@ import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.
 import {like} from "../../../api/liked/liked.ts";
 
 import {Meta} from "../../../types/meta.ts";
+
+import HomeEmptyList from "./HomeEmpty/HomeEmptyList.vue";
 
 import {List} from "../../../types/list.ts";
 import Like from "../../ui/Like.vue";
@@ -19,8 +21,9 @@ const searchStore = useSearchStore();
 import useSettingsStore from "../../../store/settingsStore.ts";
 const settingsStore = useSettingsStore();
 import useUserStore from "../../../store/userStore.ts";
-import HomeEmptyList from "./HomeEmpty/HomeEmptyList.vue";
 const userStore = useUserStore();
+import useItemsStore from "../../../store/useItemsStore.ts";
+const itemsStore = useItemsStore();
 
 const props = defineProps({
   searchName: {
@@ -32,8 +35,6 @@ const props = defineProps({
     required: true,
     default: ''
   },
-  removedItemsId: Array as PropType<number[]>,
-  createdItems: Array as PropType<List[]>
 })
 
 const emits = defineEmits(['changeItem']);
@@ -65,16 +66,8 @@ const handleItem = (id: number) => {
   emits('changeItem', id);
 }
 
-const items = ref<List[]>([]);
-const filteredItems = computed(() => {
-  return [
-      ...props.createdItems?.filter(el => !props.removedItemsId?.includes(el.id)) ?? [],
-    ...items.value?.filter(el => !props.removedItemsId?.includes(el.id))
-  ]
-})
-
 const loadMoreVisible = computed(() => {
-  return filteredItems.value?.length > 0
+  return itemsStore.items[props.searchName]?.length > 0
       && (page.value >= 1 && meta.value?.remaining_count! > 0)
 })
 
@@ -114,9 +107,9 @@ const getPosts = async(push: boolean = true) => {
 
     if (response) {
       if (push) {
-        items.value?.push(...response.items)
+        itemsStore.items[props.searchName]?.push(...response.items)
       } else {
-        items.value = response.items
+        itemsStore.items[props.searchName] = response.items
       }
 
       meta.value = response.meta
@@ -137,7 +130,7 @@ const likedItems = computed(() => {
 
 const handleLike = async (id: number) => {
   try {
-    const element = items.value?.find(el => el.id === id) ?? {title: ''}
+    const element = itemsStore.items[props.searchName]?.find(el => el.id === id) ?? {title: ''}
 
     let isLike: boolean = false
 
@@ -170,22 +163,12 @@ const handleLike = async (id: number) => {
 const debouncedGetPosts = debounce(() => getPosts(false), 500);
 
 watch(
-    () => searchStore.searchNames[props?.searchName],
-    () => debouncedGetPosts()
-)
-
-watch(
-    () => searchStore.filterTechnologies[props?.searchName],
-    () => debouncedGetPosts()
-)
-
-watch(
-    () => searchStore.myOtherFilter[props?.searchName],
-    () => debouncedGetPosts()
-)
-
-watch(
-    () => searchStore.sortBy[props?.searchName],
+    () => [
+      searchStore.searchNames[props?.searchName],
+      searchStore.filterTechnologies[props?.searchName],
+      searchStore.myOtherFilter[props?.searchName],
+      searchStore.sortBy[props?.searchName],
+    ],
     () => debouncedGetPosts()
 )
 </script>
@@ -193,9 +176,9 @@ watch(
 <template>
 
   <div class="list-wrapper">
-    <ul class="list flex row" v-if="filteredItems?.length">
+    <ul class="list flex row" v-if="itemsStore.items[searchName]?.length">
       <li class="list__item cursor-pointer col-4 position-relative"
-          v-for="(item, index) in filteredItems"
+          v-for="(item, index) in itemsStore.items[searchName]"
           :key="item.id"
           @click="handleItem(item.id)"
           :style="{'--index': index}"
@@ -260,7 +243,7 @@ watch(
       Загрузить ещё
     </Btn>
 
-    <HomeEmptyList v-if="!filteredItems?.length"/>
+    <HomeEmptyList v-if="!itemsStore.items[searchName]?.length"/>
   </div>
 
 </template>
