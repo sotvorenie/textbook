@@ -4,7 +4,10 @@ import {ref} from "vue";
 import {onBlur, onInput} from "../../../../composables/useFormValidation.ts";
 import {removeLabelText} from "../../../../composables/useLabelText.ts";
 import {addLabelText} from "../../../../composables/useLabelText.ts";
+
 import Btn from "../../../ui/Btn.vue";
+
+//=========================================================//
 
 defineProps({
   name: String,
@@ -13,6 +16,8 @@ defineProps({
 
 const emits = defineEmits(['removeTextarea'])
 
+//=========================================================//
+
 const text = defineModel({type: String, required: true});
 
 const blurInput = (event: Event) => {
@@ -20,8 +25,10 @@ const blurInput = (event: Event) => {
   removeLabelText(event);
 }
 
+// текст в поле ввода textarea
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
+// для автоматической высоты поля ввода
 const autoResize = () => {
   const textarea = textareaRef.value
   if (textarea) {
@@ -30,6 +37,7 @@ const autoResize = () => {
   }
 }
 
+// клик по полю ввода
 const handleInput = (event: Event) => {
   onInput(event)
 

@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import {computed, ref, watch, nextTick} from "vue";
 
+import {Meta} from "../../../types/meta.ts";
+
 import {debounce} from "../../../utils/debounce.ts";
 
 import {getList} from "../../../api/posts/posts.ts";
 import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.ts";
 import {like} from "../../../api/liked/liked.ts";
-
-import {Meta} from "../../../types/meta.ts";
 
 import HomeEmptyList from "./HomeEmpty/HomeEmptyList.vue";
 
@@ -39,44 +39,21 @@ const props = defineProps({
 
 const emits = defineEmits(['changeItem']);
 
-const searchTechnologies = computed(() => {
-  return searchStore.filterTechnologies[props.searchName] ?? []
-});
+//=========================================================//
 
-//await new Promise(resolve => setTimeout(resolve, 3000000));
+//=========================================================//
+//-- асинхронные функции --//
+// для получения данных с апи при изменениях фильтров
+const debouncedGetPosts = debounce(() => getPosts(false), 500);
 
-// Метод для подсветки текста
-const highlightText = (text: string) => {
-  if (!text) return 'Без названия'
-  if (!searchStore.searchNames[props?.searchName]) return text;
-
-  // Разбиваем searchName на слова
-  const words = searchStore.searchNames[props?.searchName].split(/\s+/).filter(Boolean);
-  let result = text;
-
-  words.forEach(word => {
-    const regex = new RegExp(`(${word})`, "gi");
-    result = result.replace(regex, `<span class="is-active">$1</span>`);
-  });
-
-  return result;
-};
-
-const handleItem = (id: number) => {
-  emits('changeItem', id);
-}
-
-const loadMoreVisible = computed(() => {
-  return itemsStore.items[props.searchName]?.length > 0
-      && (page.value >= 1 && meta.value?.remaining_count! > 0)
-})
-
-const meta = ref<Meta>();
-
-const loadingVisible = ref(true);
-
+// данные о номере страницы апи
 const page = ref<number>(1)
 
+// данные обо всех/оставшихся элементов в апи
+const meta = ref<Meta>();
+
+
+// получение данных списка с апи
 const getPosts = async(push: boolean = true) => {
   try {
     loadingVisible.value = true
@@ -122,12 +99,65 @@ const getPosts = async(push: boolean = true) => {
     settingsStore.settingsVisible[props.searchName] = 'list'
   } catch (_) {}
 }
-await getPosts();
+//=========================================================//
 
+
+//=========================================================//
+//-- пустая страница --//
+// видимость пустой страницы
+const emptyVisible = computed(() => {
+  return !itemsStore.items[props.searchName]?.length && !loadingVisible.value
+})
+//=========================================================//
+
+
+//=========================================================//
+//-- данные фильтров --//
+// выбранные языки и технологии
+const searchTechnologies = computed(() => {
+  return searchStore.filterTechnologies[props.searchName] ?? []
+});
+//=========================================================//
+
+
+//=========================================================//
+//-- элемент списка --//
+// выбор элемента списка
+const handleItem = (id: number) => {
+  emits('changeItem', id);
+}
+//=========================================================//
+
+
+//=========================================================//
+//-- подсветка текста --//
+// метод для подсветки текста
+const highlightText = (text: string) => {
+  if (!text) return 'Без названия'
+  if (!searchStore.searchNames[props?.searchName]) return text;
+
+  const words = searchStore.searchNames[props?.searchName].split(/\s+/).filter(Boolean);
+  let result = text;
+
+  words.forEach(word => {
+    const regex = new RegExp(`(${word})`, "gi");
+    result = result.replace(regex, `<span class="is-active">$1</span>`);
+  });
+
+  return result;
+};
+//=========================================================//
+
+
+//=========================================================//
+//-- избранное --//
+// список избранных элементов пользователя
 const likedItems = computed(() => {
   return userStore.userLiked?.items[props.searchName];
 })
 
+
+// добавление элемента в избранное
 const handleLike = async (id: number) => {
   try {
     const element = itemsStore.items[props.searchName]?.find(el => el.id === id) ?? {title: ''}
@@ -159,9 +189,25 @@ const handleLike = async (id: number) => {
     }
   } catch (_) {}
 }
+//=========================================================//
 
-const debouncedGetPosts = debounce(() => getPosts(false), 500);
 
+//=========================================================//
+//-- кнопка "Загрузить ещё" --//
+// видимость кнопки "Загрузить ещё"
+const loadMoreVisible = computed(() => {
+  return itemsStore.items[props.searchName]?.length > 0
+      && (page.value >= 1 && meta.value?.remaining_count! > 0)
+})
+
+// видимость анимации загрузки
+const loadingVisible = ref(true);
+//=========================================================//
+
+
+//=========================================================//
+//-- наблюдатели --//
+// следим за изменение фильтров, чтобы обращаться к апи по заданным параметрам
 watch(
     () => [
       searchStore.searchNames[props?.searchName],
@@ -171,6 +217,13 @@ watch(
     ],
     () => debouncedGetPosts()
 )
+//=========================================================//
+
+
+//=========================================================//
+//-- вызов асинхронных функций --//
+await getPosts()
+//=========================================================//
 </script>
 
 <template>
@@ -243,7 +296,7 @@ watch(
       Загрузить ещё
     </Btn>
 
-    <HomeEmptyList v-if="!itemsStore.items[searchName]?.length"/>
+    <HomeEmptyList v-if="emptyVisible"/>
   </div>
 
 </template>

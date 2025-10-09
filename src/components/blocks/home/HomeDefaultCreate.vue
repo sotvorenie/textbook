@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import {onMounted, reactive, ref} from "vue";
 
+import {Item} from "../../../types/item.ts";
+
 import {showAsk} from "../../../utils/modals.ts";
+import {getCurrentDateTime} from "../../../composables/useDate.ts";
+import {cancel} from "../../../composables/useCancelCreated.ts";
 
 import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.ts";
 import {createItem, redactItem} from "../../../api/posts/posts.ts";
-import {getCurrentDateTime} from "../../../composables/useDate.ts";
 
 import {addLabelText, removeLabelText} from "../../../composables/useLabelText.ts";
 import {onBlur, onInput, onSubmit} from "../../../composables/useFormValidation.ts";
 
-import {Item} from "../../../types/item.ts";
 import Btn from "../../ui/Btn.vue";
 
 import HomeCreateTextarea from "./HomeCreateTextareas/HomeCreateTextarea.vue";
@@ -31,7 +33,6 @@ const userStore = useUserStore();
 import useItemMemoStore from "../../../store/itemMemoStore.ts";
 const itemMemoStore = useItemMemoStore();
 import useItemsStore from "../../../store/useItemsStore.ts";
-import {cancel} from "../../../composables/useCancelCreated.ts";
 const itemsStore = useItemsStore();
 
 const props = defineProps({
@@ -52,171 +53,12 @@ defineOptions({
   }
 })
 
-const technologies = ref<{title: string, checked: boolean}[]>([]);
+//=========================================================//
 
-settingsStore.settingsVisible[props.name] = 'create'
 
-const newItem = reactive<Item>({
-  user_id: userStore.user.id,
-  title: '',
-  languages_and_technologies: [],
-  text: '',
-  date: '',
-  sort_date: '',
-  time: ''
-})
-
-const newItemText = ref<{type: string, text: string}[]>([])
-
-const blurInput = (event: Event) => {
-  onBlur(event);
-  removeLabelText(event);
-}
-
-const textBlock = ref<string[]>([])
-
-const textareaAttributesList: Record<string, { name: string, code: string }> = {
-  code: {
-    name: 'Код',
-    code: 'code',
-  },
-  text: {
-    name: 'Текст',
-    code: 'text',
-  },
-  title: {
-    name: 'Подзаголовок',
-    code: 'title',
-  },
-}
-const textareaAttributes = ref<{ name: string, code: string }[]>([])
-
-const createTextarea = (type: string): void => {
-  newItemText.value.push({
-    type,
-    text: ''
-  })
-
-  textBlock.value.push('HomeCreateTextarea');
-  textareaAttributes.value.push(textareaAttributesList[type])
-}
-
-const removeTextarea = (index: number) => {
-  newItemText.value.splice(index, 1)
-  textBlock.value.splice(index, 1)
-  textareaAttributes.value.splice(index, 1)
-}
-
-const back = () => {
-  blocksStore.activeBlock[props.name] = 'list';
-  settingsStore.settingsVisible[props.name] = 'list'
-}
-
-const handleBack = (): void => {
-  cancel(props.name, back)
-}
-
-const save = async (event: Event) => {
-  const valid: boolean = onSubmit(event)
-
-  if (!valid) return
-
-  const ask = await showAsk(
-      'Сохранение подсказки',
-      'Вы действительно хотите сохранить подсказку?'
-  )
-
-  if (ask) await sendRequest()
-}
-
-const convertTextToBlocks = (str: string): { type: string, text: string }[] => {
-  if (!str) return [];
-
-  const blocks: { type: string, text: string }[] = [];
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = str;
-
-  for (const child of Array.from(tempDiv.children)) {
-    let text = child.innerHTML;
-
-    text = text
-        .replace(/<br\s*\/?>/gi, '\n')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&amp;/g, '&')
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'");
-
-    if (child.tagName === 'PRE' && child.querySelector('code')) {
-      const codeElement = child.querySelector('code');
-      if (codeElement) {
-        let codeText = codeElement.innerHTML
-            .replace(/<br\s*\/?>/gi, '\n')
-            .replace(/&nbsp;/g, ' ')
-            .replace(/&lt;/g, '<')
-            .replace(/&gt;/g, '>')
-            .replace(/&amp;/g, '&')
-            .replace(/&quot;/g, '"')
-            .replace(/&#39;/g, "'");
-
-        blocks.push({
-          type: 'code',
-          text: codeText
-        });
-      }
-    } else if (child.tagName === 'H3') {
-      blocks.push({
-        type: 'title',
-        text
-      });
-    } else if (child.tagName === 'P') {
-      blocks.push({
-        type: 'text',
-        text
-      });
-    }
-  }
-
-  return blocks;
-};
-
-const initializeFromStore = () => {
-  const storedText = createStore.createData[props.name].text;
-
-  newItem.title = createStore.createData[props.name].title
-
-  if (storedText) {
-    const blocks = convertTextToBlocks(storedText);
-
-    blocks.forEach(block => {
-      textBlock.value.push('HomeCreateTextarea');
-      textareaAttributes.value.push(textareaAttributesList[block.type])
-      newItemText.value.push({
-        type: block.type,
-        text: block.text
-      });
-    });
-  }
-};
-
-const convertBlocksToText = (blocks: { type: string, text: string }[]): string => {
-  return blocks?.map(block => {
-    const lines = block.text.split('\n');
-
-    const processedLines = lines.map(line => line.replace(/ /g, '&nbsp;'));
-    const formattedText = processedLines.join('<br>');
-
-    if (block.type === 'code') {
-      return `<pre><code>${formattedText}</code></pre>`;
-    } else if (block.type === 'title') {
-      return `<h3>${formattedText}</h3>`;
-    } else {
-      return `<p>${formattedText}</p>`;
-    }
-  }).join('');
-};
-
+//=========================================================//
+//-- асинхронные функции --//
+// создание/редактирование записи
 const sendRequest = async () => {
   newItem.text = convertBlocksToText(newItemText.value)
 
@@ -283,7 +125,216 @@ const sendRequest = async () => {
 
   back()
 }
+//=========================================================//
 
+
+//=========================================================//
+//-- создаваемый элемент --//
+// создаваемый элемент
+const newItem = reactive<Item>({
+  user_id: userStore.user.id,
+  title: '',
+  languages_and_technologies: [],
+  text: '',
+  date: '',
+  sort_date: '',
+  time: ''
+})
+
+// текст создаваемого элемента
+const newItemText = ref<{type: string, text: string}[]>([])
+//=========================================================//
+
+
+//=========================================================//
+//-- заголовок --//
+// потеря фокуса поля ввода заголовка
+const blurInput = (event: Event) => {
+  onBlur(event);
+  removeLabelText(event);
+}
+//=========================================================//
+
+
+//=========================================================//
+//-- языки и технологии --//
+// список языков и технологий с полями checked для чекбоксов
+const technologies = ref<{title: string, checked: boolean}[]>([]);
+//=========================================================//
+
+
+//=========================================================//
+//-- поля ввода --//
+// список всех полей ввода
+const textBlock = ref<string[]>([])
+
+// список всевозможных типов полей ввода
+const textareaAttributesList: Record<string, { name: string, code: string }> = {
+  code: {
+    name: 'Код',
+    code: 'code',
+  },
+  text: {
+    name: 'Текст',
+    code: 'text',
+  },
+  title: {
+    name: 'Подзаголовок',
+    code: 'title',
+  },
+}
+
+// список типов созданных полей ввода
+const textareaAttributes = ref<{ name: string, code: string }[]>([])
+
+
+// создание нового поля ввода
+const createTextarea = (type: string): void => {
+  newItemText.value.push({
+    type,
+    text: ''
+  })
+
+  textBlock.value.push('HomeCreateTextarea');
+  textareaAttributes.value.push(textareaAttributesList[type])
+}
+
+// удаление поля ввода
+const removeTextarea = (index: number) => {
+  newItemText.value.splice(index, 1)
+  textBlock.value.splice(index, 1)
+  textareaAttributes.value.splice(index, 1)
+}
+//=========================================================//
+
+
+//=========================================================//
+//-- кнопки действий --//
+// закрытие блока создания
+const back = () => {
+  blocksStore.activeBlock[props.name] = 'list';
+  settingsStore.settingsVisible[props.name] = 'list'
+}
+
+// клик по кнопке "Отмена"
+const handleBack = (): void => {
+  cancel(props.name, back)
+}
+
+// клик по кнопке "Сохранить"
+const save = async (event: Event) => {
+  const valid: boolean = onSubmit(event)
+
+  if (!valid) return
+
+  const ask = await showAsk(
+      'Сохранение подсказки',
+      'Вы действительно хотите сохранить подсказку?'
+  )
+
+  if (ask) await sendRequest()
+}
+//=========================================================//
+
+
+//=========================================================//
+//-- конвертация --//
+// конвертация текста в блоки (при редактировании записи)
+const convertTextToBlocks = (str: string): { type: string, text: string }[] => {
+  if (!str) return [];
+
+  const blocks: { type: string, text: string }[] = [];
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = str;
+
+  for (const child of Array.from(tempDiv.children)) {
+    let text = child.innerHTML;
+
+    text = text
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+
+    if (child.tagName === 'PRE' && child.querySelector('code')) {
+      const codeElement = child.querySelector('code');
+      if (codeElement) {
+        let codeText = codeElement.innerHTML
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'");
+
+        blocks.push({
+          type: 'code',
+          text: codeText
+        });
+      }
+    } else if (child.tagName === 'H3') {
+      blocks.push({
+        type: 'title',
+        text
+      });
+    } else if (child.tagName === 'P') {
+      blocks.push({
+        type: 'text',
+        text
+      });
+    }
+  }
+
+  return blocks;
+};
+
+// для создания разметки при редактировании записи
+const initializeFromStore = () => {
+  const storedText = createStore.createData[props.name].text;
+
+  newItem.title = createStore.createData[props.name].title
+
+  if (storedText) {
+    const blocks = convertTextToBlocks(storedText);
+
+    blocks.forEach(block => {
+      textBlock.value.push('HomeCreateTextarea');
+      textareaAttributes.value.push(textareaAttributesList[block.type])
+      newItemText.value.push({
+        type: block.type,
+        text: block.text
+      });
+    });
+  }
+};
+
+// конвертирование блоков в текст для отправки в апи
+const convertBlocksToText = (blocks: { type: string, text: string }[]): string => {
+  return blocks?.map(block => {
+    const lines = block.text.split('\n');
+
+    const processedLines = lines.map(line => line.replace(/ /g, '&nbsp;'));
+    const formattedText = processedLines.join('<br>');
+
+    if (block.type === 'code') {
+      return `<pre><code>${formattedText}</code></pre>`;
+    } else if (block.type === 'title') {
+      return `<h3>${formattedText}</h3>`;
+    } else {
+      return `<p>${formattedText}</p>`;
+    }
+  }).join('');
+};
+//=========================================================//
+
+
+//=========================================================//
+//-- хуки --//
+// получаем список всевозможных языков и технологий, чтобы отобраить их с чекбоксами
 onMounted(() => {
   technologiesStore.technologies?.forEach(el => {
     technologies.value.push({
@@ -294,6 +345,7 @@ onMounted(() => {
 
   initializeFromStore()
 })
+//=========================================================//
 </script>
 
 <template>

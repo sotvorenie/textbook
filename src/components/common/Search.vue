@@ -9,7 +9,7 @@ const inputElement = ref<HTMLInputElement | null>(null);
 const searchWrapper = ref<HTMLElement | null>(null);
 
 const name = defineModel();
-const createVisible = defineModel('create-visible')
+const buttonsVisible = defineModel('buttons-visible')
 
 const handleVisible = (): void => {
   isVisible.value = !isVisible.value;
@@ -40,10 +40,10 @@ onBeforeUnmount(() => {
 
 watch(isVisible, () => {
   if (isVisible.value) {
-    createVisible.value = false;
+    buttonsVisible.value = false;
   } else {
     setTimeout(() => {
-      createVisible.value = true;
+      buttonsVisible.value = true;
     }, 200);
   }
 });

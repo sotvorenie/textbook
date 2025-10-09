@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import {ref} from "vue";
+import {Swiper, SwiperSlide} from "swiper/vue";
+import 'swiper/css'
 
 import {Item} from "../../../types/item.ts";
 import type { Swiper as SwiperType } from 'swiper';
 
 import {useItem} from "../../../composables/useItem.ts";
 
-import {Swiper, SwiperSlide} from "swiper/vue";
-import 'swiper/css'
+import TextbookSkeleton from "../../ui/loading/TextbookSkeleton.vue";
 
 import Arrow from "../../../assets/icons/Arrow.vue";
-
-import TextbookSkeleton from "../../ui/loading/TextbookSkeleton.vue";
 
 const props = defineProps({
   apiUrl: {
@@ -25,6 +24,12 @@ const props = defineProps({
   }
 })
 
+//=========================================================//
+
+
+//=========================================================//
+//-- элемент списка --//
+// первоначальный вид элемента списка
 const item = ref<Item>({
   user_id: -1,
   title: '',
@@ -35,15 +40,29 @@ const item = ref<Item>({
   time: '',
 })
 
+// видимость анимации загрузки
+const isLoading = ref<boolean>(true)
+//=========================================================//
+
+
+//=========================================================//
+//-- слайдер --//
+// DOM-элемент слайдера
 const swiperElement = ref<SwiperType | null>(null)
 
+// видимость кнопки "Назад"
 const isBeginning = ref(true);
+
+// видимость кнопки "Вперед"
 const isEnd = ref(false);
 
+
+// инициализация слайдера
 const onSwiper = (swiper: any) => {
   swiperElement.value = swiper
 }
 
+// проверка видимости кнопок слайдера
 const checkSlides = () => {
   if (!swiperElement.value) return
 
@@ -51,25 +70,38 @@ const checkSlides = () => {
   isEnd.value = swiperElement.value.isEnd;
 }
 
+// предыдущий слайд
 const slidePrev = () => {
   if (swiperElement.value && !isBeginning.value) {
     swiperElement.value.slidePrev();
   }
 };
+
+//следующий слайд
 const slideNext = () => {
   if (swiperElement.value && !isEnd.value) {
     swiperElement.value.slideNext();
   }
 };
+//=========================================================//
 
+
+//=========================================================//
+//-- табы --//
+// активный индекс табов
 const activeIndex = ref<number>(0)
 
+
+// выбор активного таба
 const handleTab = (index: number) => {
   activeIndex.value = index
 }
+//=========================================================//
 
-const isLoading = ref<boolean>(true)
 
+//=========================================================//
+//-- вызов функций --//
+// вызываем функцию получения данных из кэша/апи, а также получаем в переменную текст для отрисовки
 const parsedText = useItem(
     isLoading,
     props.idName,
@@ -77,6 +109,7 @@ const parsedText = useItem(
     item,
     activeIndex
 )
+//=========================================================//
 </script>
 
 <template>

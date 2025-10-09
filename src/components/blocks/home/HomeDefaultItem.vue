@@ -19,6 +19,9 @@ const props = defineProps({
   }
 })
 
+//=========================================================//
+
+// первоначальный вид элемента списка
 const item = ref<Item>({
   user_id: -1,
   title: '',
@@ -29,8 +32,10 @@ const item = ref<Item>({
   time: '',
 })
 
+// видимость анимации загрузки
 const isLoading = ref<boolean>(true)
 
+// вызываем функцию получения данных из кэша/апи, а также получаем в переменную текст для отрисовки
 const parsedText = useItem(
     isLoading,
     props.idName,

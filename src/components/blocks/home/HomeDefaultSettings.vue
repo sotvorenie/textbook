@@ -4,6 +4,7 @@ import {computed, ref, watch} from "vue";
 import {FilterList} from "../../../types/filter.ts";
 
 import {showConfirm} from "../../../utils/modals.ts";
+import {cancel} from "../../../composables/useCancelCreated.ts";
 
 import {removeItem} from "../../../api/posts/posts.ts";
 
@@ -16,22 +17,20 @@ import Back from "../../ui/Back.vue";
 import Btn from "../../ui/Btn.vue";
 
 import useBlocksStore from "../../../store/blocksStore.ts";
-import useSearchStore from "../../../store/searchStore.ts";
-import useSettingsStore from "../../../store/settingsStore.ts";
-import useUserStore from "../../../store/userStore.ts";
-import useCreateStore from "../../../store/useCreateStore.ts";
-import useItemMemoStore from "../../../store/itemMemoStore.ts";
-import useIdStore from "../../../store/idStore.ts";
-import useItemsStore from "../../../store/useItemsStore.ts";
-import {cancel} from "../../../composables/useCancelCreated.ts";
-
 const blocksStore = useBlocksStore();
+import useSearchStore from "../../../store/searchStore.ts";
 const searchStore = useSearchStore();
+import useSettingsStore from "../../../store/settingsStore.ts";
 const settingsStore = useSettingsStore();
+import useUserStore from "../../../store/userStore.ts";
 const userStore = useUserStore();
+import useCreateStore from "../../../store/useCreateStore.ts";
 const createStore = useCreateStore();
+import useItemMemoStore from "../../../store/itemMemoStore.ts";
 const itemMemoStore = useItemMemoStore();
+import useIdStore from "../../../store/idStore.ts";
 const idStore = useIdStore();
+import useItemsStore from "../../../store/useItemsStore.ts";
 const itemsStore = useItemsStore();
 
 const props = defineProps({
@@ -46,25 +45,46 @@ const props = defineProps({
   },
 })
 
+//=========================================================//
+
+
+//=========================================================//
+//-- фильтры --//
+// видимость всех элементов кроме блока поля поиска (чтобы когда оно открыто - скрывать все остальные поля0
+const buttonsVisible = ref(true)
+
+// видимость кнопки "Мои"
+const myBtnVisible = computed(() => {
+  if (props.blockName === 'textbooks') {
+    return userStore.isFullAdmin
+  }
+
+  return userStore.isAdmin
+})
+
+
+// выбор языков и технологий
 const handleFilterChange = (list: FilterList): void => {
   let checkedItems = list?.filter(item => item.checked)
   searchStore.filterTechnologies[props?.blockName] = checkedItems?.map(item => item.name)
 }
 
+// выбор: сначала старые/новые
 const handleSort = (value: string): void => {
   searchStore.sortBy[props?.blockName] = value;
 }
+//=========================================================//
 
-const handleCreate = () => {
-  blocksStore.activeBlock[props.blockName] = 'create'
-  settingsStore.settingsVisible[props?.blockName] = 'create'
-}
 
+//=========================================================//
+//-- кнопка "Назад" --//
+// возврат на страницу списка
 const goToList = () => {
   blocksStore.activeBlock[props.blockName]= 'list'
   settingsStore.settingsVisible[props.blockName] = 'list'
 }
 
+// клик по кнопке "Назад"
 const handleBack = () => {
   if (userStore.isUserPost[props.blockName]
       && blocksStore.activeBlock[props.blockName] === 'create') {
@@ -86,7 +106,12 @@ const handleBack = () => {
     userStore.isUserPost[props.blockName] = false
   }
 }
+//=========================================================//
 
+
+//=========================================================//
+//-- страница списка --//
+// видимость кнопки "Создать"
 const createVisible = computed(() => {
   if (props.blockName === 'textbooks') {
     return userStore.isFullAdmin
@@ -95,21 +120,25 @@ const createVisible = computed(() => {
   return userStore.isAdmin
 })
 
-const createBtnVisible = ref(true)
 
-const myBtnVisible = computed(() => {
-  if (props.blockName === 'textbooks') {
-    return userStore.isFullAdmin
-  }
+// клик по кнопке "Создать"
+const handleCreate = () => {
+  blocksStore.activeBlock[props.blockName] = 'create'
+  settingsStore.settingsVisible[props?.blockName] = 'create'
+}
+//=========================================================//
 
-  return userStore.isAdmin
-})
 
+//=========================================================//
+//-- страница элемента списка --//
+// видимость кнопки "Редактировать"
 const redactBtnVisible = computed(() => {
   return userStore.isUserPost[props.blockName]
       && blocksStore.activeBlock[props.blockName] === 'item'
 })
 
+
+// клик по кнопке "Редактировать"
 const handleRedact = () => {
   blocksStore.activeBlock[props.blockName] = 'create'
 
@@ -122,6 +151,7 @@ const handleRedact = () => {
   }
 }
 
+// клик по кнопке "Удалить"
 const handleRemove = async () => {
   const confirm = await showConfirm(
       'Удаление записи',
@@ -137,12 +167,17 @@ const handleRemove = async () => {
     goToList()
   }
 }
+//=========================================================//
 
+
+//=========================================================//
+//-- наблюдатели --//
+// следим за изменением активного элемента (list, item и т.д.), чтобы показывать кнопки в header-е
 watch(
     () => blocksStore.activeBlock[props.blockName],
-    () => createBtnVisible.value = true
+    () => buttonsVisible.value = true
 )
-
+//=========================================================//
 </script>
 
 <template>
@@ -151,23 +186,23 @@ watch(
        v-if="settingsStore.settingsVisible[props.blockName] === 'list'"
   >
     <Search v-model="searchStore.searchNames[props.blockName]"
-            v-model:create-visible="createBtnVisible"
+            v-model:buttons-visible="buttonsVisible"
     />
 
-    <Filter v-show="createBtnVisible" @change="handleFilterChange"/>
+    <Filter v-show="buttonsVisible" @change="handleFilterChange"/>
 
 
 
-    <HomeSettingsMyOther v-if="createBtnVisible"
+    <HomeSettingsMyOther v-if="buttonsVisible"
                          v-model="searchStore.myOtherFilter[blockName]"
                          :block-name="blockName"
                          :my-visible="myBtnVisible"
     />
 
-    <Sort @search="handleSort" v-show="createBtnVisible"/>
+    <Sort @search="handleSort" v-show="buttonsVisible"/>
 
     <Btn class="settings__create button button-small text-nowrap"
-         v-show="createBtnVisible"
+         v-show="buttonsVisible"
          v-if="createVisible"
          @click="handleCreate"
     >

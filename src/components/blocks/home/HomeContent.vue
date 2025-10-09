@@ -39,10 +39,60 @@ interface ContentComponent {
     name?: string;
     apiUrl?: string;
     removedItemsId?: number[];
-    [key: string]: any; // для других возможных props
+    [key: string]: any;
   };
 }
 
+//=========================================================//
+
+
+//=========================================================//
+//-- компоненты --//
+// компоненты header-а
+const settingsComponentsAttributes = [
+  {
+    component: HomeDefaultSettings,
+    props: {
+      createName: 'подсказку',
+      blockName: 'hints',
+      apiName: 'posts',
+    }
+  },
+  {
+    component: HomeDefaultSettings,
+    props: {
+      createName: 'учебник',
+      blockName: 'textbooks',
+      apiName: 'textbooks',
+    }
+  },
+  {
+    component: HomeDefaultSettings,
+    props: {
+      createName: 'проект',
+      blockName: 'projects',
+      apiName: 'projects',
+    }
+  },
+  {
+    component: HomeDefaultSettings,
+    props: {
+      createName: 'совет',
+      blockName: 'advices',
+      apiName: 'advices',
+    }
+  },
+  {
+    component: MessengerSettings,
+    props: {},
+  },
+  {
+    component: BlogSettings,
+    props: {},
+  }
+]
+
+// компоненты контент-части
 const contentComponents = ref<ContentComponent[]>([
   {
     component: HomeEmpty,
@@ -89,62 +139,34 @@ const contentComponents = ref<ContentComponent[]>([
     props: {},
   },
 ])
+//=========================================================//
 
-const settingsComponentsAttributes = [
-  {
-    component: HomeDefaultSettings,
-    props: {
-      createName: 'подсказку',
-      blockName: 'hints',
-      apiName: 'posts',
-    }
-  },
-  {
-    component: HomeDefaultSettings,
-    props: {
-      createName: 'учебник',
-      blockName: 'textbooks',
-      apiName: 'textbooks',
-    }
-  },
-  {
-    component: HomeDefaultSettings,
-    props: {
-      createName: 'проект',
-      blockName: 'projects',
-      apiName: 'projects',
-    }
-  },
-  {
-    component: HomeDefaultSettings,
-    props: {
-      createName: 'совет',
-      blockName: 'advices',
-      apiName: 'advices',
-    }
-  },
-  {
-    component: MessengerSettings,
-    props: {},
-  },
-  {
-    component: BlogSettings,
-    props: {},
-  }
-]
 
+//=========================================================//
+//-- аватарка пользователя --//
+// имя пользователя
 const userName = computed((): string => {
   return userIconVisible ? userStore.user?.name : 'Пользователь';
 })
 
+// проерка: есть ли у пользователя аватарка или нет (если нет, то показывать svg-человечка)
 const userIconVisible = computed(() => {
   if (!userStore.user.ava) return
 
   return !!userStore.user.ava.url?.length
 })
+//=========================================================//
 
+
+//=========================================================//
+//-- модальное окно --//
+// видимость модального окна
 const modalVisible = ref<boolean>(false);
+//=========================================================//
 
+//=========================================================//
+//-- наблюдатели --//
+// наблюдаем за активным индексом, чтобы изменять внешний вид header-а при переключении между активными элементами бокового меню
 watch(
     () => props.activeIndex,
     () => {
@@ -152,6 +174,7 @@ watch(
       settingsStore.settingsVisible[name] = blocksStore.activeBlock[name]
     }
 )
+//=========================================================//
 </script>
 
 <template>

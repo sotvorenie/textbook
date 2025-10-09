@@ -12,40 +12,18 @@ import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.
 
 import Navigation from "../../common/Navigation.vue";
 import Btn from "../../ui/Btn.vue";
+
 import Edit from "../../../assets/icons/Edit.vue";
 import UserIcon from "../../../assets/icons/UserIcon.vue";
 
 import useUserStore from "../../../store/userStore.ts";
 const userStore = useUserStore();
 
-const exit = async () => {
-  const confirmed: boolean = await showConfirm('Выход из профиля', 'Вы действительно хотите выйти из профиля?');
+//=========================================================//
 
-  if (confirmed) {
-    authToken.remove()
-    userAva.remove()
-
-    resetAllStores()
-
-    router.push('/').catch(() => {})
-  }
-}
-
-const input = ref<HTMLInputElement | null>(null)
-
-const triggerInput = async () => {
-  if (!userStore.isAdmin) {
-    await showWarning(
-        'Замена аватарки невозможна!!',
-        'Вы не являетесь Админом'
-    )
-
-    return
-  }
-
-  input.value?.click()
-}
-
+//=========================================================//
+//-- аинхронные функции --//
+// загрузка аватарки
 const uploadFile = async (event: Event) => {
   try {
     const target = event.target as HTMLInputElement
@@ -82,7 +60,33 @@ const uploadFile = async (event: Event) => {
     await sendToTelegram(TelegramEventType.LOAD_AVA, userStore.user.ava?.url)
   } catch (_) {}
 }
+//=========================================================//
 
+
+//=========================================================//
+//-- аватарка пользователя --//
+// DOM-элемент поля ввода загрузки фото аватарки
+const input = ref<HTMLInputElement | null>(null)
+
+// клик по полю ввода
+const triggerInput = async () => {
+  if (!userStore.isAdmin) {
+    await showWarning(
+        'Замена аватарки невозможна!!',
+        'Вы не являетесь Админом'
+    )
+
+    return
+  }
+
+  input.value?.click()
+}
+//=========================================================//
+
+
+//=========================================================//
+//-- данные пользователя --//
+// роль/статус пользователя
 const role = computed(() => {
   if (userStore.isFullAdmin
       && userStore.user.email === 'vitalikabrosimov00@gmail.com'
@@ -91,14 +95,33 @@ const role = computed(() => {
   if (userStore.isAdmin) return 'Админ'
   return 'Пользователь'
 })
+//=========================================================//
 
+
+//=========================================================//
+//-- кнопки действий --//
+// выход из профиля
+const exit = async () => {
+  const confirmed: boolean = await showConfirm('Выход из профиля', 'Вы действительно хотите выйти из профиля?');
+
+  if (confirmed) {
+    authToken.remove()
+    userAva.remove()
+
+    resetAllStores()
+
+    router.push('/').catch(() => {})
+  }
+}
+
+// клик по кнопке "Удалить пользователя"
 const handleRemoveUser = async () => {
   await showWarning(
       'Невозможно удалить страницу!!',
       'Ты в системе и никуда теперь отсюда не денешься))'
   )
 }
-
+//=========================================================//
 </script>
 
 <template>

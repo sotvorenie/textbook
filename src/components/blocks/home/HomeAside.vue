@@ -5,14 +5,20 @@ import {menuItems} from "../../../data/asideLinks.ts";
 
 import Menu from "../../../assets/icons/Menu.vue";
 
+//=========================================================//
+
+// индекс активного элемента бокового меню
 const activeIndex = defineModel();
 
+// открыто/закрыто боковое меню
 const isClosed = ref<boolean>(false);
 
+// открытие/закрытие бокового меню
 const changeClosed = () => {
   isClosed.value = !isClosed.value;
 }
 
+// выбор активного элемента меню
 const changeActiveIndex = (number: number): void => {
   activeIndex.value = number;
 }

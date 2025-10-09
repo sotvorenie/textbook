@@ -15,28 +15,38 @@ import useIdStore from "../../../store/idStore.ts";
 const idStore = useIdStore();
 
 const props = defineProps({
+  // название блока (hints, advices и т.д.)
   name: {
     type: String,
     required: true,
   },
+  // название url апи (posts, textbooks и т.д.)
   apiUrl: {
     type: String,
     required: true,
   },
+  // компонент списка
   listComponent: {
     type: VueElement,
     default: HomeDefaultList,
   },
+  // компонент элемента списка
   itemComponent: {
     type: VueElement,
     default: HomeDefaultItem,
   },
+  // компонент страницы создания
   createComponent: {
     type: VueElement,
     default: HomeDefaultCreate,
   },
 })
 
+//=========================================================//
+
+//=========================================================//
+//-- компоненты --//
+// активный компонент
 const activeComponent = computed(() => {
   if (blocksStore.activeBlock[props.name] === 'list') {
     return props.listComponent;
@@ -47,6 +57,7 @@ const activeComponent = computed(() => {
   }
 })
 
+// пропсы активного компонента
 const componentProps = computed(() => {
   switch (blocksStore.activeBlock[props.name]) {
     case "item":
@@ -59,13 +70,21 @@ const componentProps = computed(() => {
       };
   }
 })
+//=========================================================//
 
+
+//=========================================================//
+//-- компонент списка --//
+// выбор элемента списка
 const changeItem = (id: number): void => {
   blocksStore.activeBlock[props.name] = 'item';
   idStore.idValues[props.name] = id;
 }
+//=========================================================//
 
-// для сохранения скролла
+
+//=========================================================//
+//-- скролл --//
 const scrollManager = useSaveScroll(props.name)
 
 onMounted(() => {
@@ -79,6 +98,7 @@ onActivated(() => {
 onDeactivated(() => {
   scrollManager.destroy();
 });
+//=========================================================//
 </script>
 
 <template>
