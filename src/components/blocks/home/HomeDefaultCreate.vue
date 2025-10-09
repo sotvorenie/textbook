@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {onMounted, reactive, ref} from "vue";
 
-import {showAsk, showConfirm} from "../../../utils/modals.ts";
+import {showAsk} from "../../../utils/modals.ts";
 
 import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.ts";
 import {createItem, redactItem} from "../../../api/posts/posts.ts";
@@ -31,6 +31,7 @@ const userStore = useUserStore();
 import useItemMemoStore from "../../../store/itemMemoStore.ts";
 const itemMemoStore = useItemMemoStore();
 import useItemsStore from "../../../store/useItemsStore.ts";
+import {cancel, names} from "../../../composables/useCancelCreated.ts";
 const itemsStore = useItemsStore();
 
 const props = defineProps({
@@ -111,13 +112,8 @@ const back = () => {
   settingsStore.settingsVisible[props.name] = 'list'
 }
 
-const cancel = async () => {
-  const confirm = await showConfirm(
-      'Отмена создания подсказки',
-      'Вы действительно хотите отменить создание подсказки?'
-  )
-
-  if (confirm) back()
+const handleBack = (): void => {
+  cancel(names[props.name], back)
 }
 
 const save = async (event: Event) => {
@@ -375,7 +371,7 @@ onMounted(() => {
 
       <div class="create__btn-bar flex flex-justify-center">
         <Btn :is-submit="true">Сохранить</Btn>
-        <Btn @click="cancel">Отмена</Btn>
+        <Btn @click="handleBack">Отмена</Btn>
       </div>
 
     </form>

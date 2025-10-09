@@ -23,6 +23,7 @@ import useCreateStore from "../../../store/useCreateStore.ts";
 import useItemMemoStore from "../../../store/itemMemoStore.ts";
 import useIdStore from "../../../store/idStore.ts";
 import useItemsStore from "../../../store/useItemsStore.ts";
+import {cancel, names} from "../../../composables/useCancelCreated.ts";
 
 const blocksStore = useBlocksStore();
 const searchStore = useSearchStore();
@@ -64,7 +65,7 @@ const goToList = () => {
   settingsStore.settingsVisible[props.blockName] = 'list'
 }
 
-const handleBack = () => {
+const back = (): void => {
   if (userStore.isUserPost[props.blockName]
       && blocksStore.activeBlock[props.blockName] === 'create') {
 
@@ -80,6 +81,10 @@ const handleBack = () => {
 
     userStore.isUserPost[props.blockName] = false
   }
+}
+
+const handleBack = () => {
+  cancel(names[props.blockName], back)
 }
 
 const createVisible = computed(() => {
