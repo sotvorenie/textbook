@@ -31,7 +31,7 @@ const userStore = useUserStore();
 import useItemMemoStore from "../../../store/itemMemoStore.ts";
 const itemMemoStore = useItemMemoStore();
 import useItemsStore from "../../../store/useItemsStore.ts";
-import {cancel, names} from "../../../composables/useCancelCreated.ts";
+import {cancel} from "../../../composables/useCancelCreated.ts";
 const itemsStore = useItemsStore();
 
 const props = defineProps({
@@ -113,7 +113,7 @@ const back = () => {
 }
 
 const handleBack = (): void => {
-  cancel(names[props.name], back)
+  cancel(props.name, back)
 }
 
 const save = async (event: Event) => {

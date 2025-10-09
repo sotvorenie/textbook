@@ -23,7 +23,7 @@ import useCreateStore from "../../../store/useCreateStore.ts";
 import useItemMemoStore from "../../../store/itemMemoStore.ts";
 import useIdStore from "../../../store/idStore.ts";
 import useItemsStore from "../../../store/useItemsStore.ts";
-import {cancel, names} from "../../../composables/useCancelCreated.ts";
+import {cancel} from "../../../composables/useCancelCreated.ts";
 
 const blocksStore = useBlocksStore();
 const searchStore = useSearchStore();
@@ -65,26 +65,26 @@ const goToList = () => {
   settingsStore.settingsVisible[props.blockName] = 'list'
 }
 
-const back = (): void => {
+const handleBack = () => {
   if (userStore.isUserPost[props.blockName]
       && blocksStore.activeBlock[props.blockName] === 'create') {
 
-    blocksStore.activeBlock[props.blockName] = 'item'
+    cancel(props.blockName, () => {
+      blocksStore.activeBlock[props.blockName] = 'item'
 
-    createStore.createData[props.blockName] = {
-      title: '',
-      text: '',
-      id: -1,
-    }
+      createStore.createData[props.blockName] = {
+        title: '',
+        text: '',
+        id: -1,
+      }
+    }, 'редактирование')
+  } else if (blocksStore.activeBlock[props.blockName] === 'create') {
+    cancel(props.blockName, goToList)
   } else {
     goToList()
 
     userStore.isUserPost[props.blockName] = false
   }
-}
-
-const handleBack = () => {
-  cancel(names[props.blockName], back)
 }
 
 const createVisible = computed(() => {
@@ -103,6 +103,11 @@ const myBtnVisible = computed(() => {
   }
 
   return userStore.isAdmin
+})
+
+const redactBtnVisible = computed(() => {
+  return userStore.isUserPost[props.blockName]
+      && blocksStore.activeBlock[props.blockName] === 'item'
 })
 
 const handleRedact = () => {
@@ -174,14 +179,14 @@ watch(
     <Back @click="handleBack"/>
 
     <Btn class="button-small"
-         v-if="userStore.isUserPost[blockName]"
+         v-if="redactBtnVisible"
          @click="handleRedact"
     >
       Редактировать
     </Btn>
 
     <Btn class="button-small"
-         v-if="userStore.isUserPost[blockName]"
+         v-if="redactBtnVisible"
          @click="handleRemove"
     >
       Удалить
