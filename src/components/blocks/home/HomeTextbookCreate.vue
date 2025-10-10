@@ -324,6 +324,10 @@ const initializeFromStore = () => {
 
   let tabCounter = 0;
 
+  tabs.value = []
+
+  newItem.title = createStore.createData[props.name].title
+
   for (const tabName in storedContent) {
     const id = tabCounter++;
     tabs.value.push({ id, name: tabName });

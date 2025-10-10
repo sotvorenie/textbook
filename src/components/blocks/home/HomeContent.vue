@@ -119,15 +119,15 @@ const contentComponents = ref<ContentComponent[]>([
   {
     component: HomeDefaultContentItem,
     props: {
-      name: 'textbooks',
-      apiUrl: 'textbooks',
+      name: 'projects',
+      apiUrl: 'projects',
     },
   },
   {
     component: HomeDefaultContentItem,
     props: {
-      name: 'textbooks',
-      apiUrl: 'textbooks',
+      name: 'advices',
+      apiUrl: 'advices',
     },
   },
   {
