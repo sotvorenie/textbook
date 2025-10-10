@@ -18,8 +18,9 @@
   }
 
   &__code {
-    @include fluid-text(22, 20);
+    @include fluid-text(20, 18);
 
+    white-space: pre-wrap;
     background: $color-dark;
     padding: rem(10);
     border-radius: $radius-regular;

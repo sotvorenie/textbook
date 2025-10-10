@@ -1696,6 +1696,7 @@ a[class] {
   width: 100%;
   max-width: 100%;
   height: 100vh;
+  overflow-x: hidden;
 }
 .home__main {
   overflow-x: hidden;
@@ -2034,7 +2035,8 @@ a[class] {
   line-height: 180%;
 }
 .item__code {
-  font-size: clamp(1.25rem, 1.1141304348rem + 0.2173913043vw, 1.375rem);
+  font-size: clamp(1.125rem, 0.9891304348rem + 0.2173913043vw, 1.25rem);
+  white-space: pre-wrap;
   background: var(--color-dark);
   padding: 0.625rem;
   border-radius: 0.5rem;

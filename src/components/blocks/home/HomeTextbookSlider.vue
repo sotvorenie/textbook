@@ -5,6 +5,7 @@ import 'swiper/css'
 
 import type { Swiper as SwiperType } from 'swiper';
 import Arrow from "../../../assets/icons/Arrow.vue";
+import Absolute from "../../common/Absolute.vue";
 
 defineProps({
   items: Array as PropType<string[]>,

@@ -3,7 +3,7 @@ import {computed, onMounted, reactive, ref} from "vue";
 
 import {Item} from "../../../types/item.ts";
 
-import {showAsk} from "../../../utils/modals.ts";
+import {showAsk, showConfirm} from "../../../utils/modals.ts";
 import {getCurrentDateTime} from "../../../composables/useDate.ts";
 import {cancel} from "../../../composables/useCancelCreated.ts";
 
@@ -16,6 +16,7 @@ import {onBlur, onInput, onSubmit} from "../../../composables/useFormValidation.
 import Btn from "../../ui/Btn.vue";
 
 import HomeCreateTextarea from "./HomeCreateTextareas/HomeCreateTextarea.vue";
+import HomeTextbookSlider from "./HomeTextbookSlider.vue";
 
 import Modal from "../../common/Modal.vue";
 import CheckboxList from "../../ui/CheckboxList.vue";
@@ -33,7 +34,6 @@ const userStore = useUserStore();
 import useItemMemoStore from "../../../store/itemMemoStore.ts";
 const itemMemoStore = useItemMemoStore();
 import useItemsStore from "../../../store/useItemsStore.ts";
-import HomeTextbookSlider from "./HomeTextbookSlider.vue";
 const itemsStore = useItemsStore();
 
 const props = defineProps({
@@ -148,6 +148,28 @@ const createTab = () => {
   tabs.value.push({id: tabs.value.length, name: ''})
   activeTab.value = tabs.value.length - 1
 }
+
+// удаление таба по индексу
+const removeTab = async () => {
+  const confirm = await showConfirm(
+      'Удаление раздела учебника',
+      'Вы действительно хотите удалить этот раздел?'
+  )
+
+  if (confirm) {
+    const idToRemove = tabId.value;
+
+    tabs.value.splice(activeTab.value, 1);
+
+    delete newItemText.value[idToRemove];
+    delete textBlock.value[idToRemove];
+    delete textareaAttributes.value[idToRemove];
+
+    if (activeTab.value >= tabs.value.length) {
+      activeTab.value = tabs.value.length - 1;
+    }
+  }
+};
 //=========================================================//
 
 
@@ -446,6 +468,8 @@ onMounted(() => {
         <span class="label__counter position-absolute">{{newItem.title.length}}/100</span>
       </label>
 
+      <Btn @click="removeTab">Удалить этап</Btn>
+
       <div class="create__block position-relative">
         <div class="create__btn-bar position-sticky z-1000 flex">
           <Btn @click="createTextarea('code')">Код <></Btn>
@@ -464,6 +488,7 @@ onMounted(() => {
                      :key="index"
                      :is="textarea"
                      v-model="newItemText[tabId][index].text"
+                     v-model:active-index="activeTab"
                      v-bind="textareaAttributes[tabId][index]"
                      @remove-textarea="removeTextarea(index)"
           />

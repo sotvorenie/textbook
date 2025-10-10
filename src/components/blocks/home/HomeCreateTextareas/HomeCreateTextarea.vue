@@ -20,6 +20,8 @@ const emits = defineEmits(['removeTextarea'])
 
 const text = defineModel({type: String, required: true});
 
+const activeTab = defineModel('activeIndex')
+
 const blurInput = (event: Event) => {
   onBlur(event);
   removeLabelText(event);
@@ -44,16 +46,13 @@ const handleInput = (event: Event) => {
   autoResize()
 }
 
+watch(() => activeTab.value,
+    () => nextTick(() => {
+      autoResize()
+    })
+)
 
-// вызываем после монтирования, чтобы textarea растянулась под уже имеющийся текст
 onMounted(() => {
-  nextTick(() => {
-    autoResize()
-  })
-})
-
-// следим за внешним обновлением текста и подгоняем высоту
-watch(() => text, () => {
   nextTick(() => {
     autoResize()
   })
@@ -77,11 +76,6 @@ watch(() => text, () => {
               required
               ref="textareaRef"
     />
-    <span :class="`create__${code} fields_${code} label__${code} position-absolute`"
-          :id="`text-${code}`"
-          data-js-form-field-errors
-          @click.stop>
-    </span>
 
     <Btn class="create__remove button-small position-absolute"
          @click="emits('removeTextarea')"
