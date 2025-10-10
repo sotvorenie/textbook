@@ -74,7 +74,7 @@ const parsedText = useItem(
                           v-model:active-index="activeIndex"
       />
 
-      <div>
+      <div class="textbook__content">
         <template v-for="part in parsedText">
           <h3 class="item__pod-title text-w500" v-if="part.type === 'title'">
             {{ part.content }}

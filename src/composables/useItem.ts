@@ -31,8 +31,19 @@ export const useItem = (
         } catch (_){}
     }
 
+    const escapeHtml = (str: string) => {
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    };
+
     const highlightCodeComments = (code: string): string => {
-        return code.replace(/(\/\/.*$)/gm, '<span class="item__comment">$1</span>');
+        const escaped = escapeHtml(code);
+
+        return escaped.replace(/(\/\/.*$)/gm, '<span class="item__comment">$1</span>');
     };
 
     const parsedText = computed(() => {
@@ -57,9 +68,9 @@ export const useItem = (
             let type: "title" | "text" | "code";
             let rawContent: string;
 
-            if (block.startsWith("<pre><code>")) {
+            if (block.match(/^<pre><code(?:\s[^>]*)?>/)) { // учитываем атрибуты
                 type = "code";
-                rawContent = block.replace(/<\/?pre>|<\/?code>/g, "");
+                rawContent = block.replace(/^<pre><code(?:\s[^>]*)?>|<\/code><\/pre>$/g, "");
             } else if (block.startsWith("<h3>")) {
                 type = "title";
                 rawContent = block.replace(/<\/?h3>/g, "");
@@ -73,26 +84,16 @@ export const useItem = (
                 .replace(/&nbsp;/g, " ")
                 .replace(/&amp;/g, "&")
                 .replace(/&lt;/g, "<")
-                .replace(/&gt;/g, ">")
-                .trim();
+                .replace(/&gt;/g, ">");
 
-            if (type === "code") {
-                result.push({
-                    type,
-                    content: highlightCodeComments(cleaned),
-                });
-            } else {
-                result.push({
-                    type,
-                    content: cleaned,
-                });
-            }
+            result.push({
+                type,
+                content: type === "code" ? highlightCodeComments(cleaned) : cleaned
+            });
         }
 
         return result;
     });
-
-
 
     onActivated(async () => {
         loading.value = true

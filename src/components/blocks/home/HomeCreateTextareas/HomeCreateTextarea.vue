@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref} from "vue";
+import {nextTick, onMounted, ref, watch} from "vue";
 
 import {onBlur, onInput} from "../../../../composables/useFormValidation.ts";
 import {removeLabelText} from "../../../../composables/useLabelText.ts";
@@ -44,6 +44,20 @@ const handleInput = (event: Event) => {
   autoResize()
 }
 
+
+// вызываем после монтирования, чтобы textarea растянулась под уже имеющийся текст
+onMounted(() => {
+  nextTick(() => {
+    autoResize()
+  })
+})
+
+// следим за внешним обновлением текста и подгоняем высоту
+watch(() => text, () => {
+  nextTick(() => {
+    autoResize()
+  })
+})
 </script>
 
 <template>
