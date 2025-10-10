@@ -148,6 +148,7 @@ const handleRedact = () => {
     title: item?.title ?? '',
     text: item?.text ?? '',
     id: item?.id ?? -1,
+    content: item?.content ?? {},
   }
 }
 

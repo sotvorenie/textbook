@@ -7,6 +7,12 @@
     margin-bottom: rem(20);
   }
 
+  &__pod-title {
+    margin-bottom: rem(10);
+    border-bottom: $border-light-alt;
+    width: fit-content;
+  }
+
   &__text {
     line-height: 180%;
   }

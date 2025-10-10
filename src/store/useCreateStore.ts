@@ -7,6 +7,7 @@ const useCreateStore = defineStore('createStore', () => {
         title: string,
         text: string,
         id: number,
+        content?: Record<string, string>
     }>>({
         hints: {
             title: '',

@@ -36,63 +36,63 @@ export const useItem = (
     };
 
     const parsedText = computed(() => {
-        let text: string
+        let text: string;
         if (index) {
-            text = Object.values(item.value.content!)[index.value]
+            text = Object.values(item.value.content!)[index.value];
         } else {
-            text = item.value.text!
+            text = item.value.text!;
         }
 
         if (!text) return [];
 
-        const regex = /<code>(.*?)<\/code>/gis;
-        let lastIndex = 0;
-        const result: Array<{ type: "text" | "code"; content: string }> = [];
+        const result: Array<{ type: "title" | "text" | "code"; content: string }> = [];
 
-        let match;
-        while ((match = regex.exec(text)) !== null) {
-            const index = match.index;
+        // Сначала парсим все блоки в порядке появления
+        const regex = /<pre><code>[\s\S]*?<\/code><\/pre>|<h3>[\s\S]*?<\/h3>|<p>[\s\S]*?<\/p>/gi;
+        const blocks = text.match(regex);
 
-            if (index > lastIndex) {
-                const rawText = text?.slice(lastIndex, index);
-                const restoredText = rawText
-                    .replace(/<br\s*\/?>/gi, "\n")
-                    .replace(/&nbsp;/g, ' ')
-                    .replace(/&amp;/g, '&')
-                    .replace(/&lt;/g, '<')
-                    .replace(/&gt;/g, '>')
-                    .replace(/<[^>]*>/g, '');
+        if (!blocks) return [];
 
-                result.push({ type: "text", content: restoredText });
+        for (const block of blocks) {
+            let type: "title" | "text" | "code";
+            let rawContent: string;
+
+            if (block.startsWith("<pre><code>")) {
+                type = "code";
+                rawContent = block.replace(/<\/?pre>|<\/?code>/g, "");
+            } else if (block.startsWith("<h3>")) {
+                type = "title";
+                rawContent = block.replace(/<\/?h3>/g, "");
+            } else {
+                type = "text";
+                rawContent = block.replace(/<\/?p>/g, "");
             }
 
-            const codeContent = match[1]
+            const cleaned = rawContent
                 .replace(/<br\s*\/?>/gi, "\n")
-                .replace(/&nbsp;/g, ' ')
-                .replace(/&amp;/g, '&')
-                .replace(/&lt;/g, '<')
-                .replace(/&gt;/g, '>');
+                .replace(/&nbsp;/g, " ")
+                .replace(/&amp;/g, "&")
+                .replace(/&lt;/g, "<")
+                .replace(/&gt;/g, ">")
+                .trim();
 
-            const highlightedCode = highlightCodeComments(codeContent);
-            result.push({ type: "code", content: highlightedCode });
-
-            lastIndex = regex.lastIndex;
-        }
-
-        if (lastIndex < text?.length) {
-            const remainingText = text?.slice(lastIndex)
-                .replace(/<br\s*\/?>/gi, "\n")
-                .replace(/&nbsp;/g, ' ')
-                .replace(/&amp;/g, '&')
-                .replace(/&lt;/g, '<')
-                .replace(/&gt;/g, '>')
-                .replace(/<[^>]*>/g, '');
-
-            result.push({ type: "text", content: remainingText });
+            if (type === "code") {
+                result.push({
+                    type,
+                    content: highlightCodeComments(cleaned),
+                });
+            } else {
+                result.push({
+                    type,
+                    content: cleaned,
+                });
+            }
         }
 
         return result;
     });
+
+
 
     onActivated(async () => {
         loading.value = true

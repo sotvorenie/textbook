@@ -60,7 +60,14 @@ const parsedText = useItem(
                :key="index"
                :style="{'--index': index}"
           >
-            <p class="item__text" v-if="part.type === 'text'">{{part.content}}</p>
+            <h3 class="item__pod-title text-w500" v-if="part.type === 'title'">
+              {{ part.content }}
+            </h3>
+
+            <p class="item__text" v-else-if="part.type === 'text'">
+              {{ part.content }}
+            </p>
+
             <pre class="item__code" v-else v-html="part.content"></pre>
           </div>
         </TransitionGroup>

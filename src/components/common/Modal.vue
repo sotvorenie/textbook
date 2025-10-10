@@ -33,22 +33,24 @@ const close = () => {
 
   <slot name="activator" :open="open" :close="close" />
 
-  <Transition name="fade">
-    <div class="modal position-absolute z-10000 flex-center" v-if="visible" @click="close">
-      <div class="modal__content position-relative" :style="{width: `${size}px`}" @click.stop>
-        <button :class="['modal__close', 'position-absolute', ...roundedButtonStyle]"
-                @click="close"
-                type="button"
-                title="Закрыть"
-                aria-label="Закрыть"
-                v-if="closeVisible"
-        >
-          <Cross/>
-        </button>
+  <Teleport to="body">
+    <Transition name="fade">
+      <div class="modal position-absolute z-10000 flex-center" v-if="visible" @click="close">
+        <div class="modal__content position-relative" :style="{width: `${size}px`}" @click.stop>
+          <button :class="['modal__close', 'position-absolute', ...roundedButtonStyle]"
+                  @click="close"
+                  type="button"
+                  title="Закрыть"
+                  aria-label="Закрыть"
+                  v-if="closeVisible"
+          >
+            <Cross/>
+          </button>
 
-        <slot :close="close" />
+          <slot :close="close" />
+        </div>
       </div>
-    </div>
-  </Transition>
+    </Transition>
+  </Teleport>
 
 </template>

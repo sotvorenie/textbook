@@ -11,6 +11,8 @@ import MessengerSettings from "./HomeSettingsItems/MessengerSettings.vue";
 import BlogSettings from "./HomeSettingsItems/BlogSettings.vue";
 
 import HomeDefaultContentItem from "./HomeDefaultContentItem.vue";
+import HomeTextbookCreate from "./HomeTextbookCreate.vue";
+import HomeTextbookItem from "./HomeTextbookItem.vue";
 
 import HomeUserCard from "./HomeUserCard.vue";
 import HomeEmpty from "./HomeEmpty/HomeEmpty.vue";
@@ -103,7 +105,6 @@ const contentComponents = ref<ContentComponent[]>([
     props: {
       name: 'hints',
       apiUrl: 'posts',
-      removedItemsId: [],
     },
   },
   {
@@ -111,7 +112,8 @@ const contentComponents = ref<ContentComponent[]>([
     props: {
       name: 'textbooks',
       apiUrl: 'textbooks',
-      removedItemsId: [],
+      createComponent: HomeTextbookCreate,
+      itemComponent: HomeTextbookItem,
     },
   },
   {
@@ -119,7 +121,6 @@ const contentComponents = ref<ContentComponent[]>([
     props: {
       name: 'textbooks',
       apiUrl: 'textbooks',
-      removedItemsId: [],
     },
   },
   {
@@ -127,7 +128,6 @@ const contentComponents = ref<ContentComponent[]>([
     props: {
       name: 'textbooks',
       apiUrl: 'textbooks',
-      removedItemsId: [],
     },
   },
   {
