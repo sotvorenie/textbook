@@ -96,6 +96,7 @@ const handleBack = () => {
         title: '',
         text: '',
         id: -1,
+        languages_and_technologies: []
       }
     }, 'редактирование')
   } else if (blocksStore.activeBlock[props.blockName] === 'create') {
@@ -148,6 +149,7 @@ const handleRedact = () => {
     title: item?.title ?? '',
     text: item?.text ?? '',
     id: item?.id ?? -1,
+    languages_and_technologies: item?.languages_and_technologies ?? [],
     content: item?.content ?? {},
   }
 }

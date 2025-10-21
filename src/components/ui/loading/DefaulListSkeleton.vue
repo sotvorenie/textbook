@@ -5,7 +5,7 @@
 <template>
 
   <ul class="skeleton skeleton-default-list flex row">
-    <li class="skeleton-default-list__item col-4 position-relative"
+    <li class="skeleton-default-list__item col-4 ds-col-3 position-relative"
         v-for="_ in 9"
     >
       <div class="skeleton-default-list__title">

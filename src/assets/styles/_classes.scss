@@ -6,34 +6,7 @@ $breakpoints: (
 );
 $grid-columns: 12 !default;
 
-//break-points классы
-@each $breakpoint, $value in $breakpoints {
-  @media (min-width: $value) {
-    // Flex
-    .#{$breakpoint}-flex { display: flex !important; }
-    .#{$breakpoint}-flex-column { flex-direction: column !important; }
-    .#{$breakpoint}-flex-row { flex-direction: row !important; }
-    .#{$breakpoint}-flex-wrap { flex-wrap: wrap !important; }
-
-    // Justify
-    .#{$breakpoint}-justify-start { justify-content: start !important; }
-    .#{$breakpoint}-justify-center { justify-content: center !important; }
-    .#{$breakpoint}-justify-end { justify-content: end !important; }
-
-    // Align
-    .#{$breakpoint}-items-start { align-items: start !important; }
-    .#{$breakpoint}-items-center { align-items: center !important; }
-    .#{$breakpoint}-items-end { align-items: end !important; }
-
-    // Text
-    .#{$breakpoint}-text-center { text-align: center !important; }
-    .#{$breakpoint}-text-left { text-align: left !important; }
-    .#{$breakpoint}-text-right { text-align: right !important; }
-  }
-}
-
-//базовые классы
-//текст
+// базовые классы (оставляем как есть, не трогаем)
 .text-center {text-align: center !important;}
 .text-left {text-align: left !important;}
 .text-right {text-align: right !important;}
@@ -43,13 +16,6 @@ $grid-columns: 12 !default;
 .text-w700 {font-weight: 700 !important;}
 .text-nowrap {white-space: nowrap !important;}
 
-//position
-.top-right {
-  top: 0;
-  right: 0;
-}
-
-//flex
 .flex { display: flex !important; }
 .flex-column { flex-direction: column !important; }
 .flex-row { flex-direction: row !important; }
@@ -64,33 +30,23 @@ $grid-columns: 12 !default;
 .flex-align-center {align-items: center !important;}
 .flex-justify-center {justify-content: center !important;}
 
-//отступы
 .m-auto {margin: auto !important;}
-
-//позиционирование
 .position-relative { position: relative !important; }
 .position-absolute { position: absolute !important; }
 .position-fixed {position: fixed !important;}
 .position-sticky {position: sticky !important;}
 
-//display
 .d-inline-block { display: inline-block !important; }
-
-//overflow
 .overflow-hidden { overflow: hidden !important; }
 .overflow-y-scroll { overflow-y: scroll !important; }
 .overflow-x-scroll { overflow-x: scroll !important; }
 
-// User select
 .user-select-none { user-select: none !important; }
-
-// Cursor
 .cursor-pointer { cursor: pointer !important; }
 .cursor-not-allowed { cursor: not-allowed !important; }
 .cursor-default { cursor: default !important; }
 .cursor-text {cursor: text !important;}
 
-//z-index
 .z--1 {z-index: -1 !important;}
 .z-0 {z-index: 0 !important;}
 .z-1 {z-index: 1 !important;}
@@ -100,39 +56,35 @@ $grid-columns: 12 !default;
 .z-1001 {z-index: 1001 !important;}
 .z-10000 {z-index: 10000 !important;}
 
-//сетка
+// 🧱 GRID СЕТКА
+
 .row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--gap);
-  margin-right: calc(var(--gap) * -1);
+  display: grid !important;
+  grid-template-columns: repeat($grid-columns, 1fr);
+  gap: var(--gap) !important;
+  width: 100%;
 }
-.col {
-  flex: 1 0 0;
-}
-.col-auto {
-  flex: 0 0 auto;
-  max-width: 100%;
-}
+
+// базовые колонки
 @for $i from 1 through $grid-columns {
   .col-#{$i} {
-    flex: 0 0 calc(percentage($i / $grid-columns) - (var(--gap)));
-    max-width: calc(percentage($i / $grid-columns) - (var(--gap)));
+    grid-column: span $i;
   }
 }
+
+// адаптивные колонки
 @each $breakpoint, $value in $breakpoints {
   @media (min-width: $value) {
     @for $i from 1 through $grid-columns {
       .#{$breakpoint}-col-#{$i} {
-        flex: 0 0 percentage($i / $grid-columns);
-        max-width: percentage($i / $grid-columns);
+        grid-column: span $i;
       }
     }
-
-    .#{$breakpoint}-col-auto {
-      flex: 0 0 auto;
-      width: auto;
-      max-width: 100%;
-    }
   }
+}
+
+.col-auto { grid-column: auto; }
+
+.row .row {
+  grid-column: 1 / -1;
 }

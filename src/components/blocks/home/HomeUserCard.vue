@@ -127,7 +127,7 @@ const handleRemoveUser = async () => {
 <template>
   <div class="user-card">
     <div class="user-card__top flex row user-select-none">
-      <div class="user-card__img-container img-container position-relative col-5">
+      <div class="user-card__img-container img-container position-relative col-6">
         <img v-if="userStore.user?.ava?.url"
              :src="userStore.user?.ava?.url"
              :alt="userStore.user?.name"/>
@@ -150,7 +150,7 @@ const handleRemoveUser = async () => {
         >
       </div>
 
-      <div class="user-card__info flex flex-column flex-between">
+      <div class="user-card__info flex flex-column flex-between col-6">
         <div>
           <p class="user-card__name">Имя: {{userStore.user?.name}}</p>
           <p class="user-card__name">Статус: {{role}}</p>

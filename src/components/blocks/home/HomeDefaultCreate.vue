@@ -160,6 +160,25 @@ const blurInput = (event: Event) => {
 //-- языки и технологии --//
 // список языков и технологий с полями checked для чекбоксов
 const technologies = ref<{title: string, checked: boolean}[]>([]);
+
+
+// выбор технологий при редактировании поста
+const getSearchTechnologies = () => {
+  let languages = createStore.createData[props.name].languages_and_technologies
+
+  if (!languages.length) return
+
+  technologies.value = technologies.value?.map(el => {
+    if (languages.includes(el.title)) {
+      return {
+        title: el.title,
+        checked: true,
+      }
+    }
+
+    return el
+  })
+}
 //=========================================================//
 
 
@@ -344,6 +363,8 @@ onMounted(() => {
   })
 
   initializeFromStore()
+
+  getSearchTechnologies()
 })
 //=========================================================//
 </script>
