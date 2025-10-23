@@ -65,9 +65,7 @@ const componentProps = computed(() => {
     case "create":
       return { apiUrl: props.apiUrl, name: props.name };
     default:
-      return { apiUrl: props.apiUrl,
-        searchName: props.name,
-      };
+      return { apiUrl: props.apiUrl, searchName: props.name };
   }
 })
 //=========================================================//

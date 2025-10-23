@@ -9,7 +9,7 @@ export const like = async (name: string): Promise<any> => {
     if (userStore.userLiked.id >= 0) {
         return await patch(`/user_liked/${userStore.userLiked.id}`, {
             items: {
-                [name]: userStore.userLiked.items[name]
+                ...userStore.userLiked.items
             }
         })
     } else {
