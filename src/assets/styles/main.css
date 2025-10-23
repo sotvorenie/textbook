@@ -1544,8 +1544,8 @@ a[class] {
 }
 
 .user-card__top {
+  --gap: 20px;
   margin-bottom: 1.875rem;
-  column-gap: 1.25rem;
   flex-wrap: nowrap;
 }
 .user-card__btn-bar {

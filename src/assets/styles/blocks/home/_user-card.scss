@@ -4,8 +4,9 @@
 .user-card {
 
   &__top {
+    --gap: 20px;
+
     margin-bottom: rem(30);
-    column-gap: rem(20);
     flex-wrap: nowrap;
   }
 
