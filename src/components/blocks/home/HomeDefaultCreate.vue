@@ -95,6 +95,8 @@ const sendRequest = async () => {
     )
 
     if (response && response.id) {
+      setNewLanguages()
+
       itemsStore.items[props.name] = itemsStore.items[props.name]?.map(el => {
         if (el.id === response.id) {
           return {
@@ -178,6 +180,25 @@ const getSearchTechnologies = () => {
 
     return el
   })
+}
+
+// если изменился список языков, то добавить в нужный элемент list
+const setNewLanguages = () => {
+  const redactLanguages = Object.values(createStore.createData[props.name].languages_and_technologies)
+  const filteredLanguages = technologies.value?.filter(el => el.checked)?.map(el => el.title)
+
+  if (redactLanguages !== filteredLanguages) {
+    itemsStore.items[props.name] = itemsStore.items[props.name]?.map(el => {
+      if (el.id === createStore.createData[props.name].id) {
+        return {
+          ... el,
+          languages_and_technologies: filteredLanguages,
+        }
+      }
+
+      return el
+    })
+  }
 }
 //=========================================================//
 
