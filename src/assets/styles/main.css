@@ -945,6 +945,7 @@ a[class] {
 
 .skeleton-default-list {
   --gap: 30px;
+  height: auto;
 }
 .skeleton-default-list__item {
   padding: 1.25rem;

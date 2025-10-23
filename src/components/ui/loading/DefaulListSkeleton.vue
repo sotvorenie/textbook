@@ -1,12 +1,21 @@
 <script setup lang="ts">
+import {onMounted, ref} from "vue";
+
+const colElements = ref(6)
+
+onMounted(() =>{
+  if (window.innerWidth > 1440) {
+    colElements.value = 12
+  }
+})
 
 </script>
 
 <template>
 
-  <ul class="skeleton skeleton-default-list flex row">
+  <ul class="skeleton skeleton-default-list row">
     <li class="skeleton-default-list__item col-4 ds-col-3 position-relative"
-        v-for="_ in 9"
+        v-for="_ in colElements"
     >
       <div class="skeleton-default-list__title">
         <div class="line line__background h-30"></div>

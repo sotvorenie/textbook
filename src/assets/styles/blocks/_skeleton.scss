@@ -63,6 +63,8 @@
 .skeleton-default-list {
   --gap: 30px;
 
+  height: auto;
+
   &__item {
     padding: rem(20);
     border: $border-light-alt;
