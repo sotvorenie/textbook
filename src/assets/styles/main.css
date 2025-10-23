@@ -1012,6 +1012,20 @@ a[class] {
 .skeleton-default-item__title {
   margin-bottom: 1.25rem;
 }
+.skeleton-default-item__slider {
+  margin-bottom: 1.25rem;
+  column-gap: 1.875rem;
+}
+.skeleton-default-item__slider div {
+  height: 2.5rem;
+}
+.skeleton-default-item__slider div:nth-child(1), .skeleton-default-item__slider div:nth-child(3) {
+  width: 2.5rem;
+  border-radius: 50%;
+}
+.skeleton-default-item__slider div:nth-child(2) {
+  flex: auto;
+}
 .skeleton-default-item__text {
   margin-bottom: 0.625rem;
 }

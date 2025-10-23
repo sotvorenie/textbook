@@ -144,6 +144,24 @@
     margin-bottom: rem(20);
   }
 
+  &__slider {
+    margin-bottom: rem(20);
+    column-gap: rem(30);
+
+    div {
+      height: rem(40);
+
+      &:nth-child(1), &:nth-child(3) {
+        width: rem(40);
+        border-radius: 50%;
+      }
+
+      &:nth-child(2) {
+        flex: auto;
+      }
+    }
+  }
+
   &__text {
     margin-bottom: rem(10);
   }
