@@ -36,6 +36,13 @@ const useCreateStore = defineStore('createStore', () => {
         },
     })
 
+    const isRedact = reactive<Record<string, boolean>>({
+        hints: false,
+        advices: false,
+        projects: false,
+        textbooks: false,
+    })
+
     const resetStore = () => {
         createData.hints = {
             title: '',
@@ -61,10 +68,16 @@ const useCreateStore = defineStore('createStore', () => {
             id: -1,
             languages_and_technologies: [],
         }
+
+        isRedact.hints = false
+        isRedact.advices = false
+        isRedact.projects = false
+        isRedact.textbooks = false
     }
 
     return {
         createData,
+        isRedact,
 
         resetStore,
     }

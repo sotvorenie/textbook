@@ -76,9 +76,9 @@ const parsedText = useItem(
 
       <div class="textbook__content">
         <template v-for="part in parsedText">
-          <h3 class="item__pod-title text-w500" v-if="part.type === 'title'">
+          <h4 class="item__pod-title text-w500" v-if="part.type === 'title'">
             {{ part.content }}
-          </h3>
+          </h4>
 
           <p class="item__text" v-else-if="part.type === 'text'">
             {{ part.content }}

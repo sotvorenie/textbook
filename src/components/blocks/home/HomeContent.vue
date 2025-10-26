@@ -25,6 +25,8 @@ const userStore = useUserStore();
 import useSettingsStore from "../../../store/settingsStore.ts";
 const settingsStore = useSettingsStore();
 import useBlocksStore from "../../../store/blocksStore.ts";
+import AboutSettings from "./HomeSettingsItems/AboutSettings.vue";
+import About from "./HomeMenuItems/About.vue";
 const blocksStore = useBlocksStore();
 
 const props = defineProps({
@@ -91,7 +93,11 @@ const settingsComponentsAttributes = [
   {
     component: BlogSettings,
     props: {},
-  }
+  },
+  {
+    component: AboutSettings,
+    props: {},
+  },
 ]
 
 // компоненты контент-части
@@ -138,6 +144,10 @@ const contentComponents = ref<ContentComponent[]>([
     component: Blog,
     props: {},
   },
+  {
+    component: About,
+    props: {},
+  },
 ])
 //=========================================================//
 
@@ -179,7 +189,7 @@ watch(
 
 <template>
 
-  <div class="home__content flex flex-column">
+  <div class="home__content">
     <header class="home__content-header home__header flex flex-align-center flex-between">
 
       <div v-if="activeIndex === 0"></div>

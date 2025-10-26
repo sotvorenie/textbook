@@ -13,7 +13,7 @@ export const cancel = async (
     type: string = 'создание'
 ) => {
     const confirm = await showConfirm(
-        'Отмена создания подсказки',
+        `Отмена создания ${names[name]}`,
         `Вы действительно хотите отменить ${type} ${names[name]}?`
     )
 

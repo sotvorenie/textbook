@@ -1,0 +1,41 @@
+@use '../../helpers/index' as *;
+@use '../../variables' as *;
+
+.about {
+  @include fluid-text(24, 20);
+
+  &__title {
+    margin-bottom: rem(10);
+  }
+
+  &__list {
+    gap: rem(10);
+
+    &:not(:last-child) {
+      margin-bottom: rem(20);
+    }
+
+    &:not(.is-links) {
+      .about__item {
+        line-height: 1;
+        padding: fluid(20, 10);
+        border-radius: $radius-medium;
+        border: $border-light-alt;
+      }
+    }
+
+    &.is-links {
+      .about__item {
+        i {
+          @include square(30);
+        }
+      }
+    }
+  }
+
+  &__item {
+    a {
+      gap: fluid(10, 5);
+    }
+  }
+}

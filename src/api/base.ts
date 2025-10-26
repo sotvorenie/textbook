@@ -22,13 +22,12 @@ client.interceptors.response.use(
     async (error) => {
         if (error.response?.status === 401) {
             authToken.remove()
-            await router.push('/')
-            // Возвращаем data чтобы не попадать в catch
-            return { data: {token: null } }
+            await router.push('/login')
+            throw error
         }
 
         await showError('Ошибка сети', 'Что-то пошло не так!!')
-        return { data: {} }
+        throw error
     }
 )
 

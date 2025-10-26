@@ -69,8 +69,8 @@ const getPosts = async(push: boolean = true) => {
     if (searchStore.myOtherFilter[props?.searchName] === 'my') {
       user_id = userStore.user.id
     } else if (searchStore.myOtherFilter[props?.searchName] === 'likes') {
-      likes = likedItems.value
-    }
+      likes = likedItems.value?.length ? likedItems.value : [-1]
+     }
 
     const response: {meta: any, items: List[]} = await getList(
         props.apiUrl,

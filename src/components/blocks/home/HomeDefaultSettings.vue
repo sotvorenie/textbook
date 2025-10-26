@@ -82,12 +82,15 @@ const handleSort = (value: string): void => {
 const goToList = () => {
   blocksStore.activeBlock[props.blockName]= 'list'
   settingsStore.settingsVisible[props.blockName] = 'list'
+  userStore.isUserPost[props.blockName] = false
 }
 
 // клик по кнопке "Назад"
 const handleBack = () => {
   if (userStore.isUserPost[props.blockName]
-      && blocksStore.activeBlock[props.blockName] === 'create') {
+      && blocksStore.activeBlock[props.blockName] === 'create'
+      && createStore.isRedact[props.blockName]
+  ) {
 
     cancel(props.blockName, () => {
       blocksStore.activeBlock[props.blockName] = 'item'
@@ -99,12 +102,12 @@ const handleBack = () => {
         languages_and_technologies: []
       }
     }, 'редактирование')
+
+    createStore.isRedact[props.blockName] = false
   } else if (blocksStore.activeBlock[props.blockName] === 'create') {
     cancel(props.blockName, goToList)
   } else {
     goToList()
-
-    userStore.isUserPost[props.blockName] = false
   }
 }
 //=========================================================//
@@ -152,6 +155,8 @@ const handleRedact = () => {
     languages_and_technologies: item?.languages_and_technologies ?? [],
     content: item?.content ?? {},
   }
+
+  createStore.isRedact[props.blockName] = true
 }
 
 // клик по кнопке "Удалить"
@@ -193,8 +198,6 @@ watch(
     />
 
     <Filter v-show="buttonsVisible" @change="handleFilterChange"/>
-
-
 
     <HomeSettingsMyOther v-if="buttonsVisible"
                          v-model="searchStore.myOtherFilter[blockName]"

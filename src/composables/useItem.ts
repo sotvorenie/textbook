@@ -58,7 +58,18 @@ export const useItem = (
 
         const result: Array<{ type: "title" | "text" | "code"; content: string }> = [];
 
-        // Сначала парсим все блоки в порядке появления
+        const decodeHtmlEntities = (str: string): string => {
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = str;
+            return textarea.value;
+        };
+
+        const preserveLineBreaks = (str: string): string => {
+            return str
+                .replace(/<br\s*\/?>/gi, "\n")
+                .replace(/&nbsp;/g, " ");
+        };
+
         const regex = /<pre><code>[\s\S]*?<\/code><\/pre>|<h3>[\s\S]*?<\/h3>|<p>[\s\S]*?<\/p>/gi;
         const blocks = text.match(regex);
 
@@ -68,7 +79,7 @@ export const useItem = (
             let type: "title" | "text" | "code";
             let rawContent: string;
 
-            if (block.match(/^<pre><code(?:\s[^>]*)?>/)) { // учитываем атрибуты
+            if (block.match(/^<pre><code(?:\s[^>]*)?>/)) {
                 type = "code";
                 rawContent = block.replace(/^<pre><code(?:\s[^>]*)?>|<\/code><\/pre>$/g, "");
             } else if (block.startsWith("<h3>")) {
@@ -79,16 +90,15 @@ export const useItem = (
                 rawContent = block.replace(/<\/?p>/g, "");
             }
 
-            const cleaned = rawContent
-                .replace(/<br\s*\/?>/gi, "\n")
-                .replace(/&nbsp;/g, " ")
-                .replace(/&amp;/g, "&")
-                .replace(/&lt;/g, "<")
-                .replace(/&gt;/g, ">");
+            // Сохраняем только явные переносы строк
+            const formattedContent = preserveLineBreaks(rawContent);
+
+            // Декодируем HTML-сущности
+            const decodedContent = decodeHtmlEntities(formattedContent);
 
             result.push({
                 type,
-                content: type === "code" ? highlightCodeComments(cleaned) : cleaned
+                content: type === "code" ? highlightCodeComments(decodedContent) : decodedContent
             });
         }
 

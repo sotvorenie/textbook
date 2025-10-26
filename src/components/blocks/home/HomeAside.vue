@@ -73,12 +73,11 @@ const changeActiveIndex = (number: number): void => {
       </li>
     </TransitionGroup>
 
-    <Transition name="menu-bottom" appear :delay="500">
-      <button class="menu__bottom button button-small m-auto"
-              type="button"
-              v-if="!isClosed"
-      >Подробнее</button>
-    </Transition>
+    <button class="menu__bottom button button-small m-auto"
+            type="button"
+            v-if="!isClosed"
+            @click="changeActiveIndex(menuItems?.length + 1)"
+    >Подробнее</button>
   </aside>
 
 </template>

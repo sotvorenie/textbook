@@ -110,7 +110,9 @@ const exit = async () => {
 
     resetAllStores()
 
-    router.push('/').catch(() => {})
+    await router.push('/')
+
+    window.location.reload()
   }
 }
 

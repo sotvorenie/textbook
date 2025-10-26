@@ -103,6 +103,8 @@ const sendRequest = async () => {
     )
 
     if (response && response.id) {
+      setNewLanguages()
+
       itemsStore.items[props.name] = itemsStore.items[props.name]?.map(el => {
         if (el.id === response.id) {
           return {
@@ -205,6 +207,43 @@ const blurInput = (event: Event) => {
 //-- языки и технологии --//
 // список языков и технологий с полями checked для чекбоксов
 const technologies = ref<{title: string, checked: boolean}[]>([]);
+
+// выбор технологий при редактировании учебника
+const getSearchTechnologies = () => {
+  let languages = createStore.createData[props.name].languages_and_technologies
+
+  if (!languages.length) return
+
+  technologies.value = technologies.value?.map(el => {
+    if (languages.includes(el.title)) {
+      return {
+        title: el.title,
+        checked: true,
+      }
+    }
+
+    return el
+  })
+}
+
+// если изменился список языков, то добавить в нужный элемент list
+const setNewLanguages = () => {
+  const redactLanguages = Object.values(createStore.createData[props.name].languages_and_technologies)
+  const filteredLanguages = technologies.value?.filter(el => el.checked)?.map(el => el.title)
+
+  if (redactLanguages !== filteredLanguages) {
+    itemsStore.items[props.name] = itemsStore.items[props.name]?.map(el => {
+      if (el.id === createStore.createData[props.name].id) {
+        return {
+          ... el,
+          languages_and_technologies: filteredLanguages,
+        }
+      }
+
+      return el
+    })
+  }
+}
 //=========================================================//
 
 
@@ -294,45 +333,58 @@ const convertTextToBlocks = (str: string): { type: string, text: string }[] => {
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = str;
 
-  for (const child of Array.from(tempDiv.children)) {
-    let text = child.innerHTML;
+  const decodeHtmlEntities = (text: string): string => {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    return textarea.value;
+  };
 
-    text = text
-        .replace(/<br\s*\/?>/gi, '\n')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&amp;/g, '&')
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'");
+  const processElement = (element: Element): { type: string, text: string } | null => {
+    let text = element.innerHTML;
 
-    if (child.tagName === 'PRE' && child.querySelector('code')) {
-      const codeElement = child.querySelector('code');
+    if (element.tagName === 'PRE' && element.querySelector('code')) {
+      const codeElement = element.querySelector('code');
       if (codeElement) {
         let codeText = codeElement.innerHTML
             .replace(/<br\s*\/?>/gi, '\n')
-            .replace(/&nbsp;/g, ' ')
-            .replace(/&lt;/g, '<')
-            .replace(/&gt;/g, '>')
-            .replace(/&amp;/g, '&')
-            .replace(/&quot;/g, '"')
-            .replace(/&#39;/g, "'");
+            .replace(/&nbsp;/g, ' ');
 
-        blocks.push({
+        codeText = decodeHtmlEntities(codeText);
+
+        return {
           type: 'code',
           text: codeText
-        });
+        };
       }
-    } else if (child.tagName === 'H3') {
-      blocks.push({
+    } else if (element.tagName === 'H3') {
+      text = element.textContent || '';
+      text = decodeHtmlEntities(text);
+
+      return {
         type: 'title',
-        text
-      });
-    } else if (child.tagName === 'P') {
-      blocks.push({
+        text: text
+      };
+    } else if (element.tagName === 'P') {
+      text = element.innerHTML;
+      text = text
+          .replace(/<br\s*\/?>/gi, '\n')
+          .replace(/&nbsp;/g, ' ');
+
+      text = decodeHtmlEntities(text);
+
+      return {
         type: 'text',
-        text
-      });
+        text: text
+      };
+    }
+
+    return null;
+  };
+
+  for (const child of Array.from(tempDiv.children)) {
+    const block = processElement(child);
+    if (block) {
+      blocks.push(block);
     }
   }
 
@@ -370,10 +422,18 @@ const initializeFromStore = () => {
 // конвертирование блоков в текст для отправки в апи
 const convertBlocksToText = (blocks: { type: string, text: string }[]): string => {
   return blocks?.map(block => {
-    const lines = block.text.split('\n');
+    const escapeHtml = (text: string): string => {
+      return text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+    };
 
-    const processedLines = lines.map(line => line.replace(/ /g, '&nbsp;'));
-    const formattedText = processedLines.join('<br>');
+    const formattedText = escapeHtml(block.text)
+        .replace(/\n/g, '<br>')
+        .replace(/ /g, '&nbsp;');
 
     if (block.type === 'code') {
       return `<pre><code>${formattedText}</code></pre>`;
@@ -384,9 +444,6 @@ const convertBlocksToText = (blocks: { type: string, text: string }[]): string =
     }
   }).join('');
 };
-//=========================================================//
-
-
 //=========================================================//
 //-- хуки --//
 // получаем список всевозможных языков и технологий, чтобы отобраить их с чекбоксами
@@ -399,6 +456,8 @@ onMounted(() => {
   })
 
   initializeFromStore()
+
+  getSearchTechnologies()
 })
 //=========================================================//
 </script>
