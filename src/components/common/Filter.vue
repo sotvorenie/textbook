@@ -34,7 +34,11 @@ onMounted(() => {
 
 <template>
 
-  <Absolute v-model="filterVisible" :show-delay="400" :hide-delay="200">
+  <Absolute class="is-left"
+            v-model="filterVisible"
+            :show-delay="400"
+            :hide-delay="200"
+  >
     <template #activator>
       <button class="settings__btn-transparent recolor-svg">
         <FilterIcon/>

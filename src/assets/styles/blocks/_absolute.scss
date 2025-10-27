@@ -4,9 +4,20 @@
 .absolute {
   position: relative;
 
-  &__content {
-    @include abs-x;
+  &.is-left {
+    .absolute__content {
+      position: absolute;
+      left: rem(-50);
+    }
+  }
 
+  &:not(.is-left) {
+    .absolute__content {
+      @include abs-x;
+    }
+  }
+
+  &__content {
     z-index: 1001;
     background-color: color-mix(in srgb, var(--color-dark) 60%, transparent);
     backdrop-filter: blur(3px);

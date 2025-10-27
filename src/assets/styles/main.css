@@ -1267,10 +1267,16 @@ a[class] {
 .absolute {
   position: relative;
 }
-.absolute__content {
+.absolute.is-left .absolute__content {
+  position: absolute;
+  left: -3.125rem;
+}
+.absolute:not(.is-left) .absolute__content {
   position: absolute;
   left: 50%;
   translate: -50%;
+}
+.absolute__content {
   z-index: 1001;
   background-color: color-mix(in srgb, var(--color-dark) 60%, transparent);
   backdrop-filter: blur(3px);
