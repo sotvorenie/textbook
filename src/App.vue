@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {onMounted, onUnmounted} from "vue";
 
+import {getTheme} from "./utils/theme.ts";
+
 const handleTab = (e: KeyboardEvent) => {
   if (e.key === 'Tab') {
     const target = e.target as HTMLElement;
@@ -23,6 +25,8 @@ const handleTab = (e: KeyboardEvent) => {
 
 onMounted(() => {
   document.addEventListener('keydown', handleTab);
+
+  getTheme()
 });
 
 onUnmounted(() => {

@@ -24,7 +24,6 @@ import {empty} from "../../../../data/base64/sleepFox.ts";
   img {
     width: 60%;
     margin-bottom: -8vw;
-    filter: brightness(.95);
   }
 
   p {

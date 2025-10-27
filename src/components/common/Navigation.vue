@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+
+import {theme, changeTheme} from "../../utils/theme.ts";
 
 import Arrow from "../../assets/icons/Arrow.vue";
 import Reload from "../../assets/icons/Reload.vue";
@@ -18,33 +19,9 @@ defineProps({
   }
 })
 
-const theme = ref<string>('dark');
-
-const getTheme = () => {
-  theme.value = localStorage.getItem('theme') ?? '';
-
-  setTheme();
-}
-
-const changeTheme = () => {
-  theme.value === 'dark' ? theme.value = 'light' : theme.value = 'dark';
-
-  setTheme();
-
-  localStorage.setItem('theme', theme.value);
-}
-
-const setTheme = () => {
-  document.documentElement.setAttribute('data-theme', theme.value);
-}
-
 const locationReload = () => {
   window.location.reload();
 }
-
-onMounted(() => {
-  getTheme();
-})
 </script>
 
 <template>
