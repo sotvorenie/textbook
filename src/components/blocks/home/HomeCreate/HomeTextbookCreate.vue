@@ -314,8 +314,8 @@ const save = async (event: Event) => {
   if (!valid) return
 
   const ask = await showAsk(
-      'Сохранение подсказки',
-      'Вы действительно хотите сохранить подсказку?'
+      'Сохранение учебника',
+      'Вы действительно хотите сохранить учебник?'
   )
 
   if (ask) await sendRequest()

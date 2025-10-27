@@ -294,9 +294,21 @@ const save = async (event: Event) => {
 
   if (!valid) return
 
+  const names: Record<string, string> = {
+    hints: 'подсказки',
+    projects: 'проекта',
+    advices: 'совета',
+  }
+
+  const names_2: Record<string, string> = {
+    hints: 'подсказку',
+    projects: 'проект',
+    advices: 'совет',
+  }
+
   const ask = await showAsk(
-      'Сохранение подсказки',
-      'Вы действительно хотите сохранить подсказку?'
+      `Сохранение ${names[props.name]}`,
+      `Вы действительно хотите сохранить ${names_2[props.name]}?`
   )
 
   if (ask) await sendRequest()
