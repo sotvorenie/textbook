@@ -1,38 +1,39 @@
 <script setup lang="ts">
-import {onMounted, reactive, ref} from "vue";
+import {computed, onMounted, reactive, ref} from "vue";
 
-import {Item} from "../../../types/item.ts";
+import {Item} from "../../../../types/item.ts";
 
-import {showAsk} from "../../../utils/modals.ts";
-import {getCurrentDateTime} from "../../../composables/useDate.ts";
-import {cancel} from "../../../composables/useCancelCreated.ts";
+import {showAsk, showConfirm} from "../../../../utils/modals.ts";
+import {getCurrentDateTime} from "../../../../composables/useDate.ts";
+import {cancel} from "../../../../composables/useCancelCreated.ts";
 
-import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.ts";
-import {createItem, redactItem} from "../../../api/posts/posts.ts";
+import {sendToTelegram, TelegramEventType} from "../../../../api/telegram/telegram.ts";
+import {createItem, redactItem} from "../../../../api/posts/posts.ts";
 
-import {addLabelText, removeLabelText} from "../../../composables/useLabelText.ts";
-import {onBlur, onInput, onSubmit} from "../../../composables/useFormValidation.ts";
+import {addLabelText, removeLabelText} from "../../../../composables/useLabelText.ts";
+import {onBlur, onInput, onSubmit} from "../../../../composables/useFormValidation.ts";
 
-import Btn from "../../ui/Btn.vue";
+import Btn from "../../../ui/Btn.vue";
 
-import HomeCreateTextarea from "./HomeCreateTextareas/HomeCreateTextarea.vue";
+import HomeCreateTextarea from "./HomeCreateTextarea.vue";
+import HomeTextbookSlider from "../HomeTextbookSlider.vue";
 
-import Modal from "../../common/Modal.vue";
-import CheckboxList from "../../ui/CheckboxList.vue";
+import Modal from "../../../common/Modal.vue";
+import CheckboxList from "../../../ui/CheckboxList.vue";
 
-import useBlocksStore from "../../../store/blocksStore.ts";
+import useBlocksStore from "../../../../store/blocksStore.ts";
 const blocksStore = useBlocksStore();
-import useSettingsStore from "../../../store/settingsStore.ts";
+import useSettingsStore from "../../../../store/settingsStore.ts";
 const settingsStore = useSettingsStore();
-import useTechnologiesStore from "../../../store/technologiesStore.ts";
+import useTechnologiesStore from "../../../../store/technologiesStore.ts";
 const technologiesStore = useTechnologiesStore();
-import useCreateStore from "../../../store/useCreateStore.ts";
+import useCreateStore from "../../../../store/useCreateStore.ts";
 const createStore = useCreateStore();
-import useUserStore from "../../../store/userStore.ts";
+import useUserStore from "../../../../store/userStore.ts";
 const userStore = useUserStore();
-import useItemMemoStore from "../../../store/itemMemoStore.ts";
+import useItemMemoStore from "../../../../store/itemMemoStore.ts";
 const itemMemoStore = useItemMemoStore();
-import useItemsStore from "../../../store/useItemsStore.ts";
+import useItemsStore from "../../../../store/useItemsStore.ts";
 const itemsStore = useItemsStore();
 
 const props = defineProps({
@@ -60,17 +61,24 @@ defineOptions({
 //-- асинхронные функции --//
 // создание/редактирование записи
 const sendRequest = async () => {
-  newItem.text = convertBlocksToText(newItemText.value)
+  const content: Record<string, string> = {};
 
-  const dateTime = getCurrentDateTime()
+  for (const tab of tabs.value) {
+    const key = tab.name || `tab${tab.id}`;
+    content[key] = convertBlocksToText(newItemText.value[tab.id] || []);
+  }
 
-  newItem.time = dateTime.time
-  newItem.date = dateTime.date
-  newItem.sort_date = dateTime.sort_date
+  newItem.content = content;
+
+  const dateTime = getCurrentDateTime();
+  newItem.time = dateTime.time;
+  newItem.date = dateTime.date;
+  newItem.sort_date = dateTime.sort_date;
 
   newItem.languages_and_technologies = technologies.value
       ?.filter(item => item.checked)
-      ?.map(item => item.title)
+      ?.map(item => item.title);
+
 
   if (!createStore.createData[props.name].title.length) {
     const response: Item = await createItem(props.apiUrl, newItem)
@@ -121,12 +129,49 @@ const sendRequest = async () => {
 
   await sendToTelegram(blockNameToEventType[props.name], newItem.title)
 
-  textBlock.value = []
-  newItemText.value = []
-  textareaAttributes.value = []
-
   back()
 }
+//=========================================================//
+
+
+//=========================================================//
+//-- табы --//
+const activeTab = ref<number>(0)
+
+const tabs = ref<{id: number, name: string}[]>([{
+  id: 0,
+  name: ''
+}])
+
+const tabId = computed(() => tabs.value[activeTab.value]?.id);
+
+
+const createTab = () => {
+  tabs.value.push({id: tabs.value.length, name: ''})
+  activeTab.value = tabs.value.length - 1
+}
+
+// удаление таба по индексу
+const removeTab = async () => {
+  const confirm = await showConfirm(
+      'Удаление раздела учебника',
+      'Вы действительно хотите удалить этот раздел?'
+  )
+
+  if (confirm) {
+    const idToRemove = tabId.value;
+
+    tabs.value.splice(activeTab.value, 1);
+
+    delete newItemText.value[idToRemove];
+    delete textBlock.value[idToRemove];
+    delete textareaAttributes.value[idToRemove];
+
+    if (activeTab.value >= tabs.value.length) {
+      activeTab.value = tabs.value.length - 1;
+    }
+  }
+};
 //=========================================================//
 
 
@@ -137,14 +182,14 @@ const newItem = reactive<Item>({
   user_id: userStore.user.id,
   title: '',
   languages_and_technologies: [],
-  text: '',
+  content: {},
   date: '',
   sort_date: '',
   time: ''
 })
 
 // текст создаваемого элемента
-const newItemText = ref<{type: string, text: string}[]>([])
+const newItemText = ref<Record<string, { type: string; text: string }[]>>({});
 //=========================================================//
 
 
@@ -163,8 +208,7 @@ const blurInput = (event: Event) => {
 // список языков и технологий с полями checked для чекбоксов
 const technologies = ref<{title: string, checked: boolean}[]>([]);
 
-
-// выбор технологий при редактировании поста
+// выбор технологий при редактировании учебника
 const getSearchTechnologies = () => {
   let languages = createStore.createData[props.name].languages_and_technologies
 
@@ -206,7 +250,7 @@ const setNewLanguages = () => {
 //=========================================================//
 //-- поля ввода --//
 // список всех полей ввода
-const textBlock = ref<string[]>([])
+const textBlock = ref<Record<string, string[]>>({});
 
 // список всевозможных типов полей ввода
 const textareaAttributesList: Record<string, { name: string, code: string }> = {
@@ -225,26 +269,28 @@ const textareaAttributesList: Record<string, { name: string, code: string }> = {
 }
 
 // список типов созданных полей ввода
-const textareaAttributes = ref<{ name: string, code: string }[]>([])
-
+const textareaAttributes = ref<Record<string, { name: string; code: string }[]>>({});
 
 // создание нового поля ввода
 const createTextarea = (type: string): void => {
-  newItemText.value.push({
-    type,
-    text: ''
-  })
+  const id = tabId.value;
 
-  textBlock.value.push('HomeCreateTextarea');
-  textareaAttributes.value.push(textareaAttributesList[type])
-}
+  if (!newItemText.value[id]) newItemText.value[id] = [];
+  if (!textBlock.value[id]) textBlock.value[id] = [];
+  if (!textareaAttributes.value[id]) textareaAttributes.value[id] = [];
+
+  newItemText.value[id].push({ type, text: '' });
+  textBlock.value[id].push('HomeCreateTextarea');
+  textareaAttributes.value[id].push(textareaAttributesList[type]);
+};
 
 // удаление поля ввода
 const removeTextarea = (index: number) => {
-  newItemText.value.splice(index, 1)
-  textBlock.value.splice(index, 1)
-  textareaAttributes.value.splice(index, 1)
-}
+  const id = tabId.value;
+  newItemText.value[id]?.splice(index, 1);
+  textBlock.value[id]?.splice(index, 1);
+  textareaAttributes.value[id]?.splice(index, 1);
+};
 //=========================================================//
 
 
@@ -254,38 +300,11 @@ const removeTextarea = (index: number) => {
 const back = () => {
   blocksStore.activeBlock[props.name] = 'list';
   settingsStore.settingsVisible[props.name] = 'list'
-
-  createStore.createData[props.name] = {
-    title: '',
-    text: '',
-    id: -1,
-    languages_and_technologies: []
-  }
-  createStore.isRedact[props.name] = false
 }
 
 // клик по кнопке "Отмена"
 const handleBack = (): void => {
-  if (userStore.isUserPost[props.name]
-      && blocksStore.activeBlock[props.name] === 'create'
-      && createStore.isRedact[props.name]
-  ) {
-    cancel(props.name, () => {
-      blocksStore.activeBlock[props.name] = 'item'
-
-      createStore.createData[props.name] = {
-        title: '',
-        text: '',
-        id: -1,
-        languages_and_technologies: []
-      }
-
-      createStore.isRedact[props.name] = false
-    }, 'редактирование')
-  } else {
-    cancel(props.name, back)
-    userStore.isUserPost[props.name] = false
-  }
+  cancel(props.name, back)
 }
 
 // клик по кнопке "Сохранить"
@@ -374,20 +393,28 @@ const convertTextToBlocks = (str: string): { type: string, text: string }[] => {
 
 // для создания разметки при редактировании записи
 const initializeFromStore = () => {
-  const storedText = createStore.createData[props.name].text;
+  const storedContent = createStore.createData[props.name].content;
+  if (!storedContent) return;
+
+  let tabCounter = 0;
+
+  tabs.value = []
 
   newItem.title = createStore.createData[props.name].title
 
-  if (storedText) {
-    const blocks = convertTextToBlocks(storedText);
+  for (const tabName in storedContent) {
+    const id = tabCounter++;
+    tabs.value.push({ id, name: tabName });
+
+    const blocks = convertTextToBlocks(storedContent[tabName]);
+    newItemText.value[id] = [];
+    textBlock.value[id] = [];
+    textareaAttributes.value[id] = [];
 
     blocks.forEach(block => {
-      textBlock.value.push('HomeCreateTextarea');
-      textareaAttributes.value.push(textareaAttributesList[block.type])
-      newItemText.value.push({
-        type: block.type,
-        text: block.text
-      });
+      newItemText.value[id].push(block);
+      textBlock.value[id].push('HomeCreateTextarea');
+      textareaAttributes.value[id].push(textareaAttributesList[block.type]);
     });
   }
 };
@@ -417,9 +444,6 @@ const convertBlocksToText = (blocks: { type: string, text: string }[]): string =
     }
   }).join('');
 };
-//=========================================================//
-
-
 //=========================================================//
 //-- хуки --//
 // получаем список всевозможных языков и технологий, чтобы отобраить их с чекбоксами
@@ -473,6 +497,38 @@ onMounted(() => {
         <span class="label__counter position-absolute">{{newItem.title.length}}/100</span>
       </label>
 
+      <HomeTextbookSlider :items="tabs?.map(el => el.name)"
+                          :is-create="true"
+                          v-model:active-index="activeTab"
+                          @create-tab="createTab"
+      />
+
+      <label class="create__label label position-relative" @click.stop>
+        <span class="label__text position-absolute cursor-text user-select-none"
+              @click.stop
+        >
+          {{`Название ${activeTab + 1} темы`}}
+        </span>
+        <input class="create__input input"
+               aria-describedby="title-error"
+               @blur="blurInput"
+               @input="onInput"
+               @focus="addLabelText"
+               maxlength="100"
+               required
+               v-model="tabs[activeTab].name"
+        >
+        <span class="create__error fields_error label__error position-absolute"
+              id="title-error"
+              data-js-form-field-errors
+              @click.stop>
+        </span>
+
+        <span class="label__counter position-absolute">{{newItem.title.length}}/100</span>
+      </label>
+
+      <Btn @click="removeTab">Удалить этап</Btn>
+
       <div class="create__block position-relative">
         <div class="create__btn-bar position-sticky z-1000 flex">
           <Btn @click="createTextarea('code')">Код <></Btn>
@@ -487,11 +543,12 @@ onMounted(() => {
         <TransitionGroup name="textarea"
                          tag="div"
         >
-          <Component v-for="(textarea, index) in textBlock"
+          <Component v-for="(textarea, index) in textBlock[tabId] || []"
                      :key="index"
                      :is="textarea"
-                     v-model="newItemText[index].text"
-                     v-bind="textareaAttributes[index]"
+                     v-model="newItemText[tabId][index].text"
+                     v-model:active-index="activeTab"
+                     v-bind="textareaAttributes[tabId][index]"
                      @remove-textarea="removeTextarea(index)"
           />
         </TransitionGroup>

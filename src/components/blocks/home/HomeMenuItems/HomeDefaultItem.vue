@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import {ref} from "vue";
 
-import {useItem} from "../../../composables/useItem.ts";
+import {useItem} from "../../../../composables/useItem.ts";
 
-import {Item} from "../../../types/item.ts";
+import {Item} from "../../../../types/item.ts";
 
-import DefaultItemSkeleton from "../../ui/loading/DefaultItemSkeleton.vue";
+import DefaultItemSkeleton from "../HomeLoadings/DefaultItemSkeleton.vue";
 
 const props = defineProps({
   apiUrl: {

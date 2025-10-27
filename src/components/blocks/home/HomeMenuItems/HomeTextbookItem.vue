@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import {ref} from "vue";
 
-import {Item} from "../../../types/item.ts";
+import {Item} from "../../../../types/item.ts";
 
-import {useItem} from "../../../composables/useItem.ts";
+import {useItem} from "../../../../composables/useItem.ts";
 
-import TextbookSkeleton from "../../ui/loading/TextbookSkeleton.vue";
+import TextbookSkeleton from "../HomeLoadings/TextbookSkeleton.vue";
 
-import HomeTextbookSlider from "./HomeTextbookSlider.vue";
+import HomeTextbookSlider from "../HomeTextbookSlider.vue";
 
 const props = defineProps({
   apiUrl: {

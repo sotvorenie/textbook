@@ -4,10 +4,10 @@ import {computed, onMounted, onActivated, onDeactivated, VueElement} from "vue";
 import {useSaveScroll} from "../../../composables/useSaveScroll.ts";
 
 import HomeDefaultList from "./HomeDefaultList.vue";
-import HomeDefaultItem from "./HomeDefaultItem.vue";
-import HomeDefaultCreate from "./HomeDefaultCreate.vue";
+import HomeDefaultItem from "./HomeMenuItems/HomeDefaultItem.vue";
+import HomeDefaultCreate from "./HomeCreate/HomeDefaultCreate.vue";
 
-import DefaultListSkeleton from "../../ui/loading/DefaulListSkeleton.vue";
+import DefaultListSkeleton from "./HomeLoadings/DefaulListSkeleton.vue";
 
 import useBlocksStore from "../../../store/blocksStore.ts";
 const blocksStore = useBlocksStore();

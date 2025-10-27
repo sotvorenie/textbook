@@ -1,36 +1,36 @@
 <script setup lang="ts">
 import {computed, ref, watch} from "vue";
 
-import {FilterList} from "../../../types/filter.ts";
+import {FilterList} from "../../../../types/filter.ts";
 
-import {showConfirm} from "../../../utils/modals.ts";
-import {cancel} from "../../../composables/useCancelCreated.ts";
+import {showConfirm} from "../../../../utils/modals.ts";
+import {cancel} from "../../../../composables/useCancelCreated.ts";
 
-import {removeItem} from "../../../api/posts/posts.ts";
+import {removeItem} from "../../../../api/posts/posts.ts";
 
-import HomeSettingsMyOther from "./HomeSettingsMyOther.vue";
+import HomeSettingsMyOther from "../HomeSettingsMyOther.vue";
 
-import Filter from "../../common/Filter.vue";
-import Sort from "../../common/Sort.vue";
-import Search from "../../common/Search.vue";
-import Back from "../../ui/Back.vue";
-import Btn from "../../ui/Btn.vue";
+import Filter from "../../../common/Filter.vue";
+import Sort from "../../../common/Sort.vue";
+import Search from "../../../common/Search.vue";
+import Back from "../../../ui/Back.vue";
+import Btn from "../../../ui/Btn.vue";
 
-import useBlocksStore from "../../../store/blocksStore.ts";
+import useBlocksStore from "../../../../store/blocksStore.ts";
 const blocksStore = useBlocksStore();
-import useSearchStore from "../../../store/searchStore.ts";
+import useSearchStore from "../../../../store/searchStore.ts";
 const searchStore = useSearchStore();
-import useSettingsStore from "../../../store/settingsStore.ts";
+import useSettingsStore from "../../../../store/settingsStore.ts";
 const settingsStore = useSettingsStore();
-import useUserStore from "../../../store/userStore.ts";
+import useUserStore from "../../../../store/userStore.ts";
 const userStore = useUserStore();
-import useCreateStore from "../../../store/useCreateStore.ts";
+import useCreateStore from "../../../../store/useCreateStore.ts";
 const createStore = useCreateStore();
-import useItemMemoStore from "../../../store/itemMemoStore.ts";
+import useItemMemoStore from "../../../../store/itemMemoStore.ts";
 const itemMemoStore = useItemMemoStore();
-import useIdStore from "../../../store/idStore.ts";
+import useIdStore from "../../../../store/idStore.ts";
 const idStore = useIdStore();
-import useItemsStore from "../../../store/useItemsStore.ts";
+import useItemsStore from "../../../../store/useItemsStore.ts";
 const itemsStore = useItemsStore();
 
 const props = defineProps({

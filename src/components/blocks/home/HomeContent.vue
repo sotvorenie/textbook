@@ -6,13 +6,13 @@ import {roundedButtonStyle} from "../../../data/styles.ts";
 import Messenger from "./HomeMenuItems/Messenger.vue";
 import Blog from "./HomeMenuItems/Blog.vue";
 
-import HomeDefaultSettings from "./HomeDefaultSettings.vue";
+import HomeDefaultSettings from "./HomeSettingsItems/HomeDefaultSettings.vue";
 import MessengerSettings from "./HomeSettingsItems/MessengerSettings.vue";
 import BlogSettings from "./HomeSettingsItems/BlogSettings.vue";
 
 import HomeDefaultContentItem from "./HomeDefaultContentItem.vue";
-import HomeTextbookCreate from "./HomeTextbookCreate.vue";
-import HomeTextbookItem from "./HomeTextbookItem.vue";
+import HomeTextbookCreate from "./HomeCreate/HomeTextbookCreate.vue";
+import HomeTextbookItem from "./HomeMenuItems/HomeTextbookItem.vue";
 
 import HomeUserCard from "./HomeUserCard.vue";
 import HomeEmpty from "./HomeEmpty/HomeEmpty.vue";
