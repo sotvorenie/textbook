@@ -1208,7 +1208,7 @@ a[class] {
   translate: -50%;
   top: -100%;
   background-color: color-mix(in srgb, var(--color-light) 30%, transparent);
-  backdrop-filter: blur(1px);
+  backdrop-filter: blur(3px);
   padding: 0.625rem 1.25rem;
   border-radius: 1rem;
   transition-duration: 0.2s;
@@ -1466,6 +1466,7 @@ a[class] {
 .home__content {
   height: 100vh;
   width: 100%;
+  overflow: hidden;
 }
 .home__main {
   overflow-x: hidden;
@@ -1800,10 +1801,16 @@ a[class] {
   border-bottom: 1px solid var(--color-light-alt);
   width: fit-content;
 }
+.item__text:not(:last-child), .item__code:not(:last-child) {
+  margin-bottom: 1.25rem;
+}
 .item__text {
   line-height: 180%;
-  white-space: pre-line;
   word-wrap: break-word;
+  width: 100%;
+}
+.item__comment {
+  white-space: pre-wrap;
 }
 .item__code {
   font-size: clamp(1.125rem, 0.9891304348rem + 0.2173913043vw, 1.25rem);
@@ -1811,6 +1818,12 @@ a[class] {
   background: var(--color-dark);
   padding: 0.625rem;
   border-radius: 0.5rem;
+  position: relative;
+}
+.item__code button {
+  right: 0.625rem;
+  top: -1.25rem;
+  background: var(--color-dark-alt);
 }
 .item__comment {
   color: #fe7971;

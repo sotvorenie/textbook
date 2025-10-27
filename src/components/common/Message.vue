@@ -20,14 +20,16 @@ watch(visible, () => {
 </script>
 
 <template>
-  <div :class="{
+  <Teleport to="body">
+    <div :class="{
          'message position-absolute': true,
          'is-active': visible
         }"
-       :style="{
+         :style="{
           color: (isError ? '#fe7971' : '#59eb68')
        }"
-  >
-    <slot/>
-  </div>
+    >
+      <slot/>
+    </div>
+  </Teleport>
 </template>

@@ -2,10 +2,13 @@
 import {ref} from "vue";
 
 import {useItem} from "../../../../composables/useItem.ts";
+import decodeHtmlEntities from "../../../../composables/useDecodeHtmlEntities.ts";
 
 import {Item} from "../../../../types/item.ts";
 
 import DefaultItemSkeleton from "../HomeLoadings/DefaultItemSkeleton.vue";
+import HomeItemCode from "../HomeItemCode.vue";
+import Message from "../../../common/Message.vue";
 
 const props = defineProps({
   apiUrl: {
@@ -42,11 +45,23 @@ const parsedText = useItem(
     props.apiUrl,
     item
 )
+
+// видимость message
+const messageVisible = ref(false)
+
+// копирование кода
+const handleCopy = async (code: string): Promise<void> => {
+  await navigator.clipboard.writeText(decodeHtmlEntities(code));
+
+  messageVisible.value = true
+}
 </script>
 
 <template>
 
   <div class="item-root">
+    <Message v-model="messageVisible">Скопировано</Message>
+
     <DefaultItemSkeleton v-if="isLoading"/>
 
     <div class="item" v-else>
@@ -68,7 +83,9 @@ const parsedText = useItem(
               {{ part.content }}
             </p>
 
-            <pre class="item__code" v-else v-html="part.content"></pre>
+            <HomeItemCode :text="part.content"
+                          @copy="handleCopy"
+                          v-else/>
           </div>
         </TransitionGroup>
       </div>

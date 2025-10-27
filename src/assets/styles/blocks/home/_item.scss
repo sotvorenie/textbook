@@ -13,10 +13,20 @@
     width: fit-content;
   }
 
+  &__text, &__code {
+    &:not(:last-child) {
+      margin-bottom: rem(20);
+    }
+  }
+
   &__text {
     line-height: 180%;
-    white-space: pre-line;
     word-wrap: break-word;
+    width: 100%;
+  }
+
+  &__comment {
+    white-space: pre-wrap;
   }
 
   &__code {
@@ -26,6 +36,13 @@
     background: $color-dark;
     padding: rem(10);
     border-radius: $radius-regular;
+    position: relative;
+
+    button {
+      right: rem(10);
+      top: rem(-20);
+      background: $color-dark-alt;
+    }
   }
 
   &__comment {

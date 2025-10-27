@@ -6,7 +6,7 @@
 
   top: -100%;
   background-color: color-mix(in srgb, var(--color-light) 30%, transparent);
-  backdrop-filter: blur(1px);
+  backdrop-filter: blur(3px);
   padding: rem(10) rem(20);
   border-radius: $radius-medium;
   transition-duration: $transition-duration;

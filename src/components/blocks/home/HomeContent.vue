@@ -189,7 +189,7 @@ watch(
 
 <template>
 
-  <div class="home__content">
+  <div class="home__content flex flex-column">
     <header class="home__content-header home__header flex flex-align-center flex-between">
 
       <div v-if="activeIndex === 0"></div>

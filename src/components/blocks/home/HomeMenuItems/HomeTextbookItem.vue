@@ -4,10 +4,13 @@ import {ref} from "vue";
 import {Item} from "../../../../types/item.ts";
 
 import {useItem} from "../../../../composables/useItem.ts";
+import decodeHtmlEntities from "../../../../composables/useDecodeHtmlEntities.ts";
 
 import TextbookSkeleton from "../HomeLoadings/TextbookSkeleton.vue";
 
 import HomeTextbookSlider from "../HomeTextbookSlider.vue";
+import HomeItemCode from "../HomeItemCode.vue";
+import Message from "../../../common/Message.vue";
 
 const props = defineProps({
   apiUrl: {
@@ -50,6 +53,24 @@ const activeIndex = ref<number>(0)
 
 
 //=========================================================//
+//-- message --//
+// видимость message
+const messageVisible = ref(false)
+//=========================================================//
+
+
+//=========================================================//
+//-- блоки с кодом --//
+// копирование кода
+const handleCopy = async (code: string): Promise<void> => {
+  await navigator.clipboard.writeText(decodeHtmlEntities(code));
+
+  messageVisible.value = true
+}
+//=========================================================//
+
+
+//=========================================================//
 //-- вызов функций --//
 // вызываем функцию получения данных из кэша/апи, а также получаем в переменную текст для отрисовки
 const parsedText = useItem(
@@ -65,6 +86,8 @@ const parsedText = useItem(
 <template>
 
   <div class="item-root">
+    <Message v-model="messageVisible">Скопировано</Message>
+
     <TextbookSkeleton v-if="isLoading"/>
 
     <div class="textbook" v-else>
@@ -84,7 +107,9 @@ const parsedText = useItem(
             {{ part.content }}
           </p>
 
-          <pre class="item__code" v-else v-html="part.content"></pre>
+          <HomeItemCode :text="part.content"
+                        @copy="handleCopy"
+                        v-else/>
         </template>
       </div>
     </div>
