@@ -71,10 +71,7 @@ const handleCopy = async (code: string): Promise<void> => {
 
       <div>
         <TransitionGroup name="item-list" appear>
-          <div v-for="(part, index) in parsedText"
-               :key="index"
-               :style="{'--index': index}"
-          >
+          <template v-for="part in parsedText">
             <h3 class="item__pod-title text-w500" v-if="part.type === 'title'">
               {{ part.content }}
             </h3>
@@ -86,7 +83,7 @@ const handleCopy = async (code: string): Promise<void> => {
             <HomeItemCode :text="part.content"
                           @copy="handleCopy"
                           v-else/>
-          </div>
+          </template>
         </TransitionGroup>
       </div>
     </div>
