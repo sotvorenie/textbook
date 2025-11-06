@@ -60,7 +60,7 @@ defineOptions({
 //-- асинхронные функции --//
 // создание/редактирование записи
 const sendRequest = async () => {
-  newItem.text = convertBlocksToText(newItemText.value)
+  newItem.text = convertBlocksToText(newItems.value)
 
   const dateTime = getCurrentDateTime()
 
@@ -121,9 +121,7 @@ const sendRequest = async () => {
 
   await sendToTelegram(blockNameToEventType[props.name], newItem.title)
 
-  textBlock.value = []
-  newItemText.value = []
-  textareaAttributes.value = []
+  newItems.value = []
 
   back()
 }
@@ -132,7 +130,7 @@ const sendRequest = async () => {
 
 //=========================================================//
 //-- создаваемый элемент --//
-// создаваемый элемент
+// создаваемый элемент для апи
 const newItem = reactive<Item>({
   user_id: userStore.user.id,
   title: '',
@@ -143,8 +141,16 @@ const newItem = reactive<Item>({
   time: ''
 })
 
-// текст создаваемого элемента
-const newItemText = ref<{type: string, text: string}[]>([])
+// список textarea блоков
+const newItems= ref<{
+  id: string,
+  type: string,
+  text: string,
+  attributes: {
+    name: string,
+    code: string,
+  },
+}[]>([])
 //=========================================================//
 
 
@@ -205,9 +211,6 @@ const setNewLanguages = () => {
 
 //=========================================================//
 //-- поля ввода --//
-// список всех полей ввода
-const textBlock = ref<string[]>([])
-
 // список всевозможных типов полей ввода
 const textareaAttributesList: Record<string, { name: string, code: string }> = {
   code: {
@@ -224,26 +227,20 @@ const textareaAttributesList: Record<string, { name: string, code: string }> = {
   },
 }
 
-// список типов созданных полей ввода
-const textareaAttributes = ref<{ name: string, code: string }[]>([])
-
 
 // создание нового поля ввода
 const createTextarea = (type: string): void => {
-  newItemText.value.push({
+  newItems.value.push({
+    id: crypto.randomUUID(),
     type,
-    text: ''
+    text: '',
+    attributes: textareaAttributesList[type]
   })
-
-  textBlock.value.push('HomeCreateTextarea');
-  textareaAttributes.value.push(textareaAttributesList[type])
 }
 
 // удаление поля ввода
-const removeTextarea = (index: number) => {
-  newItemText.value.splice(index, 1)
-  textBlock.value.splice(index, 1)
-  textareaAttributes.value.splice(index, 1)
+const removeTextarea = (id: string) => {
+  newItems.value = newItems.value?.filter(el => el.id !== id)
 }
 //=========================================================//
 
@@ -394,11 +391,11 @@ const initializeFromStore = () => {
     const blocks = convertTextToBlocks(storedText);
 
     blocks.forEach(block => {
-      textBlock.value.push('HomeCreateTextarea');
-      textareaAttributes.value.push(textareaAttributesList[block.type])
-      newItemText.value.push({
+      newItems.value.push({
+        id: crypto.randomUUID(),
         type: block.type,
-        text: block.text
+        text: block.text,
+        attributes: textareaAttributesList[block.type]
       });
     });
   }
@@ -499,13 +496,13 @@ onMounted(() => {
         <TransitionGroup name="textarea"
                          tag="div"
         >
-          <Component v-for="(textarea, index) in textBlock"
-                     :key="index"
-                     :is="textarea"
-                     v-model="newItemText[index].text"
-                     v-bind="textareaAttributes[index]"
-                     @remove-textarea="removeTextarea(index)"
+          <HomeCreateTextarea v-for="item in newItems"
+                              v-model="item.text"
+                              :name="item.attributes.name"
+                              :code="item.attributes.code"
+                              @remove-textarea="removeTextarea(item.id)"
           />
+
         </TransitionGroup>
       </div>
 

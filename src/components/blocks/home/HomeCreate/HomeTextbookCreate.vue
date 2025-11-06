@@ -65,7 +65,7 @@ const sendRequest = async () => {
 
   for (const tab of tabs.value) {
     const key = tab.name || `tab${tab.id}`;
-    content[key] = convertBlocksToText(newItemText.value[tab.id] || []);
+    content[key] = convertBlocksToText(newItems.value[tab.id] || []);
   }
 
   newItem.content = content;
@@ -163,9 +163,7 @@ const removeTab = async () => {
 
     tabs.value.splice(activeTab.value, 1);
 
-    delete newItemText.value[idToRemove];
-    delete textBlock.value[idToRemove];
-    delete textareaAttributes.value[idToRemove];
+    delete newItems.value[idToRemove];
 
     if (activeTab.value >= tabs.value.length) {
       activeTab.value = tabs.value.length - 1;
@@ -177,7 +175,7 @@ const removeTab = async () => {
 
 //=========================================================//
 //-- создаваемый элемент --//
-// создаваемый элемент
+// создаваемый элемент для апи
 const newItem = reactive<Item>({
   user_id: userStore.user.id,
   title: '',
@@ -188,8 +186,16 @@ const newItem = reactive<Item>({
   time: ''
 })
 
-// текст создаваемого элемента
-const newItemText = ref<Record<string, { type: string; text: string }[]>>({});
+// элементы textarea
+const newItems = ref<Record<string, {
+  id: string;
+  type: string;
+  text: string;
+  attributes: {
+    name: string;
+    code: string;
+  }
+}[]>>({});
 //=========================================================//
 
 
@@ -249,9 +255,6 @@ const setNewLanguages = () => {
 
 //=========================================================//
 //-- поля ввода --//
-// список всех полей ввода
-const textBlock = ref<Record<string, string[]>>({});
-
 // список всевозможных типов полей ввода
 const textareaAttributesList: Record<string, { name: string, code: string }> = {
   code: {
@@ -268,28 +271,24 @@ const textareaAttributesList: Record<string, { name: string, code: string }> = {
   },
 }
 
-// список типов созданных полей ввода
-const textareaAttributes = ref<Record<string, { name: string; code: string }[]>>({});
-
 // создание нового поля ввода
 const createTextarea = (type: string): void => {
   const id = tabId.value;
 
-  if (!newItemText.value[id]) newItemText.value[id] = [];
-  if (!textBlock.value[id]) textBlock.value[id] = [];
-  if (!textareaAttributes.value[id]) textareaAttributes.value[id] = [];
+  if (!newItems.value[id]) newItems.value[id] = [];
 
-  newItemText.value[id].push({ type, text: '' });
-  textBlock.value[id].push('HomeCreateTextarea');
-  textareaAttributes.value[id].push(textareaAttributesList[type]);
+  newItems.value[id].push({
+    id: crypto.randomUUID(),
+    type,
+    text: '',
+    attributes: textareaAttributesList[type]
+  });
 };
 
 // удаление поля ввода
 const removeTextarea = (index: number) => {
   const id = tabId.value;
-  newItemText.value[id]?.splice(index, 1);
-  textBlock.value[id]?.splice(index, 1);
-  textareaAttributes.value[id]?.splice(index, 1);
+  newItems.value[id]?.splice(index, 1);
 };
 //=========================================================//
 
@@ -407,14 +406,14 @@ const initializeFromStore = () => {
     tabs.value.push({ id, name: tabName });
 
     const blocks = convertTextToBlocks(storedContent[tabName]);
-    newItemText.value[id] = [];
-    textBlock.value[id] = [];
-    textareaAttributes.value[id] = [];
+    newItems.value[id] = [];
 
     blocks.forEach(block => {
-      newItemText.value[id].push(block);
-      textBlock.value[id].push('HomeCreateTextarea');
-      textareaAttributes.value[id].push(textareaAttributesList[block.type]);
+      newItems.value[id].push({
+        id: crypto.randomUUID(),
+        ...block,
+        attributes: textareaAttributesList[block.type]
+      });
     });
   }
 };
@@ -543,13 +542,13 @@ onMounted(() => {
         <TransitionGroup name="textarea"
                          tag="div"
         >
-          <Component v-for="(textarea, index) in textBlock[tabId] || []"
-                     :key="index"
-                     :is="textarea"
-                     v-model="newItemText[tabId][index].text"
-                     v-model:active-index="activeTab"
-                     v-bind="textareaAttributes[tabId][index]"
-                     @remove-textarea="removeTextarea(index)"
+          <HomeCreateTextarea v-for="(item, index) in newItems[tabId] || []"
+                              :key="item.id"
+                              v-model="item.text"
+                              v-model:active-index="activeTab"
+                              :name="item.attributes.name"
+                              :code="item.attributes.code"
+                              @remove-textarea="removeTextarea(index)"
           />
         </TransitionGroup>
       </div>
