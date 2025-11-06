@@ -17,15 +17,24 @@ import Edit from "../../../assets/icons/Edit.vue";
 import UserIcon from "../../../assets/icons/UserIcon.vue";
 
 import useUserStore from "../../../store/userStore.ts";
+import Loading from "../../ui/Loading.vue";
 const userStore = useUserStore();
 
 //=========================================================//
 
 //=========================================================//
 //-- аинхронные функции --//
+// видимость анимации загрузки аватарки
+const isLoading = ref(false)
+
+
 // загрузка аватарки
 const uploadFile = async (event: Event) => {
   try {
+    if (isLoading.value) return
+
+    isLoading.value = true
+
     const target = event.target as HTMLInputElement
 
     if (!target || target.files?.length === 0) {
@@ -46,7 +55,6 @@ const uploadFile = async (event: Event) => {
 
     await postAva()
 
-
     if (userStore.user?.ava?.id) {
       const lastAva: number = userStore.user.ava.id
 
@@ -58,6 +66,8 @@ const uploadFile = async (event: Event) => {
     }
 
     await sendToTelegram(TelegramEventType.LOAD_AVA, userStore.user.ava?.url)
+
+    isLoading.value = false
   } catch (_) {}
 }
 //=========================================================//
@@ -70,6 +80,8 @@ const input = ref<HTMLInputElement | null>(null)
 
 // клик по полю ввода
 const triggerInput = async () => {
+  if (isLoading.value) return
+
   if (!userStore.isAdmin) {
     await showWarning(
         'Замена аватарки невозможна!!',
@@ -130,6 +142,8 @@ const handleRemoveUser = async () => {
   <div class="user-card">
     <div class="user-card__top flex row user-select-none">
       <div class="user-card__img-container img-container position-relative col-6">
+        <Loading class="user-card__loading" :size="50" v-if="isLoading"/>
+
         <img v-if="userStore.user?.ava?.url"
              :src="userStore.user?.ava?.url"
              :alt="userStore.user?.name"/>
@@ -141,6 +155,7 @@ const handleRemoveUser = async () => {
         <button class="hover-color-accent recolor-svg"
                 type="button"
                 @click="triggerInput"
+                v-if="!isLoading"
         >
           <Edit class="user-card__edit"/>
         </button>
