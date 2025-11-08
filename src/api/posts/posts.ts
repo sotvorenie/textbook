@@ -3,6 +3,8 @@ import {List} from "../../types/list.ts";
 import {Item} from "../../types/item.ts";
 import {GetList} from "./types.ts";
 
+import useOnlineStore from "../../store/useOnlineStore.ts";
+
 export const getList = async (
     name: string,
     page: number,
@@ -13,41 +15,91 @@ export const getList = async (
     id: number[] = []
 ): Promise<{meta: any, items: List[] | []}> => {
 
-    const params: GetList = {
-        _select: 'id,title,languages_and_technologies,date',
-        page,
-        limit: 9,
-        user_id,
-        sortBy
-    }
+    const onlineStore = useOnlineStore();
 
-    if (value) {
-        params.title = `*${value}`;
-    }
+    try {
+        const params: GetList = {
+            _select: 'id,title,languages_and_technologies,date',
+            page,
+            limit: 9,
+            user_id,
+            sortBy
+        }
 
-    if (languages?.length > 0) {
-        params['languages_and_technologies[]'] = languages;
-    }
+        if (value) {
+            params.title = `*${value}`;
+        }
 
-    if (id?.length > 0) {
-        params['id[]'] = id;
-    }
+        if (languages?.length > 0) {
+            params['languages_and_technologies[]'] = languages;
+        }
 
-    return await get(`/${name}`, params);
+        if (id?.length > 0) {
+            params['id[]'] = id;
+        }
+
+        return await get(`/${name}`, params);
+    } catch (err: any) {
+        if (err.message === "Network Error" || err.code === "ECONNABORTED") {
+            onlineStore.isOnline = false;
+            onlineStore.isOnlineMode = false;
+        }
+        throw err;
+    }
 }
 
 export const getItem = async (name: string,  id: number): Promise<Item> => {
-    return await get(`/${name}/${id}`)
+    const onlineStore = useOnlineStore();
+
+    try {
+        return await get(`/${name}/${id}`)
+    } catch (err: any) {
+        if (err.message === "Network Error" || err.code === "ECONNABORTED") {
+            onlineStore.isOnline = false;
+            onlineStore.isOnlineMode = false;
+        }
+        throw err;
+    }
 }
 
 export const createItem = async (name: string, item: Item): Promise<Item> => {
-    return await post(`/${name}`, item)
+    const onlineStore = useOnlineStore();
+
+    try {
+        return await post(`/${name}`, item)
+    } catch (err: any) {
+        if (err.message === "Network Error" || err.code === "ECONNABORTED") {
+            onlineStore.isOnline = false;
+            onlineStore.isOnlineMode = false;
+        }
+        throw err;
+    }
 }
 
 export const redactItem = async (name: string, item: Item, id: number): Promise<any> => {
-    return await patch(`/${name}/${id}`, item)
+    const onlineStore = useOnlineStore();
+
+    try {
+        return await patch(`/${name}/${id}`, item)
+    } catch (err: any) {
+        if (err.message === "Network Error" || err.code === "ECONNABORTED") {
+            onlineStore.isOnline = false;
+            onlineStore.isOnlineMode = false;
+        }
+        throw err;
+    }
 }
 
 export const removeItem = async (name: string, id: number): Promise<any> => {
-    await del(`/${name}/${id}`)
+    const onlineStore = useOnlineStore();
+
+    try {
+        await del(`/${name}/${id}`)
+    } catch (err: any) {
+        if (err.message === "Network Error" || err.code === "ECONNABORTED") {
+            onlineStore.isOnline = false;
+            onlineStore.isOnlineMode = false;
+        }
+        throw err;
+    }
 }

@@ -4,7 +4,7 @@
 .navigation {
   top: $position-size;
   left: $position-size;
-  column-gap: rem(20);
+  gap: rem(20);
 
   &__btn {
 
@@ -28,11 +28,16 @@
       display: inline-flex;
     }
 
-    &.theme {
+    &.theme, &.online {
 
       svg {
         @include square(30);
       }
+    }
+
+    &.online {
+      column-gap: rem(5);
+      fill: currentColor;
     }
   }
 }

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 
 defineProps({
-  theme: {
-    type: String,
-    default: 'dark'
+  active: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -13,7 +13,7 @@ defineProps({
   <div class="toggle-button flex flex-align-center">
     <button :class="{
               'toggle-button__btn': true,
-              'is-active': theme === 'light'
+              'is-active': active
             }"
             type="button"></button>
   </div>

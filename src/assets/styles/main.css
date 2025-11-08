@@ -1153,7 +1153,7 @@ a[class] {
 .navigation {
   top: 1.25rem;
   left: 1.25rem;
-  column-gap: 1.25rem;
+  gap: 1.25rem;
 }
 .navigation__btn.back svg, .navigation__btn.reload svg {
   width: 1.875rem !important;
@@ -1178,11 +1178,15 @@ a[class] {
 .navigation__btn.reload {
   display: inline-flex;
 }
-.navigation__btn.theme svg {
+.navigation__btn.theme svg, .navigation__btn.online svg {
   width: 1.875rem !important;
   min-width: 1.875rem !important;
   height: 1.875rem !important;
   min-height: 1.875rem !important;
+}
+.navigation__btn.online {
+  column-gap: 0.3125rem;
+  fill: currentColor;
 }
 
 .toggle-button {
@@ -1216,7 +1220,7 @@ a[class] {
   transition: all 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
 }
 .message::before {
-  content: "✓";
+  content: "";
   display: inline-block;
   margin-right: 0.5rem;
   font-weight: bold;

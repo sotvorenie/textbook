@@ -8,6 +8,11 @@ import Sun from "../../assets/icons/Sun.vue";
 import ToggleButton from "../ui/ToggleButton.vue";
 import Moon from "../../assets/icons/Moon.vue";
 
+import useOnlineStore from "../../store/useOnlineStore.ts";
+import Offline from "../../assets/icons/Offline.vue";
+import Online from "../../assets/icons/Online.vue";
+const onlineStore = useOnlineStore();
+
 defineProps({
   backVisible: {
     type: Boolean,
@@ -27,6 +32,7 @@ const locationReload = () => {
 <template>
   <div :class="{
           'navigation flex flex-align-center': true,
+          'flex-wrap': !backVisible,
           'position-absolute': isAbsolute,
         }">
     <button class="navigation__btn back recolor-svg flex flex-align-center" type="button" v-if="backVisible">
@@ -43,8 +49,20 @@ const locationReload = () => {
             type="button"
     >
       <Moon/>
-      <ToggleButton :theme="theme" @click="changeTheme"/>
+      <ToggleButton :active="theme === 'light'" @click="changeTheme"/>
       <Sun/>
+    </button>
+
+    <button class="navigation__btn online flex flex-align-center"
+            title="Оффлайн/Онлайн режим"
+            type="button"
+            v-if="onlineStore.isOnline"
+    >
+      <Offline/>
+      <ToggleButton :active="onlineStore.isOnlineMode"
+                    @click="onlineStore.changeMode"
+      />
+      <Online/>
     </button>
   </div>
 </template>

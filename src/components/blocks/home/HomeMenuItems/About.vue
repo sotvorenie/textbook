@@ -2,6 +2,9 @@
 
 import GitHub from "../../../../assets/icons/links/GitHub.vue";
 
+import useOnlineStore from "../../../../store/useOnlineStore.ts";
+const onlineStore = useOnlineStore();
+
 const languages = [
   {
     name: 'Vue',
@@ -64,9 +67,9 @@ const links = [
       </li>
     </ul>
 
-    <h2 class="about__title">Ссылки:</h2>
+    <h2 class="about__title" v-if="onlineStore.isOnlineMode">Ссылки:</h2>
 
-    <ul class="about__list is-links flex">
+    <ul class="about__list is-links flex" v-if="onlineStore.isOnlineMode">
       <li v-for="link in links"
           class="about__item cursor-pointer"
       >

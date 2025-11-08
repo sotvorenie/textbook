@@ -24,6 +24,8 @@ import useUserStore from "../../../store/userStore.ts";
 const userStore = useUserStore();
 import useItemsStore from "../../../store/useItemsStore.ts";
 const itemsStore = useItemsStore();
+import useOnlineStore from "../../../store/useOnlineStore.ts";
+const onlineStore = useOnlineStore();
 
 const props = defineProps({
   searchName: {
@@ -238,6 +240,7 @@ await getPosts()
       >
         <button class="list__like recolor-svg button-width-svg position-absolute"
                 type="button"
+                v-if="onlineStore.isOnlineMode"
         >
           <Like :liked="likedItems?.includes(item.id)"
                 @click.stop="handleLike(item.id)"

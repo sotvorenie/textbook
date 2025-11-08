@@ -1,9 +1,10 @@
 import axios from 'axios'
-import router from '../router'
 
 import {authToken} from "../utils/auth.ts";
 
 import {showError} from "../utils/modals.ts";
+
+import useOnlineStore from "../store/useOnlineStore.ts";
 
 const client = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -18,14 +19,31 @@ client.interceptors.request.use((config) => {
 })
 
 client.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        const onlineStore = useOnlineStore()
+
+        if (!onlineStore.isOnline) {
+            onlineStore.isOnline = true
+        }
+        return response
+    },
     async (error) => {
+        const onlineStore = useOnlineStore()
+
         if (error.response?.status === 401) {
             authToken.remove()
             return { data: {} }
         }
 
-        await showError('Ошибка сети', 'Что-то пошло не так!!')
+        if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
+            onlineStore.isOnline = false
+            onlineStore.isOnlineMode = false
+
+            await showError('Нет подключения', 'Проверьте интернет-соединение')
+            return { data: {} }
+        }
+
+        await showError('Ошибка сети', 'Что-то пошло не так!')
         return { data: {} }
     }
 )

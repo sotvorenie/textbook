@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {reactive, ref, onUnmounted} from "vue";
+import {reactive, ref, onUnmounted, onMounted, watch} from "vue";
 import router from "../router";
 import {Swiper, SwiperSlide} from "swiper/vue";
 import type {Swiper as ISwiper} from 'swiper/types'
@@ -10,8 +10,9 @@ import {addLabelText, removeLabelText} from "../composables/useLabelText.ts";
 
 import {login, register} from "../api/auth/auth.ts";
 import {AuthResponse, LoginData, RegisterData} from "../api/auth/types.ts";
+import {sendToTelegram, TelegramEventType} from "../api/telegram/telegram.ts";
 
-import {showWarning} from "../utils/modals.ts";
+import {showConfirm, showWarning} from "../utils/modals.ts";
 
 import {classes} from "../data/classes.ts";
 
@@ -19,7 +20,9 @@ import Btn from "../components/ui/Btn.vue";
 import Navigation from "../components/common/Navigation.vue";
 import Message from "../components/common/Message.vue";
 import Loading from "../components/ui/Loading.vue";
-import {sendToTelegram, TelegramEventType} from "../api/telegram/telegram.ts";
+
+import useOnlineStore from "../store/useOnlineStore.ts";
+const onlineStore = useOnlineStore();
 
 //=========================================================//
 
@@ -44,6 +47,7 @@ const loginUser = async () => {
     await router.push('/main').catch(() => {});
   } else {
     await showWarning('Ошибка входа','Пользователя с таким логином/паролем не существует!!')
+    wrongCounter.value = wrongCounter.value + 1
   }
 
   isLoading.value = false;
@@ -178,16 +182,84 @@ const handleRegister = (event: Event) => {
 //-- message --//
 const messageText = ref<string>('');
 const messageVisible = ref<boolean>(false);
+const isError = ref<boolean>(false)
+//=========================================================//
+
+
+//=========================================================//
+//-- неверные попытки --//
+// счетчик неверных попыток
+const wrongCounter = ref<number>(0)
+
+
+// показ модального окна переключения на оффлайн режим
+const showConfirmModal = async () => {
+  let text: string = ''
+
+  if (wrongCounter.value === 3) {
+    text = '3 раза'
+  } else if (wrongCounter.value > 3) {
+    text = 'более 3 раз'
+  }
+
+  const confirm = await showConfirm(
+      'Включить оффлайн режим?',
+      `Вы ${text} неправильно ввели логин/пароль!! Включить оффлайн режим?`
+  )
+
+  if (confirm) {
+    onlineStore.isOnlineMode = false
+  }
+}
+//=========================================================//
+
+
+//=========================================================//
+//-- хуки --//
+// проверям: онлайн мы или нет
+onMounted(() => {
+  onlineStore.isOnline = navigator.onLine
+
+  if (!onlineStore.isOnline) {
+    onlineStore.isOnlineMode = false
+
+    isError.value = true;
+    messageText.value = 'Нет подключения к интернету..'
+    messageVisible.value = true;
+  } else {
+    onlineStore.getFromLocalStorage()
+  }
+})
+
+// чтобы при исчезновении message - сбрасывать его isError
+watch(
+    () => messageVisible.value,
+    () => {
+      if (!messageVisible.value) {
+        isError.value = false
+      }
+    }
+)
+
+// наблюдаем за счетчиком неверных попыток
+watch(
+    () => wrongCounter.value,
+    () => {
+      if (wrongCounter.value >= 3) {
+        showConfirmModal()
+      }
+    }
+)
 //=========================================================//
 </script>
 
 <template>
   <Navigation :back-visible="false"/>
 
-  <Message v-model="messageVisible">{{messageText}}</Message>
+  <Message v-model="messageVisible" :is-error="isError">{{messageText}}</Message>
 
   <main class="auth flex-center" ref="authElement">
-    <div class="auth__inner overflow-hidden">
+    <div class="auth__inner overflow-hidden" v-if="onlineStore.isOnlineMode">
       <div class="auth__header flex flex-around">
         <button class="auth__title is-active"
                 type="button"
@@ -313,5 +385,9 @@ const messageVisible = ref<boolean>(false);
         </SwiperSlide>
       </Swiper>
     </div>
+
+    <RouterLink to="/main" v-else>
+      <Btn style="color: var(--color-light)">Перейти в приложение</Btn>
+    </RouterLink>
   </main>
 </template>

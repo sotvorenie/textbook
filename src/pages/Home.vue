@@ -20,12 +20,24 @@ import useTechnologiesStore from "../store/technologiesStore.ts";
 const technologiesStore = useTechnologiesStore();
 import useUserStore from "../store/userStore.ts";
 const userStore = useUserStore();
+import useOnlineStore from "../store/useOnlineStore.ts";
+const onlineStore = useOnlineStore();
 
 const isLoading = ref<boolean>(true);
 
 const activeMenuIndex = ref<number>(0);
 
 onMounted(async () => {
+  onlineStore.isOnline = navigator.onLine
+
+  if (!onlineStore.isOnline) {
+    onlineStore.isOnlineMode = false
+    isLoading.value = false
+    return
+  } else {
+    onlineStore.getFromLocalStorage()
+  }
+
   const user = await check();
   userStore.setUser(user as User);
 
