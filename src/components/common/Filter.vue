@@ -23,7 +23,7 @@ onMounted(() => {
   technologiesStore.technologies?.forEach((el, index) => {
     filterList.value.push({
       id: index,
-      name: el,
+      name: el.name,
       checked: false,
       icon: ''
     })

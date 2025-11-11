@@ -6,6 +6,7 @@ import {User} from "../types/user";
 import {userAva} from "../utils/ava.ts";
 import {getCurrentDateTime} from "../composables/useDate.ts";
 
+import {executeSQL} from "../api/database.ts";
 import {get} from "../api/base";
 import {check} from "../api/auth/auth.ts";
 import {getAva, getLastSession, setLastSession} from "../api/users/users.ts";
@@ -25,7 +26,26 @@ const onlineStore = useOnlineStore();
 
 const isLoading = ref<boolean>(true);
 
-const activeMenuIndex = ref<number>(0);
+const activeMenuIndex = ref<number>(0)
+
+const syncLanguagesToDB = async (): Promise<void> => {
+  try {
+    await executeSQL("BEGIN TRANSACTION");
+
+    for (const tech of technologiesStore.technologies) {
+      await executeSQL(
+          "INSERT OR REPLACE INTO technologies (id, title) VALUES (?, ?)",
+          [tech.id, tech.name]
+      );
+    }
+
+    await executeSQL("COMMIT");
+  } catch (err) {
+    await executeSQL("ROLLBACK");
+    console.error("Ошибка при синхронизации технологий:", err);
+    throw err;
+  }
+};
 
 onMounted(async () => {
   onlineStore.isOnline = navigator.onLine
@@ -60,7 +80,7 @@ onMounted(async () => {
 
   const getTechnologies = async () => {
     try {
-      const response: string[] = await get('/technologies');
+      const response: {id: number, name: string}[] = await get('/technologies');
 
       if (response) {
         technologiesStore.technologies = response
@@ -68,6 +88,8 @@ onMounted(async () => {
     } catch (_) {}
   }
   await getTechnologies()
+
+  await syncLanguagesToDB()
 
   const getLiked = async () => {
     try {

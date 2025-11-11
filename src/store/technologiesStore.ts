@@ -3,7 +3,10 @@ import {ref} from "vue";
 
 const useTechnologiesStore = defineStore('technologiesStore', () => {
 
-    const technologies = ref<string[]>([])
+    const technologies = ref<{
+        id: number,
+        name: string,
+    }[]>([])
 
     const resetStore = () => {
         technologies.value = []
