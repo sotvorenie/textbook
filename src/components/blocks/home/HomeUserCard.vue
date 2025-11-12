@@ -6,19 +6,25 @@ import {authToken} from "../../../utils/auth.ts";
 import {showConfirm, showError, showWarning} from "../../../utils/modals.ts";
 import {userAva} from "../../../utils/ava.ts";
 import { resetAllStores } from "../../../utils/resetAllStores";
+import {roundedButtonStyle} from "../../../data/styles.ts";
 
 import {deletePredLastFile, postAva, postFile} from "../../../api/users/users.ts";
 import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.ts";
 
 import Navigation from "../../common/Navigation.vue";
 import Btn from "../../ui/Btn.vue";
+import Loading from "../../ui/Loading.vue";
+import Modal from "../../common/Modal.vue";
 
 import Edit from "../../../assets/icons/Edit.vue";
 import UserIcon from "../../../assets/icons/UserIcon.vue";
 
+import HomeSync from "./HomeSync.vue";
+
 import useUserStore from "../../../store/userStore.ts";
-import Loading from "../../ui/Loading.vue";
 const userStore = useUserStore();
+import useOnlineStore from "../../../store/useOnlineStore.ts";
+const onlineStore = useOnlineStore();
 
 //=========================================================//
 
@@ -136,6 +142,16 @@ const handleRemoveUser = async () => {
   )
 }
 //=========================================================//
+
+
+//=========================================================//
+//-- синхронизация --//
+// видимость модалки синхронизации
+const syncModalVisible = ref<boolean>(false)
+
+// возможность закрытия модалки синхронизации
+const syncCloseActive = ref<boolean>(true)
+//=========================================================//
 </script>
 
 <template>
@@ -181,5 +197,24 @@ const handleRemoveUser = async () => {
       <Btn class="user-card__btn" @click="exit">Выйти</Btn>
       <Btn class="user-card__btn" @click="handleRemoveUser">Удалить профиль</Btn>
     </div>
+
+    <Modal :close-active="syncCloseActive"
+           v-model="syncModalVisible"
+           :size="500"
+    >
+      <template #activator="{open}">
+        <button :class="['user-card__sync', 'position-absolute', ...roundedButtonStyle]"
+                type="button"
+                title="Синхронизировать данные"
+                aria-label="Синхронизировать данные"
+                v-if="onlineStore.visibleUnSync"
+                @click="open"
+        >!</button>
+      </template>
+
+      <template #default>
+        <HomeSync/>
+      </template>
+    </Modal>
   </div>
 </template>

@@ -1,8 +1,8 @@
-import { del, get, patch, post } from "../base.ts";
-import { List } from "../../types/list.ts";
-import { Item } from "../../types/item.ts";
-import { GetList } from "./types.ts";
-import { executeSQL, selectSQL } from "../database.ts";
+import {del, get, patch, post} from "../base.ts";
+import {List} from "../../types/list.ts";
+import {Item} from "../../types/item.ts";
+import {GetList} from "./types.ts";
+import {executeSQL, selectSQL} from "../database.ts";
 import useOnlineStore from "../../store/useOnlineStore.ts";
 
 const tablesConfig: Record<string, Record<string, string>> = {
@@ -208,14 +208,21 @@ const getItemFromDB = async (name: string, id: number): Promise<Item> => {
 export const createItem = async (name: string, item: Item): Promise<Item> => {
     const onlineStore = useOnlineStore();
 
+    console.log(item)
+
     try {
-        const createdItem = await post(`/${name}`, item) as Item
-        await createItemInDB(name, item, createdItem.id as number);
-        return createdItem
+        if (onlineStore.isOnlineMode) {
+            const createdItem = await post(`/${name}`, item) as Item
+            await createItemInDB(name, item, createdItem.id as number);
+            return createdItem
+        } else {
+            return await createItemInDB(name, item, -1, "create");
+        }
     } catch (err: any) {
         if (err.message === "Network Error" || err.code === "ECONNABORTED") {
             onlineStore.isOnline = false;
             onlineStore.isOnlineMode = false;
+
             return await createItemInDB(name, item, -1, "create");
         }
         throw err;
@@ -227,7 +234,15 @@ const createItemInDB = async (name: string, item: Item, id: number = -1, offline
     if (!config) throw new Error(`Неизвестная таблица: ${name}`);
 
     const contentName = config.table === tablesConfig.textbooks.table ? "content" : "text";
-    const itemId: number = id >= 0 ? id : item.id as number
+
+    let itemId: number;
+    if (id >= 0) {
+        itemId = id;
+    } else {
+        const result: any = await executeSQL(`SELECT id FROM ${config.table} ORDER BY id DESC LIMIT 1`);
+        const lastItem = Array.isArray(result) ? result[0] : result?.rows?.[0] || result;
+        itemId = (lastItem?.id || 0) + 1;
+    }
 
     const sql = `
         INSERT INTO ${config.table} (
@@ -248,20 +263,26 @@ const createItemInDB = async (name: string, item: Item, id: number = -1, offline
     ];
 
     await executeSQL(sql, values);
-    return { ...item };
+
+    return {...item, id: itemId};
 };
 
 export const redactItem = async (name: string, item: Item, id: number): Promise<any> => {
     const onlineStore = useOnlineStore();
 
     try {
-        await redactItemInDB(name, item, id);
-        return await patch(`/${name}/${id}`, item);
+        if (onlineStore.isOnlineMode) {
+            await redactItemInDB(name, item, id);
+            return await patch(`/${name}/${id}`, item);
+        } else {
+            return await redactItemInDB(name, item, id, "redact")
+        }
     } catch (err: any) {
         if (err.message === "Network Error" || err.code === "ECONNABORTED") {
             onlineStore.isOnline = false;
             onlineStore.isOnlineMode = false;
-            await redactItemInDB(name, item, id, "redact");
+
+            return await redactItemInDB(name, item, id, "redact");
         }
         throw err;
     }
@@ -302,19 +323,31 @@ const redactItemInDB = async (
         id,
     ];
 
-    return await executeSQL(sql, values);
+    try {
+        await executeSQL(sql, values);
+
+        return {...item, id}
+    } catch (error) {
+        console.error('ExecuteSQL error:', error);
+        throw error;
+    }
 };
 
 export const removeItem = async (name: string, id: number): Promise<any> => {
     const onlineStore = useOnlineStore();
 
     try {
-        await del(`/${name}/${id}`);
-        await removeFromDB(name, id);
+        if (onlineStore.isOnlineMode) {
+            await del(`/${name}/${id}`);
+            await removeFromDB(name, id);
+        } else {
+            await removeFromDB(name, id);
+        }
     } catch (err: any) {
         if (err.message === "Network Error" || err.code === "ECONNABORTED") {
             onlineStore.isOnline = false;
             onlineStore.isOnlineMode = false;
+
             await removeFromDB(name, id);
         }
         throw err;
@@ -322,8 +355,6 @@ export const removeItem = async (name: string, id: number): Promise<any> => {
 };
 
 const removeFromDB = async (name: string, id: number) => {
-
-    console.log(id)
     const config = tablesConfig[name];
     if (!config) throw new Error(`Неизвестная таблица: ${name}`);
 

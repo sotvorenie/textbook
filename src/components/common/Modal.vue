@@ -5,7 +5,7 @@ import { roundedButtonStyle } from "../../data/styles.ts";
 
 const visible = defineModel({default: false});
 
-defineProps({
+const props = defineProps({
   closeVisible: {
     type: Boolean,
     default: true
@@ -13,7 +13,12 @@ defineProps({
   size: {
     type: Number,
     default: 600
-  }
+  },
+  // чтобы запретить закрытие модалки, пока не закончатся асинхронные запросы
+  closeActive: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const emits = defineEmits(['close']);
@@ -23,6 +28,8 @@ const open = () => {
 }
 
 const close = () => {
+  if (!props.closeActive) return
+
   emits('close');
   visible.value = false;
 }

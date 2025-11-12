@@ -1,0 +1,45 @@
+@use '../../helpers/index' as *;
+@use '../../variables' as *;
+
+.sync {
+
+  &__btn {
+
+    &.all {
+      margin-bottom: rem(15);
+      width: 100%;
+    }
+
+    &:not(.all) {
+      width: 50%;
+    }
+  }
+
+  &__title {
+    margin-bottom: rem(10);
+  }
+
+  &__list {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: rem(10);
+  }
+
+  &__item {
+    border: $border-light-alt;
+    padding: rem(10);
+    border-radius: $radius-medium;
+
+    &:not(:last-child) {
+      margin-bottom: rem(10);
+    }
+  }
+
+  &__btn-bar {
+    column-gap: rem(10);
+  }
+
+  &__date {
+    margin-bottom: rem(10);
+  }
+}

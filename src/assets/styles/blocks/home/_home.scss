@@ -17,6 +17,16 @@
 
   &__user {
     @include square($button-size);
+
+    &-sync {
+      @include square(18);
+      @include flex-center();
+
+      right: 0;
+      bottom: 0;
+      background: $color-accent;
+      border-radius: 50%;
+    }
   }
 
   &__content-header, &__main {

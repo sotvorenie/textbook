@@ -117,6 +117,9 @@ onMounted(async () => {
     await sendToTelegram(TelegramEventType.NEW_SESSION)
   }
 
+  // получаем несихнронизированные данные с бд
+  await onlineStore.getOfflinePosts()
+
   isLoading.value = false
 })
 </script>

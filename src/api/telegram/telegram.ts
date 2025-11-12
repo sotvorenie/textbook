@@ -1,5 +1,7 @@
 import useUserStore from "../../store/userStore.ts";
 const userStore = useUserStore();
+import useOnlineStore from "../../store/useOnlineStore.ts";
+const onlineStore = useOnlineStore();
 
 const bot_token = import.meta.env.VITE_TELEGRAM_BOT_TOKEN
 const chat_id = import.meta.env.VITE_TELEGRAM_CHAT_ID
@@ -19,7 +21,7 @@ export enum TelegramEventType {
 
 export const sendToTelegram = async (eventType: TelegramEventType, title?: string): Promise<void> => {
     try {
-        if (!userStore.isViewer) return
+        if (!userStore.isViewer || !onlineStore.isOnlineMode) return
 
         const messages = {
             [TelegramEventType.NEW_SESSION]: `🚪 Пользователь "${userStore.user.name}" зашел в приложение`,

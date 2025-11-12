@@ -69,4 +69,15 @@
       margin-bottom: rem(20);
     }
   }
+
+  &__sync {
+    @include square($button-size);
+
+    top: rem(40);
+    right: rem(-25);
+    background: $color-dark;
+    font-size: rem(28);
+    color: $color-accent;
+    border-color: $color-accent;
+  }
 }

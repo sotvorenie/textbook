@@ -14,6 +14,9 @@ import HomeDefaultContentItem from "./HomeDefaultContentItem.vue";
 import HomeTextbookCreate from "./HomeCreate/HomeTextbookCreate.vue";
 import HomeTextbookItem from "./HomeMenuItems/HomeTextbookItem.vue";
 
+import AboutSettings from "./HomeSettingsItems/AboutSettings.vue";
+import About from "./HomeMenuItems/About.vue";
+
 import HomeUserCard from "./HomeUserCard.vue";
 import HomeEmpty from "./HomeEmpty/HomeEmpty.vue";
 
@@ -25,9 +28,9 @@ const userStore = useUserStore();
 import useSettingsStore from "../../../store/settingsStore.ts";
 const settingsStore = useSettingsStore();
 import useBlocksStore from "../../../store/blocksStore.ts";
-import AboutSettings from "./HomeSettingsItems/AboutSettings.vue";
-import About from "./HomeMenuItems/About.vue";
 const blocksStore = useBlocksStore();
+import useOnlineStore from "../../../store/useOnlineStore.ts";
+const onlineStore = useOnlineStore();
 
 const props = defineProps({
   activeIndex: {
@@ -204,17 +207,26 @@ watch(
       <Modal v-model="modalVisible" :size="600">
         <template #activator="{open}">
           <Transition name="avatar" appear>
-            <button :class="['home__user', 'img-container', ...roundedButtonStyle]"
-                    :title="userName"
-                    aria-label="Пользователь"
-                    type="button"
-                    @click="open">
-              <img :src="userStore.user.ava?.url"
-                   :alt="userName"
-                   v-if="userIconVisible"
-              />
-              <UserIcon v-else/>
-            </button>
+            <div class="home__user-wrapper position-relative" @click="open">
+              <button :class="['home__user', 'img-container', ...roundedButtonStyle]"
+                      :title="userName"
+                      aria-label="Пользователь"
+                      type="button"
+              >
+                <img :src="userStore.user.ava?.url"
+                     :alt="userName"
+                     v-if="userIconVisible"
+                />
+                <UserIcon v-else/>
+              </button>
+
+              <div class="home__user-sync position-absolute cursor-pointer"
+                   title="Доступна синхронизация!"
+                   v-if="onlineStore.visibleUnSync"
+              >
+                !
+              </div>
+            </div>
           </Transition>
         </template>
 

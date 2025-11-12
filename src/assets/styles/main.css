@@ -1482,6 +1482,19 @@ a[class] {
   height: 3.125rem !important;
   min-height: 3.125rem !important;
 }
+.home__user-sync {
+  width: 1.125rem !important;
+  min-width: 1.125rem !important;
+  height: 1.125rem !important;
+  min-height: 1.125rem !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  right: 0;
+  bottom: 0;
+  background: #fe7971;
+  border-radius: 50%;
+}
 .home__content-header, .home__main {
   padding-inline: clamp(1.5625rem, -0.1358695652rem + 2.7173913043vw, 3.125rem);
 }
@@ -1650,6 +1663,18 @@ a[class] {
 }
 .user-card__name:not(:last-child) {
   margin-bottom: 1.25rem;
+}
+.user-card__sync {
+  width: 3.125rem !important;
+  min-width: 3.125rem !important;
+  height: 3.125rem !important;
+  min-height: 3.125rem !important;
+  top: 2.5rem;
+  right: -1.5625rem;
+  background: var(--color-dark);
+  font-size: 1.75rem;
+  color: #fe7971;
+  border-color: #fe7971;
 }
 
 .settings {
@@ -1955,6 +1980,36 @@ a[class] {
 }
 .about__item a {
   gap: clamp(0.3125rem, -0.027173913rem + 0.5434782609vw, 0.625rem);
+}
+
+.sync__btn.all {
+  margin-bottom: 0.9375rem;
+  width: 100%;
+}
+.sync__btn:not(.all) {
+  width: 50%;
+}
+.sync__title {
+  margin-bottom: 0.625rem;
+}
+.sync__list {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 0.625rem;
+}
+.sync__item {
+  border: 1px solid var(--color-light-alt);
+  padding: 0.625rem;
+  border-radius: 1rem;
+}
+.sync__item:not(:last-child) {
+  margin-bottom: 0.625rem;
+}
+.sync__btn-bar {
+  column-gap: 0.625rem;
+}
+.sync__date {
+  margin-bottom: 0.625rem;
 }
 
 /*# sourceMappingURL=main.css.map */
