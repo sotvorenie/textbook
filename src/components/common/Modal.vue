@@ -49,7 +49,7 @@ const close = () => {
                   type="button"
                   title="Закрыть"
                   aria-label="Закрыть"
-                  v-if="closeVisible"
+                  v-if="closeVisible && closeActive"
           >
             <Cross/>
           </button>

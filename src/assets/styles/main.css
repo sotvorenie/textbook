@@ -1982,12 +1982,11 @@ a[class] {
   gap: clamp(0.3125rem, -0.027173913rem + 0.5434782609vw, 0.625rem);
 }
 
-.sync__btn.all {
-  margin-bottom: 0.9375rem;
+.sync__btn {
   width: 100%;
 }
-.sync__btn:not(.all) {
-  width: 50%;
+.sync__btn.all {
+  margin-bottom: 0.9375rem;
 }
 .sync__title {
   margin-bottom: 0.625rem;
@@ -2004,9 +2003,6 @@ a[class] {
 }
 .sync__item:not(:last-child) {
   margin-bottom: 0.625rem;
-}
-.sync__btn-bar {
-  column-gap: 0.625rem;
 }
 .sync__date {
   margin-bottom: 0.625rem;

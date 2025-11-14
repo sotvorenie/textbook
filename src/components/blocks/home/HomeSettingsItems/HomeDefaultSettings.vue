@@ -32,6 +32,8 @@ import useIdStore from "../../../../store/idStore.ts";
 const idStore = useIdStore();
 import useItemsStore from "../../../../store/useItemsStore.ts";
 const itemsStore = useItemsStore();
+import useOnlineStore from "../../../../store/useOnlineStore.ts";
+const onlineStore = useOnlineStore();
 
 const props = defineProps({
   createName: String,
@@ -118,10 +120,10 @@ const handleBack = () => {
 // видимость кнопки "Создать"
 const createVisible = computed(() => {
   if (props.blockName === 'textbooks') {
-    return userStore.isFullAdmin
+    return userStore.isFullAdmin || !onlineStore.isOnlineMode
   }
 
-  return userStore.isAdmin
+  return userStore.isAdmin || !onlineStore.isOnlineMode
 })
 
 
@@ -138,6 +140,12 @@ const handleCreate = () => {
 // видимость кнопки "Редактировать"
 const redactBtnVisible = computed(() => {
   return userStore.isUserPost[props.blockName]
+      && blocksStore.activeBlock[props.blockName] === 'item'
+})
+
+// видимость кнопки удалить
+const removeBtnVisible = computed(() => {
+  return (userStore.isUserPost[props.blockName] || !onlineStore.isOnlineMode)
       && blocksStore.activeBlock[props.blockName] === 'item'
 })
 
@@ -227,7 +235,7 @@ watch(
     </Btn>
 
     <Btn class="button-small"
-         v-if="redactBtnVisible"
+         v-if="removeBtnVisible"
          @click="handleRemove"
     >
       Удалить

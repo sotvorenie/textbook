@@ -200,7 +200,7 @@ const syncCloseActive = ref<boolean>(true)
 
     <Modal :close-active="syncCloseActive"
            v-model="syncModalVisible"
-           :size="500"
+           :size="400"
     >
       <template #activator="{open}">
         <button :class="['user-card__sync', 'position-absolute', ...roundedButtonStyle]"
@@ -212,8 +212,11 @@ const syncCloseActive = ref<boolean>(true)
         >!</button>
       </template>
 
-      <template #default>
-        <HomeSync/>
+      <template #default="{close}">
+        <HomeSync @close="close"
+                  @off-close="syncCloseActive = false"
+                  @on-close="syncCloseActive = true"
+        />
       </template>
     </Modal>
   </div>

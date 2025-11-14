@@ -4,14 +4,10 @@
 .sync {
 
   &__btn {
+    width: 100%;
 
     &.all {
       margin-bottom: rem(15);
-      width: 100%;
-    }
-
-    &:not(.all) {
-      width: 50%;
     }
   }
 
@@ -33,10 +29,6 @@
     &:not(:last-child) {
       margin-bottom: rem(10);
     }
-  }
-
-  &__btn-bar {
-    column-gap: rem(10);
   }
 
   &__date {

@@ -435,7 +435,7 @@ const convertBlocksToText = (blocks: { type: string, text: string }[]): string =
 onMounted(() => {
   technologiesStore.technologies?.forEach(el => {
     technologies.value.push({
-      title: el.name,
+      title: el,
       checked: false
     })
   })

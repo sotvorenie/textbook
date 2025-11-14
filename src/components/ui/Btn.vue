@@ -22,7 +22,7 @@ defineProps({
 <template>
   <button class="button position-relative"
           :type="isSubmit ? 'submit' : 'button'"
-          :disabled="isDisabled"
+          :disabled="isDisabled || isLoading"
   >
     <span :style="{opacity: isLoading ? '0' : '100'}">
       <slot/>

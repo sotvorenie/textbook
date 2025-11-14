@@ -2,6 +2,7 @@ import {defineStore} from "pinia";
 import {computed, ref} from "vue";
 import {UnAuthorizedList} from "../types/list.ts";
 import {selectSQL} from "../api/database.ts";
+import useUserStore from "./userStore.ts";
 
 const useOnlineStore = defineStore("onlineStore", () => {
     // режим приложения
@@ -27,35 +28,28 @@ const useOnlineStore = defineStore("onlineStore", () => {
         localStorage.setItem("online", JSON.stringify(isOnlineMode.value))
     }
 
-    // несинхронизированные созданные элементы
-    const createdPosts = ref<UnAuthorizedList[]>([])
-    // несинхронизированные редактированные элементы
-    const redactedPosts = ref<UnAuthorizedList[]>([])
+    // несинхронизированные элементы
+    const offlinePosts = ref<UnAuthorizedList[]>([])
 
-    // проверка: есть ли несинхронизированные данные
+    // проверка: есть ли несинхронизированные данные (и можем ли мы их синхроонизировать (админ мы или нет))
     const visibleUnSync = computed(() => {
-        const sum = (createdPosts.value?.length || 0) + (redactedPosts.value?.length || 0)
-        return Boolean(sum)
+        const userStore = useUserStore()
+
+        const check = offlinePosts.value?.length || 0
+        return Boolean(check) && isOnlineMode.value && userStore.isAdmin
     })
 
-    // получаем все неавторизованные записи
+    // получаем все несинхронизированные записи
     const getOfflinePosts = async () => {
         const tablesNames = ['advices', 'projects', 'posts', 'textbooks']
 
-        createdPosts.value = []
-        redactedPosts.value = []
+        offlinePosts.value = []
 
         for (const tableName of tablesNames) {
             const items =
                 await selectSQL<UnAuthorizedList>(`SELECT * FROM ${tableName} WHERE offline != ''`)
 
-            items.forEach(item => {
-                if (item.offline === 'create') {
-                    createdPosts.value.push(item)
-                } else if (item.offline === 'redact') {
-                    redactedPosts.value.push(item)
-                }
-            })
+            items.forEach(item => offlinePosts.value.push(item))
         }
     }
 
@@ -63,8 +57,7 @@ const useOnlineStore = defineStore("onlineStore", () => {
         isOnlineMode,
         isOnline,
 
-        createdPosts,
-        redactedPosts,
+        offlinePosts,
 
         visibleUnSync,
         getOfflinePosts,
