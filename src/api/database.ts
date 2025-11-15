@@ -1,5 +1,6 @@
 import Database from "@tauri-apps/plugin-sql";
 import { appLocalDataDir, join } from "@tauri-apps/api/path";
+import useUserStore from "../store/userStore.ts";
 
 export const tablesConfig: Record<string, Record<string, string>> = {
     advices: {
@@ -52,20 +53,32 @@ export const selectSQL = async <T = any>(
     return database.select<T[]>(sql, values);
 };
 
-export const removeOffline = async (name: string, id: number): Promise<void> => {
+export const removeOffline = async (name: string, id: number, newItemId?: number): Promise<void> => {
+    const userStore = useUserStore()
+
     const config = tablesConfig[name];
     if (!config) throw new Error(`Неизвестная таблица: ${name}`);
 
+    const sets: string[] = ["offline = ''", "user_id = ?"]
+    const values: any[] = [userStore.user.id]
+
+    if (newItemId) {
+        sets.push('id = ?')
+        values.push(newItemId)
+    }
+
+    values.push(id)
+
     return await executeSQL(
-        `UPDATE ${config.table} SET offline = '' WHERE id = ?`,
-        [id]
+        `UPDATE ${config.table} SET ${sets.join(', ')} WHERE id = ?`,
+        values
     );
 }
 
 export const initDB = async () => {
     await executeSQL(`
     CREATE TABLE IF NOT EXISTS advices (
-      id INTEGER PRIMARY KEY,
+      id INTEGER,
       user_id INTEGER,
       title TEXT,
       text TEXT,
@@ -80,7 +93,7 @@ export const initDB = async () => {
 
     await executeSQL(`
     CREATE TABLE IF NOT EXISTS projects (
-      id INTEGER PRIMARY KEY,
+      id INTEGER,
       user_id INTEGER,
       title TEXT,
       text TEXT,
@@ -95,7 +108,7 @@ export const initDB = async () => {
 
     await executeSQL(`
     CREATE TABLE IF NOT EXISTS posts (
-      id INTEGER PRIMARY KEY,
+      id INTEGER,
       user_id INTEGER,
       title TEXT,
       text TEXT,
@@ -110,7 +123,7 @@ export const initDB = async () => {
 
     await executeSQL(`
     CREATE TABLE IF NOT EXISTS textbooks (
-      id INTEGER PRIMARY KEY,
+      id INTEGER,
       user_id INTEGER,
       title TEXT,
       content TEXT,

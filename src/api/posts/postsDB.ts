@@ -83,8 +83,19 @@ export const getItemFromDB = async (name: string, id: number): Promise<Item> => 
 
     const item = items[0];
 
+    let content = item.content;
+    if (typeof content === 'string') {
+        try {
+            content = JSON.parse(content);
+        } catch (e) {
+            console.error('Error parsing content:', e);
+            content = {};
+        }
+    }
+
     return {
         ...item,
+        content: content,
         languages_and_technologies: item.languages_and_technologies ? JSON.parse(item.languages_and_technologies) : []
     };
 };
@@ -177,3 +188,16 @@ export const removeFromDB = async (name: string, id: number) => {
 
     return await executeSQL(`DELETE FROM ${config.table} WHERE id = ?`, [id]);
 };
+
+
+export const checkPost = async (name: string, id: number): Promise<boolean> => {
+
+
+    const config = tablesConfig[name];
+    if (!config) throw new Error(`Неизвестная таблица: ${name}`);
+
+    const item = await selectSQL<any>(`SELECT * FROM ${config.table} WHERE id = ?`, [id]);
+
+    return item && item.length > 0;
+
+}

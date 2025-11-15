@@ -44,12 +44,14 @@ const syncItem = async (item: UnAuthorizedList, isAll: boolean = false) => {
     const response: Item = await getItemFromDB(item.block_name, item.id)
 
     if (item.offline === 'create') {
-      await createItem(item.block_name, response, false)
+      const itemElement: Item = await createItem(item.block_name, response, false)
+
+      await removeOffline(item.block_name, item.id, itemElement.id)
     } else if (item.offline === 'redact') {
       await redactItem(item.block_name, response, response.id as number, false)
-    }
 
-    await removeOffline(item.block_name, item.id)
+      await removeOffline(item.block_name, item.id)
+    }
 
     onlineStore.offlinePosts = onlineStore.offlinePosts.filter(el => {
       return !(el.id === item.id && el.block_name === item.block_name)

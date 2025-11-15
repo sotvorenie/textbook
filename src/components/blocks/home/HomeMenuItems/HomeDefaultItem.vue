@@ -1,14 +1,23 @@
 <script setup lang="ts">
-import {ref} from "vue";
+import {ref, watchEffect} from "vue";
 
 import {useItem} from "../../../../composables/useItem.ts";
 import decodeHtmlEntities from "../../../../composables/useDecodeHtmlEntities.ts";
+import {showConfirm} from "../../../../utils/modals.ts";
+
+import {checkPost, createItemInDB} from "../../../../api/posts/postsDB.ts";
 
 import {Item} from "../../../../types/item.ts";
 
 import DefaultItemSkeleton from "../HomeLoadings/DefaultItemSkeleton.vue";
 import HomeItemCode from "../HomeItemCode.vue";
 import Message from "../../../common/Message.vue";
+import Btn from "../../../ui/Btn.vue";
+
+import useIdStore from "../../../../store/idStore.ts";
+const idStore = useIdStore();
+import useOnlineStore from "../../../../store/useOnlineStore.ts";
+const onlineStore = useOnlineStore();
 
 const props = defineProps({
   apiUrl: {
@@ -39,7 +48,7 @@ const item = ref<Item>({
 const isLoading = ref<boolean>(true)
 
 // вызываем функцию получения данных из кэша/апи, а также получаем в переменную текст для отрисовки
-const parsedText = useItem(
+const {text, itemElement} = useItem(
     isLoading,
     props.idName,
     props.apiUrl,
@@ -55,6 +64,36 @@ const handleCopy = async (code: string): Promise<void> => {
 
   messageVisible.value = true
 }
+
+// видимость кнопки "Скачать"
+const downloadVisible = ref<boolean>(false)
+
+// клик по кнопке "Скачать"
+const handleDownload = async () => {
+  const check = await showConfirm(
+      'Скачивание материала',
+      'Вы действительно хотите скачать данный материал?'
+  )
+
+  if (check) {
+    isDownload.value = true
+
+    await createItemInDB(props.apiUrl, itemElement.value, itemElement.value.id)
+
+    downloadVisible.value = false
+    isDownload.value = false
+  }
+}
+
+// видимость анимации скачивания
+const isDownload =  ref<boolean>(false)
+
+// проверка наличие поста в бд
+watchEffect(async () => {
+  if (!onlineStore.isOnlineMode) return
+
+  downloadVisible.value = !await checkPost(props.apiUrl, idStore.idValues[props.idName])
+})
 </script>
 
 <template>
@@ -65,13 +104,21 @@ const handleCopy = async (code: string): Promise<void> => {
     <DefaultItemSkeleton v-if="isLoading"/>
 
     <div class="item" v-else>
+      <Btn class="item__download button-small"
+           v-if="downloadVisible"
+           @click="handleDownload"
+           :is-loading="isDownload"
+      >
+        Скачать
+      </Btn>
+
       <Transition name="item-title" appear>
         <p class="item__title h2">{{item?.title}}</p>
       </Transition>
 
       <div>
         <TransitionGroup name="item-list" appear>
-          <template v-for="part in parsedText">
+          <template v-for="part in text">
             <h3 class="item__pod-title text-w500" v-if="part.type === 'title'">
               {{ part.content }}
             </h3>

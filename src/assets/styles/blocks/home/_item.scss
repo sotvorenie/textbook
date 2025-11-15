@@ -3,6 +3,10 @@
 
 .item {
 
+  &__download {
+    margin-bottom: rem(10);
+  }
+
   &__title {
     margin-bottom: rem(20);
   }

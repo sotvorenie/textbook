@@ -133,5 +133,5 @@ export const useItem = (
         loading.value = false
     })
 
-    return parsedText
+    return {text: parsedText, itemElement: item}
 }

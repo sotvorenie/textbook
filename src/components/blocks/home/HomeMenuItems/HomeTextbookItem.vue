@@ -1,16 +1,25 @@
 <script setup lang="ts">
-import {ref} from "vue";
+import {ref, watchEffect} from "vue";
 
 import {Item} from "../../../../types/item.ts";
 
 import {useItem} from "../../../../composables/useItem.ts";
 import decodeHtmlEntities from "../../../../composables/useDecodeHtmlEntities.ts";
+import {showConfirm} from "../../../../utils/modals.ts";
+
+import {checkPost, createItemInDB} from "../../../../api/posts/postsDB.ts";
 
 import TextbookSkeleton from "../HomeLoadings/TextbookSkeleton.vue";
 
 import HomeTextbookSlider from "../HomeTextbookSlider.vue";
 import HomeItemCode from "../HomeItemCode.vue";
 import Message from "../../../common/Message.vue";
+
+import useOnlineStore from "../../../../store/useOnlineStore.ts";
+const onlineStore = useOnlineStore();
+import useIdStore from "../../../../store/idStore.ts";
+import Btn from "../../../ui/Btn.vue";
+const idStore = useIdStore();
 
 const props = defineProps({
   apiUrl: {
@@ -73,7 +82,7 @@ const handleCopy = async (code: string): Promise<void> => {
 //=========================================================//
 //-- вызов функций --//
 // вызываем функцию получения данных из кэша/апи, а также получаем в переменную текст для отрисовки
-const parsedText = useItem(
+const {text, itemElement} = useItem(
     isLoading,
     props.idName,
     props.apiUrl,
@@ -81,6 +90,37 @@ const parsedText = useItem(
     activeIndex
 )
 //=========================================================//
+
+
+// видимость кнопки "Скачать"
+const downloadVisible = ref<boolean>(false)
+
+// клик по кнопке "Скачать"
+const handleDownload = async () => {
+  const check = await showConfirm(
+      'Скачивание материала',
+      'Вы действительно хотите скачать данный материал?'
+  )
+
+  if (check) {
+    isDownload.value = true
+
+    await createItemInDB(props.apiUrl, itemElement.value, itemElement.value.id)
+
+    downloadVisible.value = false
+    isDownload.value = false
+  }
+}
+
+// видимость анимации скачивания
+const isDownload =  ref<boolean>(false)
+
+// проверка наличие поста в бд
+watchEffect(async () => {
+  if (!onlineStore.isOnlineMode) return
+
+  downloadVisible.value = !await checkPost(props.apiUrl, idStore.idValues[props.idName])
+})
 </script>
 
 <template>
@@ -91,6 +131,14 @@ const parsedText = useItem(
     <TextbookSkeleton v-if="isLoading"/>
 
     <div class="textbook" v-else>
+      <Btn class="item__download button-small"
+           v-if="downloadVisible"
+           @click="handleDownload"
+           :is-loading="isDownload"
+      >
+        Скачать
+      </Btn>
+
       <p class="textbook__title h2">{{item.title}}</p>
 
       <HomeTextbookSlider :items="Object.keys(item?.content ?? {})"
@@ -98,7 +146,7 @@ const parsedText = useItem(
       />
 
       <div class="textbook__content">
-        <template v-for="part in parsedText">
+        <template v-for="part in text">
           <h4 class="item__pod-title text-w500" v-if="part.type === 'title'">
             {{ part.content }}
           </h4>
