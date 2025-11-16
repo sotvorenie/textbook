@@ -34,6 +34,8 @@ import useItemMemoStore from "../../../../store/itemMemoStore.ts";
 const itemMemoStore = useItemMemoStore();
 import useItemsStore from "../../../../store/useItemsStore.ts";
 const itemsStore = useItemsStore();
+import useOnlineStore from "../../../../store/useOnlineStore.ts";
+const onlineStore = useOnlineStore();
 
 const props = defineProps({
   apiUrl: {
@@ -68,9 +70,13 @@ const sendRequest = async () => {
   newItem.date = dateTime.date
   newItem.sort_date = dateTime.sort_date
 
-  newItem.languages_and_technologies = technologies.value
-      ?.filter(item => item.checked)
-      ?.map(item => item.title)
+  if (onlineStore.isOnlineMode) {
+    newItem.languages_and_technologies = technologies.value
+        ?.filter(item => item.checked)
+        ?.map(item => item.title)
+  } else {
+    newItem.languages_and_technologies = createStore.createData[props.name].languages_and_technologies
+  }
 
   if (!createStore.createData[props.name].title.length) {
     const response: Item = await createItem(props.apiUrl, newItem)
@@ -190,6 +196,8 @@ const getSearchTechnologies = () => {
 
 // если изменился список языков, то добавить в нужный элемент list
 const setNewLanguages = () => {
+  if (!onlineStore.isOnlineMode) return
+
   const redactLanguages = Object.values(createStore.createData[props.name].languages_and_technologies)
   const filteredLanguages = technologies.value?.filter(el => el.checked)?.map(el => el.title)
 
@@ -506,7 +514,7 @@ onMounted(() => {
         </TransitionGroup>
       </div>
 
-      <div class="create__technologies">
+      <div class="create__technologies" v-if="onlineStore.isOnlineMode">
         <Modal>
           <template #activator="{open}">
             <Btn class="m-auto" @click="open">Выбрать языки и технологии</Btn>

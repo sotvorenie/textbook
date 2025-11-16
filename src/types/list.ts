@@ -9,6 +9,7 @@ export interface UnAuthorizedList extends Omit<List, 'languages_and_technologies
     type: string;
     offline: string;
     block_name: string;
+    user_id?: number;
 }
 
 export interface ListBlog {

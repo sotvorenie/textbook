@@ -31,7 +31,7 @@ const useOnlineStore = defineStore("onlineStore", () => {
     // несинхронизированные элементы
     const offlinePosts = ref<UnAuthorizedList[]>([])
 
-    // проверка: есть ли несинхронизированные данные (и можем ли мы их синхроонизировать (админ мы или нет))
+    // проверка: есть ли несинхронизированные данные (и можем ли мы их синхронизировать (админ мы или нет))
     const visibleUnSync = computed(() => {
         const userStore = useUserStore()
 
@@ -42,15 +42,42 @@ const useOnlineStore = defineStore("onlineStore", () => {
     // получаем все несинхронизированные записи
     const getOfflinePosts = async () => {
         const tablesNames = ['advices', 'projects', 'posts', 'textbooks']
+        const userStore = useUserStore()
 
         offlinePosts.value = []
 
-        for (const tableName of tablesNames) {
-            const items =
-                await selectSQL<UnAuthorizedList>(`SELECT * FROM ${tableName} WHERE offline != ''`)
+        try {
+            for (const tableName of tablesNames) {
+                const items = await selectSQL<UnAuthorizedList>(
+                    `SELECT * FROM ${tableName} WHERE offline != ''`
+                );
 
-            items.forEach(item => offlinePosts.value.push(item))
+                for (const item of items) {
+                    if (hasAccessToOfflinePost(userStore, item)) {
+                        offlinePosts.value.push(item);
+                    }
+                }
+            }
+        } catch (err) {
+            console.log(err)
         }
+    }
+
+    const hasAccessToOfflinePost = (userStore: any, item: any): boolean => {
+        const isTextbook = item.block_name === 'textbooks';
+        const isRedact = item.offline === 'redact';
+
+        if (isTextbook) {
+            if (isRedact) {
+                return userStore.isFullAdmin && item.user_id === userStore.user.id;
+            }
+            return userStore.isFullAdmin;
+        }
+
+        if (isRedact) {
+            return userStore.isAdmin && item.user_id === userStore.user.id;
+        }
+        return userStore.isAdmin;
     }
 
     return {

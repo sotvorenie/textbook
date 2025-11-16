@@ -137,14 +137,8 @@ const handleCreate = () => {
 
 //=========================================================//
 //-- страница элемента списка --//
-// видимость кнопки "Редактировать"
-const redactBtnVisible = computed(() => {
-  return userStore.isUserPost[props.blockName]
-      && blocksStore.activeBlock[props.blockName] === 'item'
-})
-
-// видимость кнопки удалить
-const removeBtnVisible = computed(() => {
+// видимость кнопки редактировать/удалить
+const removeRedactBtnVisible = computed(() => {
   return (userStore.isUserPost[props.blockName] || !onlineStore.isOnlineMode)
       && blocksStore.activeBlock[props.blockName] === 'item'
 })
@@ -228,14 +222,14 @@ watch(
     <Back @click="handleBack"/>
 
     <Btn class="button-small"
-         v-if="redactBtnVisible"
+         v-if="removeRedactBtnVisible"
          @click="handleRedact"
     >
       Редактировать
     </Btn>
 
     <Btn class="button-small"
-         v-if="removeBtnVisible"
+         v-if="removeRedactBtnVisible"
          @click="handleRemove"
     >
       Удалить

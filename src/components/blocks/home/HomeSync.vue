@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, ref, watch} from "vue";
+import {computed, ref} from "vue";
 
 import {UnAuthorizedList} from "../../../types/list.ts";
 import {Item} from "../../../types/item.ts";
@@ -11,34 +11,21 @@ import {getItemFromDB} from "../../../api/posts/postsDB.ts";
 import {removeOffline} from "../../../api/database.ts";
 
 import Btn from "../../ui/Btn.vue";
-import Message from "../../common/Message.vue";
 
 import useOnlineStore from "../../../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();
 import useUserStore from "../../../store/userStore.ts";
 const userStore = useUserStore();
 
-const emits = defineEmits(['onClose', 'offClose', 'close'])
-
-// видимость кнопки "Синхронизировать" (на случай, если у нас есть несинхронизированный учебник, а мы не fullAdmin)
-const syncBtnVisible = (item: UnAuthorizedList) => {
-  if (item.block_name === 'textbooks') {
-    return userStore.isFullAdmin
-  }
-
-  return true
-}
-
-// видимость кнопки "Синхронизировать все" (на случай, если у нас есть несинхронизированный учебник, а мы не fullAdmin)
-const syncAllBtnVisible = computed((): boolean => {
-  if (userStore.isFullAdmin) return true
-
-  return onlineStore.offlinePosts.some(el => el.block_name === 'textbooks')
-})
+const emits = defineEmits(['onClose', 'offClose', 'close', 'message'])
 
 // синхронизировать данные для одного элемента списка
 const syncItem = async (item: UnAuthorizedList, isAll: boolean = false) => {
   isLoading.value = true
+
+  if (!isAll) {
+    emits('offClose')
+  }
 
   try {
     const response: Item = await getItemFromDB(item.block_name, item.id)
@@ -57,13 +44,16 @@ const syncItem = async (item: UnAuthorizedList, isAll: boolean = false) => {
       return !(el.id === item.id && el.block_name === item.block_name)
     })
 
-    messageText.value = 'Запись синхронизирована!!'
-    messageVisible.value = true
+    if (!isAll) {
+      emits('message', 'Запись синхронизирована')
+    }
+
   } catch (err) {
     throw err
   } finally {
     if (!isAll) {
       isLoading.value = false
+      emits('onClose')
     }
   }
 }
@@ -71,9 +61,10 @@ const syncItem = async (item: UnAuthorizedList, isAll: boolean = false) => {
 // видимость анимации загрузки
 const isLoading = ref< boolean>(false)
 
-// синхронизитровать все
+// синхронизировать все
 const syncAll = async () => {
   isLoading.value = true
+  emits('offClose');
 
   try {
     const itemsToSync = [...onlineStore.offlinePosts]
@@ -84,8 +75,7 @@ const syncAll = async () => {
 
     onlineStore.offlinePosts = []
 
-    messageText.value = 'Все записи синхронизированы!!'
-    messageVisible.value = true
+    emits('message', 'Все записи синхронизированы!!')
 
     emits('close')
 
@@ -93,37 +83,17 @@ const syncAll = async () => {
     throw error;
   } finally {
     isLoading.value = false;
+    emits('onClose');
   }
 }
-
-// видимость message
-const messageVisible = ref<boolean>(false)
-
-// текст message
-const messageText = ref<string>('')
-
-watch(
-    () => isLoading.value,
-    (val) => {
-      if (val) {
-        emits('offClose');
-      } else {
-        emits('onClose');
-      }
-    }
-);
-
 </script>
 
 <template>
 
   <div class="sync">
-    <Message v-model="messageVisible">{{messageText}}</Message>
-
     <Btn class="sync__btn all"
          @click="syncAll"
          :is-loading="isLoading"
-         v-if="syncAllBtnVisible"
     >
       Синхронизировать все
     </Btn>
@@ -145,7 +115,6 @@ watch(
         <Btn class="sync__btn"
              @click="syncItem(item)"
              :is-loading="isLoading"
-             v-if="syncBtnVisible(item)"
         >
           Синхронизировать
         </Btn>

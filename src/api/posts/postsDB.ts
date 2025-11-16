@@ -175,8 +175,16 @@ export const redactItemInDB = async (
     const languagesJson = JSON.stringify(item.languages_and_technologies || []);
 
     await executeSQL(
-        `UPDATE ${config.table} SET user_id = ?, title = ?, ${contentName} = ?, date = ?, sort_date = ?, time = ?, offline = ?, languages = ? WHERE id = ?`,
-        [item.user_id, item.title, (item as any)[contentName], item.date, item.sort_date, item.time, offline, languagesJson, id]
+        `UPDATE ${config.table} SET
+                title = ?, 
+                ${contentName} = ?, 
+                date = ?, 
+                sort_date = ?, 
+                time = ?, 
+                offline = ?, 
+                languages_and_technologies = ? 
+              WHERE id = ?`,
+        [item.title, (item as any)[contentName], item.date, item.sort_date, item.time, offline, languagesJson, id]
     );
 
     return {...item, id};
