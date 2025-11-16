@@ -49,7 +49,15 @@ const useOnlineStore = defineStore("onlineStore", () => {
         try {
             for (const tableName of tablesNames) {
                 const items = await selectSQL<UnAuthorizedList>(
-                    `SELECT * FROM ${tableName} WHERE offline != ''`
+                    `SELECT 
+                            id,
+                            title,
+                            date,
+                            languages_and_technologies,
+                            offline,
+                            block_name,
+                            user_id
+                          FROM ${tableName} WHERE offline != ''`
                 );
 
                 for (const item of items) {

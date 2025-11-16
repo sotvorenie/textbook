@@ -46,7 +46,12 @@ export const getListFromDB = async (
     const sortOrder = sortBy.startsWith("-") ? "DESC" : "ASC";
 
     const items = await selectSQL<any>(
-        `SELECT * FROM ${config.table} ${where} ORDER BY ${sortName} ${sortOrder} LIMIT ? OFFSET ?`,
+        `SELECT 
+                id,
+                title,
+                date,
+                languages_and_technologies
+              FROM ${config.table} ${where} ORDER BY ${sortName} ${sortOrder} LIMIT ? OFFSET ?`,
         [...params, limit, offset]
     );
 

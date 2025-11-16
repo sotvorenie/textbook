@@ -127,7 +127,6 @@ export const removeItem = async (name: string, id: number): Promise<any> => {
     try {
         if (onlineStore.isOnlineMode) {
             await del(`/${name}/${id}`);
-            await removeFromDB(name, id);
         } else {
             await removeFromDB(name, id);
         }
