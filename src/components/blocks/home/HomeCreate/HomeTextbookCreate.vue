@@ -36,6 +36,7 @@ const itemMemoStore = useItemMemoStore();
 import useItemsStore from "../../../../store/useItemsStore.ts";
 const itemsStore = useItemsStore();
 import useOnlineStore from "../../../../store/useOnlineStore.ts";
+import ToggleButton from "../../../ui/ToggleButton.vue";
 const onlineStore = useOnlineStore();
 
 const props = defineProps({
@@ -87,7 +88,9 @@ const sendRequest = async () => {
 
 
   if (!createStore.createData[props.name].title.length) {
-    const response: Item = await createItem(props.apiUrl, newItem)
+    const createInDB: boolean = onlineStore.isOnlineMode ? localCopyActive.value : true
+
+    const response: Item = await createItem(props.apiUrl, newItem, createInDB)
 
     if (response && response.id) {
       itemsStore.items[props.name].unshift({
@@ -452,6 +455,22 @@ const convertBlocksToText = (blocks: { type: string, text: string }[]): string =
   }).join('');
 };
 //=========================================================//
+
+
+//=========================================================//
+//-- локальная копия --//
+// создавать ли локальную копию создаваемого поста
+const localCopyActive = ref<boolean>(true)
+
+
+// переключение значения локальной копии
+const handleLocalCopy = () => {
+  localCopyActive.value = !localCopyActive.value;
+}
+//=========================================================//
+
+
+//=========================================================//
 //-- хуки --//
 // получаем список всевозможных языков и технологий, чтобы отобразить их с checkbox
 onMounted(() => {
@@ -573,6 +592,20 @@ onMounted(() => {
             </div>
           </template>
         </Modal>
+      </div>
+
+      <div class="create__local flex flex-column flex-align-center"
+           v-if="onlineStore.isOnlineMode"
+      >
+        <p class="create__local-title h5">Создать локальную копию?</p>
+
+        <div class="create__local-btn flex flex-align-center"
+             title="Создать локальную копию?"
+        >
+          нет
+          <ToggleButton :active="localCopyActive" @click="handleLocalCopy"/>
+          да
+        </div>
       </div>
 
       <div class="create__btn-bar flex flex-justify-center">

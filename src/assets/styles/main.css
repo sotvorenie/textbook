@@ -1916,9 +1916,19 @@ a[class] {
   top: -1.875rem;
   right: 0.9375rem;
 }
+.create__technologies {
+  margin-bottom: 1.25rem;
+}
 .create__technologies-list {
   height: 25rem;
   overflow-y: auto;
+}
+.create__local-title {
+  margin-bottom: 0.625rem;
+}
+.create__local-btn {
+  column-gap: 0.625rem;
+  text-transform: uppercase;
 }
 
 .textbook__title {
