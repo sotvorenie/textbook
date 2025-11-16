@@ -139,7 +139,15 @@ const handleCreate = () => {
 //-- страница элемента списка --//
 // видимость кнопки редактировать/удалить
 const removeRedactBtnVisible = computed(() => {
-  return (userStore.isUserPost[props.blockName] || !onlineStore.isOnlineMode)
+  let userStatus
+
+  if (props.blockName === 'textbooks') {
+    userStatus = userStore.isFullAdmin
+  } else {
+    userStatus = userStore.isAdmin
+  }
+
+  return ((userStore.isUserPost[props.blockName] && userStatus) || !onlineStore.isOnlineMode)
       && blocksStore.activeBlock[props.blockName] === 'item'
 })
 
