@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, ref} from "vue";
+import {ref} from "vue";
 
 import {UnAuthorizedList} from "../../../types/list.ts";
 import {Item} from "../../../types/item.ts";
@@ -14,8 +14,6 @@ import Btn from "../../ui/Btn.vue";
 
 import useOnlineStore from "../../../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();
-import useUserStore from "../../../store/userStore.ts";
-const userStore = useUserStore();
 
 const emits = defineEmits(['onClose', 'offClose', 'close', 'message'])
 
