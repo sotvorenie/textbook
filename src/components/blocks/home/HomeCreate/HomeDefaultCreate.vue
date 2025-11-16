@@ -172,7 +172,7 @@ const blurInput = (event: Event) => {
 
 //=========================================================//
 //-- языки и технологии --//
-// список языков и технологий с полями checked для чекбоксов
+// список языков и технологий с полями checked для checkbox
 const technologies = ref<{title: string, checked: boolean}[]>([]);
 
 
@@ -198,7 +198,7 @@ const getSearchTechnologies = () => {
 const setNewLanguages = () => {
   if (!onlineStore.isOnlineMode) return
 
-  const redactLanguages = Object.values(createStore.createData[props.name].languages_and_technologies)
+  const redactLanguages: string[] = Object.values(createStore.createData[props.name].languages_and_technologies)
   const filteredLanguages = technologies.value?.filter(el => el.checked)?.map(el => el.title)
 
   if (redactLanguages !== filteredLanguages) {
@@ -439,7 +439,7 @@ const convertBlocksToText = (blocks: { type: string, text: string }[]): string =
 
 //=========================================================//
 //-- хуки --//
-// получаем список всевозможных языков и технологий, чтобы отобраить их с чекбоксами
+// получаем список всевозможных языков и технологий, чтобы отобразить их с checkbox
 onMounted(() => {
   technologiesStore.technologies?.forEach(el => {
     technologies.value.push({

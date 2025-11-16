@@ -35,6 +35,8 @@ import useItemMemoStore from "../../../../store/itemMemoStore.ts";
 const itemMemoStore = useItemMemoStore();
 import useItemsStore from "../../../../store/useItemsStore.ts";
 const itemsStore = useItemsStore();
+import useOnlineStore from "../../../../store/useOnlineStore.ts";
+const onlineStore = useOnlineStore();
 
 const props = defineProps({
   apiUrl: {
@@ -75,9 +77,13 @@ const sendRequest = async () => {
   newItem.date = dateTime.date;
   newItem.sort_date = dateTime.sort_date;
 
-  newItem.languages_and_technologies = technologies.value
-      ?.filter(item => item.checked)
-      ?.map(item => item.title);
+  if (onlineStore.isOnlineMode) {
+    newItem.languages_and_technologies = technologies.value
+        ?.filter(item => item.checked)
+        ?.map(item => item.title)
+  } else {
+    newItem.languages_and_technologies = createStore.createData[props.name].languages_and_technologies
+  }
 
 
   if (!createStore.createData[props.name].title.length) {
@@ -135,7 +141,7 @@ const sendRequest = async () => {
 
 
 //=========================================================//
-//-- табы --//
+//-- tabs --//
 const activeTab = ref<number>(0)
 
 const tabs = ref<{id: number, name: string}[]>([{
@@ -151,7 +157,7 @@ const createTab = () => {
   activeTab.value = tabs.value.length - 1
 }
 
-// удаление таба по индексу
+// удаление tdb по индексу
 const removeTab = async () => {
   const confirm = await showConfirm(
       'Удаление раздела учебника',
@@ -211,7 +217,7 @@ const blurInput = (event: Event) => {
 
 //=========================================================//
 //-- языки и технологии --//
-// список языков и технологий с полями checked для чекбоксов
+// список языков и технологий с полями checked для checkbox
 const technologies = ref<{title: string, checked: boolean}[]>([]);
 
 // выбор технологий при редактировании учебника
@@ -234,7 +240,9 @@ const getSearchTechnologies = () => {
 
 // если изменился список языков, то добавить в нужный элемент list
 const setNewLanguages = () => {
-  const redactLanguages = Object.values(createStore.createData[props.name].languages_and_technologies)
+  if (!onlineStore.isOnlineMode) return
+
+  const redactLanguages: string[] = Object.values(createStore.createData[props.name].languages_and_technologies)
   const filteredLanguages = technologies.value?.filter(el => el.checked)?.map(el => el.title)
 
   if (redactLanguages !== filteredLanguages) {
@@ -445,11 +453,11 @@ const convertBlocksToText = (blocks: { type: string, text: string }[]): string =
 };
 //=========================================================//
 //-- хуки --//
-// получаем список всевозможных языков и технологий, чтобы отобраить их с чекбоксами
+// получаем список всевозможных языков и технологий, чтобы отобразить их с checkbox
 onMounted(() => {
   technologiesStore.technologies?.forEach(el => {
     technologies.value.push({
-      title: el.name,
+      title: el,
       checked: false
     })
   })
@@ -553,7 +561,7 @@ onMounted(() => {
         </TransitionGroup>
       </div>
 
-      <div class="create__technologies">
+      <div class="create__technologies" v-if="onlineStore.isOnlineMode">
         <Modal>
           <template #activator="{open}">
             <Btn class="m-auto" @click="open">Выбрать языки и технологии</Btn>
