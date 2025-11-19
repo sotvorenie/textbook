@@ -3,6 +3,54 @@
 
 .textbook {
 
+  &__search {
+
+    &-btn {
+      margin-bottom: rem(20) !important;
+
+      svg {
+        width: rem(25);
+        height: auto;
+      }
+
+      span {
+        margin-right: rem(5);
+      }
+    }
+
+    &-input {
+      margin-bottom: rem(20);
+    }
+
+    &-list {
+      max-height: rem(400);
+      overflow-y: auto;
+      padding-right: rem(10);
+    }
+
+    &-item {
+      border: $border-light-alt;
+      padding: rem(10);
+      border-radius: $radius-regular;
+      transition-duration: $transition-duration;
+
+      &:not(:last-child) {
+        margin-bottom: rem(10);
+      }
+
+      @include hover {
+        color: $color-accent;
+        border-color: inherit;
+      }
+
+      &.is-active {
+        color: $color-accent;
+        border-color: inherit;
+        pointer-events: none;
+      }
+    }
+  }
+
   &__title {
     margin-bottom: fluid(40, 20);
   }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, watchEffect} from "vue";
+import {computed, ref, watchEffect} from "vue";
 
 import {Item} from "../../../../types/item.ts";
 
@@ -14,11 +14,15 @@ import TextbookSkeleton from "../HomeLoadings/TextbookSkeleton.vue";
 import HomeTextbookSlider from "../HomeTextbookSlider.vue";
 import HomeItemCode from "../HomeItemCode.vue";
 import Message from "../../../common/Message.vue";
+import Modal from "../../../common/Modal.vue";
+
+import SearchIcon from "../../../../assets/icons/SearchIcon.vue";
 
 import useOnlineStore from "../../../../store/useOnlineStore.ts";
-const onlineStore = useOnlineStore();
 import useIdStore from "../../../../store/idStore.ts";
 import Btn from "../../../ui/Btn.vue";
+
+const onlineStore = useOnlineStore();
 const idStore = useIdStore();
 
 const props = defineProps({
@@ -55,9 +59,19 @@ const isLoading = ref<boolean>(true)
 
 
 //=========================================================//
-//-- табы --//
-// активный индекс табов
+//-- tabs --//
+// активный индекс tab
 const activeIndex = ref<number>(0)
+
+// название активного tab
+const activeTabName = computed((): string => {
+  return allTabs.value[activeIndex.value] ?? ''
+})
+
+// массив tabs
+const allTabs = computed((): string[] => {
+  return Object.keys(item.value?.content ?? {}) ?? []
+})
 //=========================================================//
 
 
@@ -92,8 +106,14 @@ const {text, itemElement} = useItem(
 //=========================================================//
 
 
+//=========================================================//
+//-- скачивание --//
 // видимость кнопки "Скачать"
 const downloadVisible = ref<boolean>(false)
+
+// видимость анимации скачивания
+const isDownload =  ref<boolean>(false)
+
 
 // клик по кнопке "Скачать"
 const handleDownload = async () => {
@@ -112,15 +132,31 @@ const handleDownload = async () => {
   }
 }
 
-// видимость анимации скачивания
-const isDownload =  ref<boolean>(false)
-
-// проверка наличие поста в бд
+// проверка наличие поста в локальной бд для скрытия/показа кнопки "Скачать"
 watchEffect(async () => {
   if (!onlineStore.isOnlineMode) return
 
   downloadVisible.value = !await checkPost(props.apiUrl, idStore.idValues[props.idName])
 })
+//=========================================================//
+
+
+//=========================================================//
+//-- модальное окно --//
+// название темы в поле ввода в модальном окне
+const searchNameInModal = ref<string>('')
+
+// отфильтрованный список tabs для модального окна
+const filteredTabsForModal = computed((): string[] => {
+  return allTabs.value?.filter((el: string) => el.toLowerCase().includes(searchNameInModal.value.toLowerCase())) ?? []
+})
+
+
+// выбор активного tab в модальном окне
+const handleTabInModal = (tabName: string): void => {
+  activeIndex.value = allTabs.value.indexOf(tabName)
+}
+//=========================================================//
 </script>
 
 <template>
@@ -141,7 +177,41 @@ watchEffect(async () => {
 
       <p class="textbook__title h2">{{item.title}}</p>
 
-      <HomeTextbookSlider :items="Object.keys(item?.content ?? {})"
+      <Modal :size="500">
+        <template #activator="{open}">
+          <Btn class="textbook__search-btn button-small recolor-svg m-auto flex"
+               @click="open"
+          >
+            <span>Найти тему</span>
+            <SearchIcon/>
+          </Btn>
+        </template>
+
+        <template #default="{close}">
+          <input class="textbook__search-input input"
+                 placeholder="Найти тему.."
+                 v-model="searchNameInModal"
+          >
+
+          <ul class="textbook__search-list">
+            <li v-for="tab in filteredTabsForModal"
+                :key="tab"
+                :class="{
+                  'textbook__search-item cursor-pointer': true,
+                  'is-active': tab === activeTabName
+                }"
+                @click="() => {
+                  handleTabInModal(tab)
+                  close()
+                }"
+            >
+              {{tab}}
+            </li>
+          </ul>
+        </template>
+      </Modal>
+
+      <HomeTextbookSlider :items="allTabs"
                           v-model:active-index="activeIndex"
       />
 

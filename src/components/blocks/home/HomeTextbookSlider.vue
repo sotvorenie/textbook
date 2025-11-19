@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {PropType, ref} from "vue";
+import {nextTick, PropType, ref, watch} from "vue";
 import {Swiper, SwiperSlide} from "swiper/vue";
 import 'swiper/css'
 
@@ -19,7 +19,7 @@ const activeIndex = defineModel('active-index')
 const emits = defineEmits(['createTab'])
 
 
-// выбор активного таба
+// выбор активного tab
 const handleTab = (index: number) => {
   activeIndex.value = index
 }
@@ -55,13 +55,39 @@ const slidePrev = () => {
   }
 };
 
-//следующий слайд
+// следующий слайд
 const slideNext = () => {
   if (swiperElement.value && !isEnd.value) {
     swiperElement.value.slideNext();
   }
 };
 
+// функция для прокрутки к активному слайду
+const scrollToActiveSlide = () => {
+  if (!swiperElement.value || activeIndex.value === undefined || activeIndex.value === null) return
+
+  const slides = swiperElement.value.slides
+  const activeSlide = slides[activeIndex.value as number]
+
+  if (!activeSlide) return
+
+  const swiperRect = swiperElement.value.el.getBoundingClientRect()
+  const slideRect = activeSlide.getBoundingClientRect()
+
+  const isFullyVisible = slideRect.left >= swiperRect.left && slideRect.right <= swiperRect.right
+
+  if (!isFullyVisible) {
+    swiperElement.value.slideTo(activeIndex.value as number)
+  }
+}
+
+// следим за изменением activeIndex и прокручиваем к нему
+watch(activeIndex, async (newIndex, oldIndex) => {
+  if (newIndex !== oldIndex && newIndex !== undefined && newIndex !== null) {
+    await nextTick()
+    scrollToActiveSlide()
+  }
+})
 </script>
 
 <template>

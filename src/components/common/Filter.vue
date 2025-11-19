@@ -23,7 +23,7 @@ onMounted(() => {
   technologiesStore.technologies?.forEach((el, index) => {
     filterList.value.push({
       id: index,
-      name: el.name,
+      name: el,
       checked: false,
       icon: ''
     })
@@ -55,7 +55,7 @@ onMounted(() => {
               :key="item?.id"
           >
             <label class="flex flex-align-center flex-between">
-              <span class="filter__name">{{item?.name}}</span>
+              <span class="filter__name">{{item.name}}</span>
               <Checkbox :checked="item?.checked"
                         :disabled="!item"
                         @change="checkboxChange(index)"/>

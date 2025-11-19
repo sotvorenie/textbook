@@ -1931,6 +1931,50 @@ a[class] {
   text-transform: uppercase;
 }
 
+.textbook__search-btn {
+  margin-bottom: 1.25rem !important;
+}
+.textbook__search-btn svg {
+  width: 1.5625rem;
+  height: auto;
+}
+.textbook__search-btn span {
+  margin-right: 0.3125rem;
+}
+.textbook__search-input {
+  margin-bottom: 1.25rem;
+}
+.textbook__search-list {
+  max-height: 25rem;
+  overflow-y: auto;
+  padding-right: 0.625rem;
+}
+.textbook__search-item {
+  border: 1px solid var(--color-light-alt);
+  padding: 0.625rem;
+  border-radius: 0.5rem;
+  transition-duration: 0.2s;
+}
+.textbook__search-item:not(:last-child) {
+  margin-bottom: 0.625rem;
+}
+@media (any-hover: hover) {
+  .textbook__search-item:hover {
+    color: #fe7971;
+    border-color: inherit;
+  }
+}
+@media (any-hover: none) {
+  .textbook__search-item:active {
+    color: #fe7971;
+    border-color: inherit;
+  }
+}
+.textbook__search-item.is-active {
+  color: #fe7971;
+  border-color: inherit;
+  pointer-events: none;
+}
 .textbook__title {
   margin-bottom: clamp(1.25rem, -0.1086956522rem + 2.1739130435vw, 2.5rem);
 }
