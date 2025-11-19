@@ -1874,11 +1874,15 @@ a[class] {
 }
 .item__code {
   font-size: clamp(1.125rem, 0.9891304348rem + 0.2173913043vw, 1.25rem);
-  white-space: pre-wrap;
   background: var(--color-dark);
   padding: 0.625rem;
   border-radius: 0.5rem;
   position: relative;
+}
+.item__code pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 .item__code button {
   right: 0.625rem;
