@@ -35,9 +35,17 @@
       }
     }
 
-    &.online {
+    .online {
       column-gap: rem(5);
       fill: currentColor;
+
+      svg {
+        @include square(30);
+      }
     }
+  }
+
+  &__loading {
+    @include abs-center;
   }
 }

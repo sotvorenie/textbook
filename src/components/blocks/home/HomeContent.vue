@@ -31,14 +31,8 @@ import useBlocksStore from "../../../store/blocksStore.ts";
 const blocksStore = useBlocksStore();
 import useOnlineStore from "../../../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();
-
-const props = defineProps({
-  activeIndex: {
-    type: Number,
-    request: true,
-    default: 0
-  }
-})
+import useHomeStore from "../../../store/useHomeStore.ts";
+const homeStore = useHomeStore();
 
 interface ContentComponent {
   component: any;
@@ -162,7 +156,7 @@ const userName = computed((): string => {
   return userIconVisible ? userStore.user?.name : 'Пользователь';
 })
 
-// проерка: есть ли у пользователя аватарка или нет (если нет, то показывать svg-человечка)
+// проверка: есть ли у пользователя аватарка или нет (если нет, то показывать svg-человечка)
 const userIconVisible = computed(() => {
   if (!userStore.user.ava) return
 
@@ -181,9 +175,9 @@ const modalVisible = ref<boolean>(false);
 //-- наблюдатели --//
 // наблюдаем за активным индексом, чтобы изменять внешний вид header-а при переключении между активными элементами бокового меню
 watch(
-    () => props.activeIndex,
+    () => homeStore.activeMenuIndex,
     () => {
-      const name: string = settingsComponentsAttributes[props.activeIndex - 1].props.blockName!
+      const name: string = settingsComponentsAttributes[homeStore.activeMenuIndex - 1]?.props.blockName!
       settingsStore.settingsVisible[name] = blocksStore.activeBlock[name]
     }
 )
@@ -195,12 +189,12 @@ watch(
   <div class="home__content flex flex-column">
     <header class="home__content-header home__header flex flex-align-center flex-between">
 
-      <div v-if="activeIndex === 0"></div>
+      <div v-if="homeStore.activeMenuIndex === 0"></div>
 
       <KeepAlive v-else>
-        <Component :key="`settings-${activeIndex - 1}`"
-                   :is="settingsComponentsAttributes[activeIndex - 1]?.component"
-                   v-bind="settingsComponentsAttributes[activeIndex - 1]?.props || {}"
+        <Component :key="`settings-${homeStore.activeMenuIndex - 1}`"
+                   :is="settingsComponentsAttributes[homeStore.activeMenuIndex - 1]?.component"
+                   v-bind="settingsComponentsAttributes[homeStore.activeMenuIndex - 1]?.props || {}"
         />
       </KeepAlive>
 
@@ -238,9 +232,9 @@ watch(
 
     <div class="home__main">
       <KeepAlive>
-        <Component :is="contentComponents[activeIndex].component"
-                   :key="`content-${activeIndex}`"
-                   v-bind="contentComponents[activeIndex].props"
+        <Component :is="contentComponents[homeStore.activeMenuIndex].component"
+                   :key="`content-${homeStore.activeMenuIndex}`"
+                   v-bind="contentComponents[homeStore.activeMenuIndex].props"
         />
       </KeepAlive>
     </div>

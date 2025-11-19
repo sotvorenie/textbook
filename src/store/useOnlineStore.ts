@@ -1,7 +1,10 @@
 import {defineStore} from "pinia";
 import {computed, ref} from "vue";
+
 import {UnAuthorizedList} from "../types/list.ts";
+
 import {selectSQL} from "../api/database.ts";
+
 import useUserStore from "./userStore.ts";
 
 const useOnlineStore = defineStore("onlineStore", () => {
@@ -13,6 +16,9 @@ const useOnlineStore = defineStore("onlineStore", () => {
 
     // загрузилась ли у нас бд
     const isDBActive = ref<boolean>(true)
+
+    // видимость анимации загрузки в кнопке переключения режимов приложения
+    const modeLoadingVisible = ref<boolean>(false)
 
     // изменение режима приложения
     const changeMode = () => {
@@ -74,6 +80,7 @@ const useOnlineStore = defineStore("onlineStore", () => {
         }
     }
 
+    // проверка: вносить ли несинхронизированный элемент в список для синхронизации
     const hasAccessToOfflinePost = (userStore: any, item: any): boolean => {
         const isTextbook = item.block_name === 'textbooks';
         const isRedact = item.offline === 'redact';
@@ -95,6 +102,8 @@ const useOnlineStore = defineStore("onlineStore", () => {
         isOnlineMode,
         isOnline,
         isDBActive,
+
+        modeLoadingVisible,
 
         offlinePosts,
 

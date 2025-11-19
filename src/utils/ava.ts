@@ -1,8 +1,9 @@
 import useUserStore from "../store/userStore.ts";
-const userStore = useUserStore();
 
 export const userAva = {
     set() {
+        const userStore = useUserStore();
+
         localStorage.setItem('ava', JSON.stringify(userStore.user.ava));
     },
     get() {

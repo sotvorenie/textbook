@@ -3,12 +3,12 @@ import {del, get, patch, post} from "../base.ts";
 import useUserStore from "../../store/userStore.ts";
 import {userAva} from "../../utils/ava.ts";
 import {getCurrentDateTime} from "../../composables/useDate.ts";
-const userStore = useUserStore();
 
 import useOnlineStore from "../../store/useOnlineStore.ts";
 
 export const postFile = async (file: File): Promise<void> => {
     const onlineStore = useOnlineStore()
+    const userStore = useUserStore();
 
     try {
         const formData = new FormData();
@@ -38,6 +38,7 @@ export const postFile = async (file: File): Promise<void> => {
 
 export const postAva = async (): Promise<any> => {
     const onlineStore = useOnlineStore()
+    const userStore = useUserStore();
 
     try {
         await patch(`/users/${userStore.user.id}`, {
@@ -68,6 +69,7 @@ export const deletePredLastFile = async (id: number) => {
 
 export const getAva = async (): Promise<void> => {
     const onlineStore = useOnlineStore()
+    const userStore = useUserStore();
 
     try {
         const response: {ava: {url: string, id: number}}[] = await get(`/users?id=${userStore.user.id}&_select=ava`)
@@ -90,6 +92,7 @@ export const getAva = async (): Promise<void> => {
 
 export const getLastSession = async (): Promise<void> => {
     const onlineStore = useOnlineStore()
+    const userStore = useUserStore();
 
     try {
         const response: {last_session: string} = await get(`/users/${userStore.user.id}?_select=last_session`)
@@ -108,6 +111,7 @@ export const getLastSession = async (): Promise<void> => {
 
 export const setLastSession = async ():Promise<void> => {
     const onlineStore = useOnlineStore()
+    const userStore = useUserStore();
 
     try {
         const dateTime = getCurrentDateTime()

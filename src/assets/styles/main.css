@@ -1184,9 +1184,21 @@ a[class] {
   height: 1.875rem !important;
   min-height: 1.875rem !important;
 }
-.navigation__btn.online {
+.navigation__btn .online {
   column-gap: 0.3125rem;
   fill: currentColor;
+}
+.navigation__btn .online svg {
+  width: 1.875rem !important;
+  min-width: 1.875rem !important;
+  height: 1.875rem !important;
+  min-height: 1.875rem !important;
+}
+.navigation__loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
 }
 
 .toggle-button {

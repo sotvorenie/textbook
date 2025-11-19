@@ -100,7 +100,7 @@ const getPosts = async(push: boolean = true) => {
 
       createStore.isCanCreateInAPI[props.name] = checkTotalItems
 
-      if (!checkTotalItems && (userStore.isAdmin || userStore.isFullAdmin)) {
+      if (!checkTotalItems && (userStore.isAdmin || userStore.isFullAdmin) && onlineStore.isOnlineMode) {
         await showWarning(
             'Недостаточно места!!',
             'Внимание! На сервере недостаточно места для данной категории! Создание нового элемента будет происходить локально'

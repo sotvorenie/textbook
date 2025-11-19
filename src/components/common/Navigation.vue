@@ -2,15 +2,17 @@
 
 import {theme, changeTheme} from "../../utils/theme.ts";
 
+import ToggleButton from "../ui/ToggleButton.vue";
+
+import Moon from "../../assets/icons/Moon.vue";
+import Offline from "../../assets/icons/Offline.vue";
+import Online from "../../assets/icons/Online.vue";
 import Arrow from "../../assets/icons/Arrow.vue";
 import Reload from "../../assets/icons/Reload.vue";
 import Sun from "../../assets/icons/Sun.vue";
-import ToggleButton from "../ui/ToggleButton.vue";
-import Moon from "../../assets/icons/Moon.vue";
 
 import useOnlineStore from "../../store/useOnlineStore.ts";
-import Offline from "../../assets/icons/Offline.vue";
-import Online from "../../assets/icons/Online.vue";
+import Loading from "../ui/loading/Loading.vue";
 const onlineStore = useOnlineStore();
 
 defineProps({
@@ -53,16 +55,20 @@ const locationReload = () => {
       <Sun/>
     </button>
 
-    <button class="navigation__btn online flex flex-align-center"
+    <button class="navigation__btn position-relative"
             title="Оффлайн/Онлайн режим"
             type="button"
             v-if="onlineStore.isOnline"
     >
-      <Offline/>
-      <ToggleButton :active="onlineStore.isOnlineMode"
-                    @click="onlineStore.changeMode"
-      />
-      <Online/>
+      <span class="online flex flex-align-center" :style="{opacity: onlineStore.modeLoadingVisible ? '0' : '1'}">
+        <Offline/>
+        <ToggleButton :active="onlineStore.isOnlineMode"
+                      @click="onlineStore.changeMode"
+        />
+        <Online/>
+      </span>
+
+      <Loading class="navigation__loading position-absolute" v-if="onlineStore.modeLoadingVisible"/>
     </button>
   </div>
 </template>

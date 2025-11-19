@@ -5,11 +5,10 @@ import {menuItems} from "../../../data/asideLinks.ts";
 
 import Menu from "../../../assets/icons/Menu.vue";
 
+import useHomeStore from "../../../store/useHomeStore.ts";
+const homeStore = useHomeStore();
+
 //=========================================================//
-
-// индекс активного элемента бокового меню
-const activeIndex = defineModel();
-
 // открыто/закрыто боковое меню
 const isClosed = ref<boolean>(false);
 
@@ -20,7 +19,7 @@ const changeClosed = () => {
 
 // выбор активного элемента меню
 const changeActiveIndex = (number: number): void => {
-  activeIndex.value = number;
+  homeStore.activeMenuIndex = number;
 }
 </script>
 
@@ -54,7 +53,7 @@ const changeActiveIndex = (number: number): void => {
     >
       <li :class="{
             'menu__item': true,
-            'is-active': activeIndex === index + 1,
+            'is-active': homeStore.activeMenuIndex === index + 1,
           }"
           v-for="(item, index) in menuItems"
           :key="item.id"
