@@ -2,7 +2,7 @@ import axios from 'axios'
 
 import {authToken} from "../utils/auth.ts";
 
-import {showError} from "../utils/modals.ts";
+import {showError, showWarning} from "../utils/modals.ts";
 
 import useOnlineStore from "../store/useOnlineStore.ts";
 
@@ -44,7 +44,15 @@ client.interceptors.response.use(
         }
 
         await showError('Ошибка сети', 'Что-то пошло не так!')
-        return { data: {} }
+        onlineStore.isOnline = false
+        onlineStore.isOnlineMode = false
+        onlineStore.setToLocalStorage()
+        await showWarning(
+            'Включение оффлайн режима',
+            'Будет включен оффлайн режим! Страница будет перезагружена..'
+        )
+        window.location.reload()
+        //return { data: {} }
     }
 )
 
