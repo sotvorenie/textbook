@@ -65,11 +65,16 @@ export const getItem = async (name: string, id: number): Promise<Item> => {
     }
 };
 
-export const createItem = async (name: string, item: Item, createInDB: boolean = true): Promise<Item> => {
+export const createItem = async (
+    name: string,
+    item: Item,
+    createInDB: boolean = true,
+    createInAPI: boolean = true
+): Promise<Item> => {
     const onlineStore = useOnlineStore();
 
     try {
-        if (onlineStore.isOnlineMode) {
+        if (onlineStore.isOnlineMode && createInAPI) {
             const createdItem = await post(`/${name}`, item) as Item
 
             if (createInDB) {

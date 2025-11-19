@@ -82,9 +82,9 @@ const sendRequest = async () => {
   if (!createStore.createData[props.name].title.length) {
     const createInDB: boolean = onlineStore.isOnlineMode ? localCopyActive.value : true
 
-    const response: Item = await createItem(props.apiUrl, newItem, createInDB)
+    const response: Item = await createItem(props.apiUrl, newItem, createInDB, createStore.isCanCreateInAPI[props.name])
 
-    if (response && response.id) {
+    if (response && response.id && (createStore.isCanCreateInAPI[props.name] || !onlineStore.isOnlineMode)) {
       itemsStore.items[props.name].unshift({
         id: response.id,
         title: response.title,
@@ -545,7 +545,7 @@ onMounted(() => {
       </div>
 
       <div class="create__local flex flex-column flex-align-center"
-           v-if="onlineStore.isOnlineMode"
+           v-if="onlineStore.isOnlineMode && createStore.isCanCreateInAPI[props.name]"
       >
         <p class="create__local-title h5">Создать локальную копию?</p>
 

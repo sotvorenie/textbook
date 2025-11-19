@@ -26,6 +26,9 @@ import useItemsStore from "../../../store/useItemsStore.ts";
 const itemsStore = useItemsStore();
 import useOnlineStore from "../../../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();
+import useCreateStore from "../../../store/useCreateStore.ts";
+import {showWarning} from "../../../utils/modals.ts";
+const createStore = useCreateStore();
 
 const props = defineProps({
   searchName: {
@@ -92,6 +95,17 @@ const getPosts = async(push: boolean = true) => {
       }
 
       meta.value = response.meta
+
+      const checkTotalItems: boolean = (meta.value?.total_items as number) < 500
+
+      createStore.isCanCreateInAPI[props.searchName] = checkTotalItems
+
+      if (!checkTotalItems && (userStore.isAdmin || userStore.isFullAdmin)) {
+        await showWarning(
+            'Недостаточно места!!',
+            'Внимание! На сервере недостаточно места для данной категории! Создание нового элемента будет происходить локально'
+        )
+      }
 
       await nextTick();
     }

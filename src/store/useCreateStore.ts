@@ -43,6 +43,14 @@ const useCreateStore = defineStore('createStore', () => {
         textbooks: false,
     })
 
+    // возможно ли создать еще запись в апи (на случай если в апи уже 500 записей)
+    const isCanCreateInAPI = reactive<Record<string, boolean>>({
+        hints: true,
+        advices: true,
+        projects: true,
+        textbooks: true,
+    })
+
     const resetStore = () => {
         createData.hints = {
             title: '',
@@ -73,11 +81,17 @@ const useCreateStore = defineStore('createStore', () => {
         isRedact.advices = false
         isRedact.projects = false
         isRedact.textbooks = false
+
+        isRedact.hints = true
+        isRedact.advices = true
+        isRedact.projects = true
+        isRedact.textbooks = true
     }
 
     return {
         createData,
         isRedact,
+        isCanCreateInAPI,
 
         resetStore,
     }
