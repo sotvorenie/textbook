@@ -209,7 +209,7 @@ watch(
 
     <Filter v-show="buttonsVisible" @change="handleFilterChange"/>
 
-    <HomeSettingsMyOther v-if="buttonsVisible"
+    <HomeSettingsMyOther v-if="buttonsVisible && onlineStore.isOnlineMode"
                          v-model="searchStore.myOtherFilter[blockName]"
                          :block-name="blockName"
                          :my-visible="myBtnVisible"
