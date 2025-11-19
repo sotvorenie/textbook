@@ -5,13 +5,6 @@ import App from "./App.vue";
 import {openDB, initDB} from "./api/database";
 
 const start = async () => {
-    try {
-        await openDB()
-        await initDB()
-    } catch (error) {
-        console.error("❌ Ошибка при инициализации базы данных:", error);
-    }
-
     const app = createApp(App);
 
     app.directive('autofocus', {
@@ -21,6 +14,10 @@ const start = async () => {
     })
 
     app.use(createPinia());
+
+    await openDB()
+    await initDB()
+
     app.use(router);
     app.mount("#app");
 }

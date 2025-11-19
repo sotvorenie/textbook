@@ -11,6 +11,9 @@ const useOnlineStore = defineStore("onlineStore", () => {
     // есть ли доступ к интернету
     const isOnline = ref<boolean>(true)
 
+    // загрузилась ли у нас бд
+    const isDBActive = ref<boolean>(true)
+
     // изменение режима приложения
     const changeMode = () => {
         isOnlineMode.value = !isOnlineMode.value
@@ -67,7 +70,7 @@ const useOnlineStore = defineStore("onlineStore", () => {
                 }
             }
         } catch (err) {
-            console.log(err)
+            return
         }
     }
 
@@ -91,6 +94,7 @@ const useOnlineStore = defineStore("onlineStore", () => {
     return {
         isOnlineMode,
         isOnline,
+        isDBActive,
 
         offlinePosts,
 

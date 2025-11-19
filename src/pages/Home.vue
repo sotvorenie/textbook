@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {onMounted, ref} from "vue";
+import router from "../router";
 
 import {User} from "../types/user";
 
@@ -21,6 +22,7 @@ const technologiesStore = useTechnologiesStore();
 import useUserStore from "../store/userStore.ts";
 const userStore = useUserStore();
 import useOnlineStore from "../store/useOnlineStore.ts";
+import {showError} from "../utils/modals.ts";
 const onlineStore = useOnlineStore();
 
 const isLoading = ref<boolean>(true);
@@ -43,8 +45,34 @@ onMounted(async () => {
     }
   }
 
-  const user = await check();
-  userStore.setUser(user as User);
+  const checkUser = async () => {
+    try {
+      const user = await check();
+      userStore.setUser(user as User);
+    } catch (err: any) {
+      if (err.message === 'NO_TOKEN') {
+        isLoading.value = false
+        await router.push('/')
+        return
+      }
+
+      if (err.message === 'OFFLINE') {
+        await showError(
+            'Ошибка авторизации',
+            'Приложение переключено в оффлайн режим'
+        )
+        onlineStore.isOnline = false
+        onlineStore.isOnlineMode = false
+        isLoading.value = false
+        return
+      }
+
+      isLoading.value = false
+      await router.push('/')
+      return
+    }
+  }
+  await checkUser()
 
   const getAdmins = async () => {
     try {
@@ -59,7 +87,12 @@ onMounted(async () => {
       userStore.isAdmin = !!user;
       userStore.isFullAdmin = user?.full ?? false
       userStore.isViewer = user?.viewer ?? false
-    } catch (_) {}
+    } catch (_) {
+      await showError(
+          'Ошибка получения статуса',
+          'Не удалось получить статус пользователя'
+      )
+    }
   }
   await getAdmins()
 
@@ -70,7 +103,12 @@ onMounted(async () => {
       if (response) {
         technologiesStore.technologies = response
       }
-    } catch (_) {}
+    } catch (_) {
+      await showError(
+          'Ошибка получения языков и технологий',
+          'Не удалось получить список языков и технологий'
+      )
+    }
   }
   await getTechnologies()
 
@@ -81,16 +119,31 @@ onMounted(async () => {
       if (response?.length) {
         userStore.userLiked = response[0];
       }
-    } catch (_) {}
+    } catch (_) {
+      await showError(
+          'Ошибка получения избранных постов',
+          'Не удалось получить список избранных постов'
+      )
+    }
   }
   await getLiked()
 
-  const ava = userAva.get()
-  if (!ava?.url) {
-    await getAva()
-  } else {
-    userStore.user.ava = ava
+  const getUserAvatar = async () => {
+    try {
+      const ava = userAva.get()
+      if (!ava?.url) {
+        await getAva()
+      } else {
+        userStore.user.ava = ava
+      }
+    } catch (_) {
+      await showError(
+          'Ошибка загрузки аватара',
+          'Не удалось загрузить аватар пользователя'
+      )
+    }
   }
+  await getUserAvatar()
 
   await getLastSession()
   await setLastSession()
@@ -100,7 +153,7 @@ onMounted(async () => {
     await sendToTelegram(TelegramEventType.NEW_SESSION)
   }
 
-  // получаем несихнронизированные данные с бд
+  // получаем несинхронизированные данные с бд
   await onlineStore.getOfflinePosts()
 
   isLoading.value = false

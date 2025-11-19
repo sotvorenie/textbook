@@ -2,9 +2,10 @@ import axios from 'axios'
 
 import {authToken} from "../utils/auth.ts";
 
-import {showError, showWarning} from "../utils/modals.ts";
+import {showError} from "../utils/modals.ts";
 
 import useOnlineStore from "../store/useOnlineStore.ts";
+import router from "../router";
 
 const client = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -32,27 +33,29 @@ client.interceptors.response.use(
 
         if (error.response?.status === 401) {
             authToken.remove()
-            return { data: {} }
+            await showError(
+                'Ошибка авторизации',
+                'Вы будете перенаправлены на страницу авторизации'
+            )
+            await router.push('/')
+
+            return Promise.reject(error)
         }
 
-        if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
+        const isNetworkError =
+            error.code === 'ECONNABORTED' ||
+            error.message === 'Network Error' ||
+            !error.response
+        if (isNetworkError) {
             onlineStore.isOnline = false
             onlineStore.isOnlineMode = false
 
             await showError('Нет подключения', 'Проверьте интернет-соединение')
-            return { data: {} }
+
+            return Promise.reject(error)
         }
 
-        await showError('Ошибка сети', 'Что-то пошло не так!')
-        onlineStore.isOnline = false
-        onlineStore.isOnlineMode = false
-        onlineStore.setToLocalStorage()
-        await showWarning(
-            'Включение оффлайн режима',
-            'Будет включен оффлайн режим! Страница будет перезагружена..'
-        )
-        window.location.reload()
-        //return { data: {} }
+        return Promise.reject(error)
     }
 )
 

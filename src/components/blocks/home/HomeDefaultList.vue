@@ -4,6 +4,7 @@ import {computed, ref, watch, nextTick} from "vue";
 import {Meta} from "../../../types/meta.ts";
 
 import {debounce} from "../../../utils/debounce.ts";
+import {showError, showWarning} from "../../../utils/modals.ts";
 
 import {getList} from "../../../api/posts/posts.ts";
 import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.ts";
@@ -27,11 +28,10 @@ const itemsStore = useItemsStore();
 import useOnlineStore from "../../../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();
 import useCreateStore from "../../../store/useCreateStore.ts";
-import {showWarning} from "../../../utils/modals.ts";
 const createStore = useCreateStore();
 
 const props = defineProps({
-  searchName: {
+  name: {
     type: String,
     required: true
   },
@@ -71,34 +71,34 @@ const getPosts = async(push: boolean = true) => {
 
     let user_id: number | null = null
     let likes: number[] = []
-    if (searchStore.myOtherFilter[props?.searchName] === 'my') {
+    if (searchStore.myOtherFilter[props?.name] === 'my') {
       user_id = userStore.user.id
-    } else if (searchStore.myOtherFilter[props?.searchName] === 'likes') {
+    } else if (searchStore.myOtherFilter[props?.name] === 'likes') {
       likes = likedItems.value?.length ? likedItems.value : [-1]
      }
 
     const response: {meta: any, items: List[]} = await getList(
         props.apiUrl,
         page.value,
-        searchStore.searchNames[props?.searchName],
-        searchStore.filterTechnologies[props?.searchName],
+        searchStore.searchNames[props?.name],
+        searchStore.filterTechnologies[props?.name],
         user_id,
-        searchStore.sortBy[props?.searchName],
+        searchStore.sortBy[props?.name],
         likes
     );
 
     if (response) {
       if (push) {
-        itemsStore.items[props.searchName]?.push(...response.items)
+        itemsStore.items[props.name]?.push(...response.items)
       } else {
-        itemsStore.items[props.searchName] = response.items
+        itemsStore.items[props.name] = response.items
       }
 
       meta.value = response.meta
 
       const checkTotalItems: boolean = (meta.value?.total_items as number) < 500
 
-      createStore.isCanCreateInAPI[props.searchName] = checkTotalItems
+      createStore.isCanCreateInAPI[props.name] = checkTotalItems
 
       if (!checkTotalItems && (userStore.isAdmin || userStore.isFullAdmin)) {
         await showWarning(
@@ -110,10 +110,15 @@ const getPosts = async(push: boolean = true) => {
       await nextTick();
     }
 
+    settingsStore.settingsVisible[props.name] = 'list'
+  } catch (_) {
+    await showError(
+        'Ошибка загрузки контента',
+        'Не удалось загрузить список элементов'
+    )
+  } finally {
     loadingVisible.value = false
-
-    settingsStore.settingsVisible[props.searchName] = 'list'
-  } catch (_) {}
+  }
 }
 //=========================================================//
 
@@ -122,7 +127,7 @@ const getPosts = async(push: boolean = true) => {
 //-- пустая страница --//
 // видимость пустой страницы
 const emptyVisible = computed(() => {
-  return !itemsStore.items[props.searchName]?.length && !loadingVisible.value
+  return !itemsStore.items[props.name]?.length && !loadingVisible.value
 })
 //=========================================================//
 
@@ -131,7 +136,7 @@ const emptyVisible = computed(() => {
 //-- данные фильтров --//
 // выбранные языки и технологии
 const searchTechnologies = computed(() => {
-  return searchStore.filterTechnologies[props.searchName] ?? []
+  return searchStore.filterTechnologies[props.name] ?? []
 });
 //=========================================================//
 
@@ -150,9 +155,9 @@ const handleItem = (id: number) => {
 // метод для подсветки текста
 const highlightText = (text: string) => {
   if (!text) return 'Без названия'
-  if (!searchStore.searchNames[props?.searchName]) return text;
+  if (!searchStore.searchNames[props?.name]) return text;
 
-  const words = searchStore.searchNames[props?.searchName].split(/\s+/).filter(Boolean);
+  const words = searchStore.searchNames[props?.name].split(/\s+/).filter(Boolean);
   let result = text;
 
   words.forEach(word => {
@@ -169,31 +174,31 @@ const highlightText = (text: string) => {
 //-- избранное --//
 // список избранных элементов пользователя
 const likedItems = computed(() => {
-  return userStore.userLiked?.items[props.searchName];
+  return userStore.userLiked?.items[props.name];
 })
 
 
 // добавление элемента в избранное
 const handleLike = async (id: number) => {
   try {
-    const element = itemsStore.items[props.searchName]?.find(el => el.id === id) ?? {title: ''}
+    const element = itemsStore.items[props.name]?.find(el => el.id === id) ?? {title: ''}
 
     let isLike: boolean = false
 
-    const userLikes = userStore.userLiked.items[props.searchName]
+    const userLikes = userStore.userLiked.items[props.name]
 
     if (userLikes && userLikes?.includes(id)) {
-      userStore.userLiked.items[props.searchName] =
+      userStore.userLiked.items[props.name] =
           userLikes?.filter((item: number) => item !== id)
     } else {
       if (!userLikes) {
-        userStore.userLiked.items[props.searchName] = []
+        userStore.userLiked.items[props.name] = []
       }
-      userStore.userLiked?.items[props.searchName].push(id)
+      userStore.userLiked?.items[props.name].push(id)
       isLike = true
     }
 
-    const response = await like(props.searchName)
+    const response = await like(props.name)
 
     if (response) {
       isLike ? await sendToTelegram(TelegramEventType.LIKE, element.title)
@@ -203,7 +208,13 @@ const handleLike = async (id: number) => {
         userStore.userLiked.id = response.id
       }
     }
-  } catch (_) {}
+  } catch (_) {
+    await showError(
+        'Ошибка добавления в избранное',
+        'Не удалось добавить элемент в избранное'
+    )
+    userStore.userLiked?.items[props.name].pop()
+  }
 }
 //=========================================================//
 
@@ -212,7 +223,7 @@ const handleLike = async (id: number) => {
 //-- кнопка "Загрузить ещё" --//
 // видимость кнопки "Загрузить ещё"
 const loadMoreVisible = computed(() => {
-  return itemsStore.items[props.searchName]?.length > 0
+  return itemsStore.items[props.name]?.length > 0
       && (page.value >= 1 && meta.value?.remaining_count! > 0)
 })
 
@@ -226,10 +237,10 @@ const loadingVisible = ref(true);
 // следим за изменение фильтров, чтобы обращаться к апи по заданным параметрам
 watch(
     () => [
-      searchStore.searchNames[props?.searchName],
-      searchStore.filterTechnologies[props?.searchName],
-      searchStore.myOtherFilter[props?.searchName],
-      searchStore.sortBy[props?.searchName],
+      searchStore.searchNames[props?.name],
+      searchStore.filterTechnologies[props?.name],
+      searchStore.myOtherFilter[props?.name],
+      searchStore.sortBy[props?.name],
     ],
     () => debouncedGetPosts()
 )
@@ -245,9 +256,9 @@ await getPosts()
 <template>
 
   <div class="list-wrapper">
-    <ul class="list flex row" v-if="itemsStore.items[searchName]?.length">
+    <ul class="list flex row" v-if="itemsStore.items[name]?.length">
       <li class="list__item cursor-pointer col-4 ds-col-3 position-relative"
-          v-for="(item, index) in itemsStore.items[searchName]"
+          v-for="(item, index) in itemsStore.items[name]"
           :key="item.id"
           @click="handleItem(item.id)"
           :style="{'--index': index}"

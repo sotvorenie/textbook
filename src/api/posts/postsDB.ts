@@ -1,6 +1,7 @@
 import {List} from "../../types/list.ts";
 import {Item} from "../../types/item.ts";
 import {executeSQL, selectSQL, tablesConfig} from "../database.ts";
+import {showError} from "../../utils/modals.ts";
 
 export const getListFromDB = async (
     name: string,
@@ -45,64 +46,70 @@ export const getListFromDB = async (
     const sortName = sortBy.replace("-", "");
     const sortOrder = sortBy.startsWith("-") ? "DESC" : "ASC";
 
-    const items = await selectSQL<any>(
-        `SELECT 
+    try {
+        const items = await selectSQL<any>(
+            `SELECT 
                 id,
                 title,
                 date,
                 languages_and_technologies
               FROM ${config.table} ${where} ORDER BY ${sortName} ${sortOrder} LIMIT ? OFFSET ?`,
-        [...params, limit, offset]
-    );
+            [...params, limit, offset]
+        );
 
-    const processedItems = items.map(item => ({
-        ...item,
-        languages_and_technologies: item.languages_and_technologies ? JSON.parse(item.languages_and_technologies) : []
-    }));
+        const processedItems = items.map(item => ({
+            ...item,
+            languages_and_technologies: item.languages_and_technologies ? JSON.parse(item.languages_and_technologies) : []
+        }));
 
-    const countRows = await selectSQL<{ total: number }>(
-        `SELECT COUNT(*) AS total FROM ${config.table} ${where}`,
-        params
-    );
+        const countRows = await selectSQL<{ total: number }>(
+            `SELECT COUNT(*) AS total FROM ${config.table} ${where}`,
+            params
+        );
 
-    const total = countRows[0]?.total ?? 0;
+        const total = countRows[0]?.total ?? 0;
 
-    const meta = {
-        current_page: page,
-        from: total === 0 ? 0 : offset + 1,
-        to: Math.min(offset + limit, total),
-        total,
-        per_page: limit,
-        last_page: Math.ceil(total / limit),
-    };
+        const meta = {
+            current_page: page,
+            from: total === 0 ? 0 : offset + 1,
+            to: Math.min(offset + limit, total),
+            total,
+            per_page: limit,
+            last_page: Math.ceil(total / limit),
+        };
 
-    return { meta, items: processedItems };
+        return { meta, items: processedItems };
+    } catch (err) {
+        throw err
+    }
 };
 
 export const getItemFromDB = async (name: string, id: number): Promise<Item> => {
-    const config = tablesConfig[name];
-    if (!config) throw new Error(`Неизвестная таблица: ${name}`);
+    try {
+        const config = tablesConfig[name];
 
-    const items = await selectSQL<any>(`SELECT * FROM ${config.table} WHERE id = ?`, [id]);
-    if (items.length === 0) throw new Error(`Запись не найдена: ${name}`);
+        const items = await selectSQL<any>(`SELECT * FROM ${config.table} WHERE id = ?`, [id]);
 
-    const item = items[0];
+        const item = items[0];
 
-    let content = item.content;
-    if (typeof content === 'string') {
-        try {
-            content = JSON.parse(content);
-        } catch (e) {
-            console.error('Error parsing content:', e);
-            content = {};
+        let content = item.content;
+        if (typeof content === 'string') {
+            try {
+                content = JSON.parse(content);
+            } catch (e) {
+                console.error('Error parsing content:', e);
+                content = {};
+            }
         }
-    }
 
-    return {
-        ...item,
-        content: content,
-        languages_and_technologies: item.languages_and_technologies ? JSON.parse(item.languages_and_technologies) : []
-    };
+        return {
+            ...item,
+            content: content,
+            languages_and_technologies: item.languages_and_technologies ? JSON.parse(item.languages_and_technologies) : []
+        };
+    } catch (err) {
+        throw err
+    }
 };
 
 export const createItemInDB = async (
@@ -111,33 +118,33 @@ export const createItemInDB = async (
     id: number = -1,
     offline: string = ""
 ) => {
-    const config = tablesConfig[name];
-    if (!config) throw new Error(`Неизвестная таблица: ${name}`);
+    try {
+        const config = tablesConfig[name];
 
-    const getNextId = async (table: string): Promise<number> => {
-        const result = await selectSQL<{max_id: number}>(`SELECT MAX(id) as max_id FROM ${table}`);
-        const maxId = result[0]?.max_id || 0;
+        const getNextId = async (table: string): Promise<number> => {
+            const result = await selectSQL<{max_id: number}>(`SELECT MAX(id) as max_id FROM ${table}`);
+            const maxId = result[0]?.max_id || 0;
 
-        for (let nextId = maxId + 1; nextId < maxId + 100; nextId++) {
-            const existing = await selectSQL(`SELECT id FROM ${table} WHERE id = ?`, [nextId]);
-            if (existing.length === 0) return nextId;
+            for (let nextId = maxId + 1; nextId < maxId + 100; nextId++) {
+                const existing = await selectSQL(`SELECT id FROM ${table} WHERE id = ?`, [nextId]);
+                if (existing.length === 0) return nextId;
+            }
+            throw new Error(`Не удалось найти свободный ID для таблицы ${table}`);
+        };
+
+        let itemId: number;
+        if (id >= 0) {
+            const existing = await selectSQL(`SELECT id FROM ${config.table} WHERE id = ?`, [id]);
+            itemId = existing.length > 0 ? await getNextId(config.table) : id;
+        } else {
+            itemId = await getNextId(config.table);
         }
-        throw new Error(`Не удалось найти свободный ID для таблицы ${table}`);
-    };
 
-    let itemId: number;
-    if (id >= 0) {
-        const existing = await selectSQL(`SELECT id FROM ${config.table} WHERE id = ?`, [id]);
-        itemId = existing.length > 0 ? await getNextId(config.table) : id;
-    } else {
-        itemId = await getNextId(config.table);
-    }
+        const contentName = config.table === tablesConfig.textbooks.table ? "content" : "text";
+        const languagesJson = JSON.stringify(item.languages_and_technologies || []);
 
-    const contentName = config.table === tablesConfig.textbooks.table ? "content" : "text";
-    const languagesJson = JSON.stringify(item.languages_and_technologies || []);
-
-    await executeSQL(
-        `INSERT INTO ${config.table} (
+        await executeSQL(
+            `INSERT INTO ${config.table} (
                 id, 
                 user_id, 
                 title, 
@@ -150,21 +157,30 @@ export const createItemInDB = async (
                 languages_and_technologies
                 ) 
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-            itemId,
-            item.user_id,
-            item.title,
-            (item as any)[contentName],
-            item.date,
-            item.sort_date,
-            item.time,
-            offline,
-            name,
-            languagesJson
-        ]
-    );
+            [
+                itemId,
+                item.user_id,
+                item.title,
+                (item as any)[contentName],
+                item.date,
+                item.sort_date,
+                item.time,
+                offline,
+                name,
+                languagesJson
+            ]
+        );
 
-    return {...item, id: itemId};
+        return {...item, id: itemId};
+
+    } catch (err) {
+        await showError(
+            'Ошибка создания записи',
+            'Возникла ошибка создания записи в локальной базе данных..'
+        )
+
+        throw err
+    }
 };
 
 export const redactItemInDB = async (
@@ -173,14 +189,14 @@ export const redactItemInDB = async (
     id: number,
     offline: string = ""
 ) => {
-    const config = tablesConfig[name];
-    if (!config) throw new Error(`Неизвестная таблица: ${name}`);
+    try {
+        const config = tablesConfig[name];
 
-    const contentName = config.table === tablesConfig.textbooks.table ? "content" : "text";
-    const languagesJson = JSON.stringify(item.languages_and_technologies || []);
+        const contentName = config.table === tablesConfig.textbooks.table ? "content" : "text";
+        const languagesJson = JSON.stringify(item.languages_and_technologies || []);
 
-    await executeSQL(
-        `UPDATE ${config.table} SET
+        await executeSQL(
+            `UPDATE ${config.table} SET
                 title = ?, 
                 ${contentName} = ?, 
                 date = ?, 
@@ -189,17 +205,23 @@ export const redactItemInDB = async (
                 offline = ?, 
                 languages_and_technologies = ? 
               WHERE id = ?`,
-        [item.title, (item as any)[contentName], item.date, item.sort_date, item.time, offline, languagesJson, id]
-    );
+            [item.title, (item as any)[contentName], item.date, item.sort_date, item.time, offline, languagesJson, id]
+        );
 
-    return {...item, id};
+        return {...item, id};
+    } catch (err) {
+        throw err
+    }
 };
 
 export const removeFromDB = async (name: string, id: number) => {
-    const config = tablesConfig[name];
-    if (!config) throw new Error(`Неизвестная таблица: ${name}`);
+    try {
+        const config = tablesConfig[name];
 
-    return await executeSQL(`DELETE FROM ${config.table} WHERE id = ?`, [id]);
+        return await executeSQL(`DELETE FROM ${config.table} WHERE id = ?`, [id]);
+    } catch (err) {
+
+    }
 };
 
 
@@ -207,10 +229,14 @@ export const checkPost = async (name: string, id: number): Promise<boolean> => {
 
 
     const config = tablesConfig[name];
-    if (!config) throw new Error(`Неизвестная таблица: ${name}`);
+    if (!config) return false
 
-    const item = await selectSQL<any>(`SELECT * FROM ${config.table} WHERE id = ?`, [id]);
+    try {
+        const item = await selectSQL<any>(`SELECT * FROM ${config.table} WHERE id = ?`, [id])
 
-    return item && item.length > 0;
+        return item && item.length > 0;
+    } catch (_) {
+        return false
+    }
 
 }

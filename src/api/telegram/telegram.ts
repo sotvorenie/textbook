@@ -49,5 +49,7 @@ export const sendToTelegram = async (eventType: TelegramEventType, title?: strin
                 parse_mode: 'HTML'
             })
         });
-    } catch (_) {}
+    } catch (_) {
+        return
+    }
 }

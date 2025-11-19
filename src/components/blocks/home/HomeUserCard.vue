@@ -13,7 +13,7 @@ import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.
 
 import Navigation from "../../common/Navigation.vue";
 import Btn from "../../ui/Btn.vue";
-import Loading from "../../ui/Loading.vue";
+import Loading from "../../ui/loading/Loading.vue";
 import Modal from "../../common/Modal.vue";
 import Message from "../../common/Message.vue";
 
@@ -75,7 +75,12 @@ const uploadFile = async (event: Event) => {
     await sendToTelegram(TelegramEventType.LOAD_AVA, userStore.user.ava?.url)
 
     isLoading.value = false
-  } catch (_) {}
+  } catch (_) {
+    await showError(
+        'Ошибка загрузки файлов',
+        'Не удалось загрузить аватар..'
+    )
+  }
 }
 //=========================================================//
 
@@ -121,7 +126,10 @@ const role = computed(() => {
 //-- кнопки действий --//
 // выход из профиля
 const exit = async () => {
-  const confirmed: boolean = await showConfirm('Выход из профиля', 'Вы действительно хотите выйти из профиля?');
+  const confirmed: boolean = await showConfirm(
+      'Выход из профиля',
+      'Вы действительно хотите выйти из профиля?'
+  );
 
   if (confirmed) {
     authToken.remove()
@@ -129,9 +137,16 @@ const exit = async () => {
 
     resetAllStores()
 
-    await router.push('/')
+    try {
+      await router.push('/')
 
-    window.location.reload()
+      window.location.reload()
+    } catch (_) {
+      await showError(
+          'Ошибка роутера',
+          'Не удалось перейти на страницу авторизации..'
+      )
+    }
   }
 }
 

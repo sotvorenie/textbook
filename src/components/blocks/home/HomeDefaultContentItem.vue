@@ -58,16 +58,7 @@ const activeComponent = computed(() => {
 })
 
 // пропсы активного компонента
-const componentProps = computed(() => {
-  switch (blocksStore.activeBlock[props.name]) {
-    case "item":
-      return { apiUrl: props.apiUrl, idName: props.name };
-    case "create":
-      return { apiUrl: props.apiUrl, name: props.name };
-    default:
-      return { apiUrl: props.apiUrl, searchName: props.name };
-  }
-})
+const componentProps = { apiUrl: props.apiUrl, name: props.name }
 //=========================================================//
 
 

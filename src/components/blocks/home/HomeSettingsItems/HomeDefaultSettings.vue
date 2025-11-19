@@ -3,8 +3,8 @@ import {computed, ref, watch} from "vue";
 
 import {FilterList} from "../../../../types/filter.ts";
 
-import {showConfirm} from "../../../../utils/modals.ts";
-import {cancel} from "../../../../composables/useCancelCreated.ts";
+import {showConfirm, showError} from "../../../../utils/modals.ts";
+import {cancel} from "../../../../composables/useCreatedFunctions.ts";
 
 import {removeItem} from "../../../../api/posts/posts.ts";
 
@@ -176,13 +176,20 @@ const handleRemove = async () => {
       `Вы действительно хотите удалить ${props.createName}?`
   )
   if (confirm) {
-    await removeItem(props.apiName, idStore.idValues[props.blockName])
+    try {
+      await removeItem(props.apiName, idStore.idValues[props.blockName])
 
-    const arr = itemsStore.items[props.blockName];
-    const index = arr.findIndex(el => el.id === idStore.idValues[props.blockName]);
-    if (index !== -1) arr.splice(index, 1);
-
-    goToList()
+      const arr = itemsStore.items[props.blockName];
+      const index = arr.findIndex(el => el.id === idStore.idValues[props.blockName]);
+      if (index !== -1) arr.splice(index, 1);
+    } catch (_) {
+      await showError(
+          'Ошибка удаления записи',
+          'Не удалось удалить запись..'
+      )
+    } finally {
+      goToList()
+    }
   }
 }
 //=========================================================//

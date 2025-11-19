@@ -42,6 +42,10 @@ const languages = [
     name: 'Swiper.js',
     icon: ''
   },
+  {
+    name: 'SQLite',
+    icon: ''
+  },
 ]
 
 const links = [

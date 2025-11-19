@@ -20,8 +20,8 @@ export const useSaveScroll = (pageName: string) => {
     const setup = () => {
         mainElement.addEventListener('scroll', debouncedSaveScroll);
 
-        watch(() => blocksStore.activeBlock[pageName], () => {
-            nextTick(() => {
+        watch(() => blocksStore.activeBlock[pageName], async () => {
+            await nextTick(() => {
                 const savedPosition =
                     scrollStore.scrolls[pageName][blocksStore.activeBlock[pageName]];
                 if (savedPosition > 0) {
@@ -39,8 +39,8 @@ export const useSaveScroll = (pageName: string) => {
         setup,
         destroy,
         saveScroll,
-        restoreScroll: () => {
-            nextTick(() => {
+        restoreScroll: async () => {
+            await nextTick(() => {
                 const savedPosition =
                     scrollStore.scrolls[pageName][blocksStore.activeBlock[pageName]];
                 if (savedPosition > 0) {

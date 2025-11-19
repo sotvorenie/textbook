@@ -5,7 +5,7 @@ const useCreateStore = defineStore('createStore', () => {
 
     const createData = reactive<Record<string, {
         title: string,
-        text: string,
+        text?: string,
         id: number,
         languages_and_technologies: string[],
         content?: Record<string, string>
@@ -30,7 +30,7 @@ const useCreateStore = defineStore('createStore', () => {
         },
         textbooks: {
             title: '',
-            text: '',
+            content: {},
             id: -1,
             languages_and_technologies: [],
         },
@@ -72,7 +72,7 @@ const useCreateStore = defineStore('createStore', () => {
         }
         createData.textbooks = {
             title: '',
-            text: '',
+            content: {},
             id: -1,
             languages_and_technologies: [],
         }

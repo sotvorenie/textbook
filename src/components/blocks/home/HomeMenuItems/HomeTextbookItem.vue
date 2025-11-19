@@ -5,7 +5,7 @@ import {Item} from "../../../../types/item.ts";
 
 import {useItem} from "../../../../composables/useItem.ts";
 import decodeHtmlEntities from "../../../../composables/useDecodeHtmlEntities.ts";
-import {showConfirm} from "../../../../utils/modals.ts";
+import {showConfirm, showError} from "../../../../utils/modals.ts";
 
 import {checkPost, createItemInDB} from "../../../../api/posts/postsDB.ts";
 
@@ -31,7 +31,7 @@ const props = defineProps({
     required: true,
     default: ''
   },
-  idName: {
+  name: {
     type: String,
     required: true
   }
@@ -79,6 +79,12 @@ const allTabs = computed((): string[] => {
 //-- message --//
 // видимость message
 const messageVisible = ref(false)
+
+// текст message
+const messageText = ref<string>('Скопировано')
+
+// ошибочный ли message
+const isErrorMessage = ref<boolean>(false)
 //=========================================================//
 
 
@@ -86,9 +92,18 @@ const messageVisible = ref(false)
 //-- блоки с кодом --//
 // копирование кода
 const handleCopy = async (code: string): Promise<void> => {
-  await navigator.clipboard.writeText(decodeHtmlEntities(code));
+  try {
+    await navigator.clipboard.writeText(decodeHtmlEntities(code));
 
-  messageVisible.value = true
+    messageText.value = 'Скопировано'
+    isErrorMessage.value = false
+    messageVisible.value = true
+  } catch (_) {
+    await showError(
+        'Ошибка копирования',
+        'Не удалось скопировать данные..'
+    )
+  }
 }
 //=========================================================//
 
@@ -98,7 +113,7 @@ const handleCopy = async (code: string): Promise<void> => {
 // вызываем функцию получения данных из кэша/апи, а также получаем в переменную текст для отрисовки
 const {text, itemElement} = useItem(
     isLoading,
-    props.idName,
+    props.name,
     props.apiUrl,
     item,
     activeIndex
@@ -125,10 +140,17 @@ const handleDownload = async () => {
   if (check) {
     isDownload.value = true
 
-    await createItemInDB(props.apiUrl, itemElement.value, itemElement.value.id)
+    try {
+      await createItemInDB(props.apiUrl, itemElement.value, itemElement.value.id)
 
-    downloadVisible.value = false
-    isDownload.value = false
+      isDownload.value = false
+    } catch (_) {
+      messageText.value = 'Не удалось скачать..'
+      isErrorMessage.value = true
+      messageVisible.value = true
+    } finally {
+      downloadVisible.value = false
+    }
   }
 }
 
@@ -136,7 +158,7 @@ const handleDownload = async () => {
 watchEffect(async () => {
   if (!onlineStore.isOnlineMode) return
 
-  downloadVisible.value = !await checkPost(props.apiUrl, idStore.idValues[props.idName])
+  downloadVisible.value = !await checkPost(props.apiUrl, idStore.idValues[props.name])
 })
 //=========================================================//
 
@@ -162,7 +184,7 @@ const handleTabInModal = (tabName: string): void => {
 <template>
 
   <div class="item-root">
-    <Message v-model="messageVisible">Скопировано</Message>
+    <Message v-model="messageVisible" :is-error="isErrorMessage">Скопировано</Message>
 
     <TextbookSkeleton v-if="isLoading"/>
 

@@ -2,16 +2,15 @@ import {computed, onActivated, Ref} from "vue";
 
 import {Item} from "../types/item.ts";
 
+import {showError} from "../utils/modals.ts";
+
 import {getItem} from "../api/posts/posts.ts";
 
 import useIdStore from "../store/idStore.ts";
-const idStore = useIdStore()
 import useItemMemoStore from "../store/itemMemoStore.ts";
-const itemMemoStore = useItemMemoStore();
 import useSettingsStore from "../store/settingsStore.ts";
-const settingsStore = useSettingsStore();
 import useUserStore from "../store/userStore.ts";
-const userStore = useUserStore();
+import useBlocksStore from "../store/blocksStore.ts";
 
 export const useItem = (
     loading: Ref<boolean>,
@@ -20,6 +19,12 @@ export const useItem = (
     item: Ref<Item>,
     index?: Ref<number>
 ) => {
+    const idStore = useIdStore()
+    const itemMemoStore = useItemMemoStore();
+    const settingsStore = useSettingsStore();
+    const userStore = useUserStore();
+    const blocksStore = useBlocksStore();
+
     const getListItem = async () => {
         try {
             if (!idStore.idValues[name]) return
@@ -28,7 +33,14 @@ export const useItem = (
             if (response) {
                 item.value = response;
             }
-        } catch (_){}
+        } catch (err){
+            await showError(
+                'Ошибка загрузки элемента',
+                'Не удалось загрузить элемент'
+            )
+
+            throw err
+        }
     }
 
     const escapeHtml = (str: string) => {
@@ -118,12 +130,19 @@ export const useItem = (
         if (data) {
             item.value = data
         } else {
-            await getListItem();
+            try {
+                await getListItem();
 
-            itemMemoStore.setItem(
-                name,
-                idStore.idValues[name], item.value
-            )
+                itemMemoStore.setItem(
+                    name,
+                    idStore.idValues[name], item.value
+                )
+            } catch (_) {
+                blocksStore.activeBlock[name] = 'list'
+                settingsStore.settingsVisible[name] = 'list'
+
+                return
+            }
         }
 
         if (item.value.user_id === userStore.user.id) {

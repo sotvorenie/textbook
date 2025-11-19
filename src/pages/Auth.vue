@@ -12,14 +12,14 @@ import {login, register} from "../api/auth/auth.ts";
 import {AuthResponse, LoginData, RegisterData} from "../api/auth/types.ts";
 import {sendToTelegram, TelegramEventType} from "../api/telegram/telegram.ts";
 
-import {showConfirm, showWarning} from "../utils/modals.ts";
+import {showConfirm, showError, showWarning} from "../utils/modals.ts";
 
 import {classes} from "../data/classes.ts";
 
 import Btn from "../components/ui/Btn.vue";
 import Navigation from "../components/common/Navigation.vue";
 import Message from "../components/common/Message.vue";
-import Loading from "../components/ui/Loading.vue";
+import Loading from "../components/ui/loading/Loading.vue";
 
 import useOnlineStore from "../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();
@@ -32,47 +32,61 @@ const isLoading = ref<boolean>(false);
 
 
 const loginUser = async () => {
-  isLoading.value = true;
+  try {
+    isLoading.value = true;
 
-  let data: LoginData = {
-    email: loginForm.email,
-    password: loginForm.password,
+    let data: LoginData = {
+      email: loginForm.email,
+      password: loginForm.password,
+    }
+
+    let response: AuthResponse = await login(data);
+
+    if (response.token) {
+      await sendToTelegram(TelegramEventType.LOGIN, response.data.name)
+
+      await router.push('/main').catch(() => {});
+    } else {
+      await showWarning('Ошибка входа','Пользователя с таким логином/паролем не существует!!')
+      wrongCounter.value = wrongCounter.value + 1
+    }
+  } catch (_) {
+    await showError(
+        'Ошибка авторизации',
+        'Не удалось авторизоваться..'
+    )
+  } finally {
+    isLoading.value = false;
   }
-
-  let response: AuthResponse = await login(data);
-
-  if (response.token) {
-    await sendToTelegram(TelegramEventType.LOGIN, response.data.name)
-
-    await router.push('/main').catch(() => {});
-  } else {
-    await showWarning('Ошибка входа','Пользователя с таким логином/паролем не существует!!')
-    wrongCounter.value = wrongCounter.value + 1
-  }
-
-  isLoading.value = false;
 }
 
 const registerUser = async () => {
-  isLoading.value = true;
+  try {
+    isLoading.value = true;
 
-  let data: RegisterData = {
-    email: registerForm.email,
-    password: registerForm.password,
-    name: registerForm.name
+    let data: RegisterData = {
+      email: registerForm.email,
+      password: registerForm.password,
+      name: registerForm.name
+    }
+
+    let response: AuthResponse = await register(data);
+
+    if (response.token) {
+      await sendToTelegram(TelegramEventType.REGISTER, response.data.name)
+
+      successRegister();
+    } else {
+      await showWarning('Ошибка регистрации','Пользователь с таким email уже существует!!');
+    }
+  } catch (_) {
+    await showError(
+        'Ошибка регистрации',
+        'Не удалось зарегистрироваться..'
+    )
+  } finally {
+    isLoading.value = false;
   }
-
-  let response: AuthResponse = await register(data);
-
-  if (response.token) {
-    await sendToTelegram(TelegramEventType.REGISTER, response.data.name)
-
-    successRegister();
-  } else {
-    await showWarning('Ошибка регистрации','Пользователь с таким email уже существует!!');
-  }
-
-  isLoading.value = false;
 }
 
 const successRegister = () => {

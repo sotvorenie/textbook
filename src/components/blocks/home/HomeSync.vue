@@ -5,6 +5,7 @@ import {UnAuthorizedList} from "../../../types/list.ts";
 import {Item} from "../../../types/item.ts";
 
 import {sliceString} from "../../../composables/useSliceString.ts";
+import {showError} from "../../../utils/modals.ts";
 
 import {createItem, redactItem} from "../../../api/posts/posts.ts";
 import {getItemFromDB} from "../../../api/posts/postsDB.ts";
@@ -47,7 +48,10 @@ const syncItem = async (item: UnAuthorizedList, isAll: boolean = false) => {
     }
 
   } catch (err) {
-    throw err
+    await showError(
+        'Ошибка синхронизации',
+        'Не удалось синхронизировать данные..'
+    )
   } finally {
     if (!isAll) {
       isLoading.value = false
@@ -77,8 +81,8 @@ const syncAll = async () => {
 
     emits('close')
 
-  } catch (error) {
-    throw error;
+  } catch (_) {
+
   } finally {
     isLoading.value = false;
     emits('onClose');

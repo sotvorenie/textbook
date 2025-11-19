@@ -81,8 +81,10 @@ export const getAva = async (): Promise<void> => {
         if (err.message === "Network Error" || err.code === "ECONNABORTED") {
             onlineStore.isOnline = false;
             onlineStore.isOnlineMode = false;
+            return
         }
-        throw err;
+
+        return
     }
 }
 
@@ -100,7 +102,7 @@ export const getLastSession = async (): Promise<void> => {
             onlineStore.isOnline = false;
             onlineStore.isOnlineMode = false;
         }
-        throw err;
+        return
     }
 }
 
@@ -118,6 +120,6 @@ export const setLastSession = async ():Promise<void> => {
             onlineStore.isOnline = false;
             onlineStore.isOnlineMode = false;
         }
-        throw err;
+        return
     }
 }
