@@ -8,16 +8,22 @@ export const useSaveScroll = (pageName: string) => {
     const scrollStore = useScrollStore();
     const blocksStore = useBlocksStore();
 
-    const mainElement =
+    const getMainElement = () =>
         document.querySelector('.home__main') as HTMLDivElement;
 
     const saveScroll = () => {
+        const mainElement = getMainElement();
+        if (!mainElement) return;
+
         scrollStore.scrolls[pageName][blocksStore.activeBlock[pageName]] = mainElement.scrollTop;
     };
 
     const debouncedSaveScroll = debounce(saveScroll, 200);
 
     const setup = () => {
+        const mainElement = getMainElement();
+        if (!mainElement) return;
+
         mainElement.addEventListener('scroll', debouncedSaveScroll);
 
         watch(() => blocksStore.activeBlock[pageName], async () => {
@@ -32,6 +38,9 @@ export const useSaveScroll = (pageName: string) => {
     };
 
     const destroy = () => {
+        const mainElement = getMainElement();
+        if (!mainElement) return;
+
         mainElement.removeEventListener('scroll', debouncedSaveScroll);
     };
 
@@ -40,13 +49,16 @@ export const useSaveScroll = (pageName: string) => {
         destroy,
         saveScroll,
         restoreScroll: async () => {
-            await nextTick(() => {
-                const savedPosition =
-                    scrollStore.scrolls[pageName][blocksStore.activeBlock[pageName]];
-                if (savedPosition > 0) {
-                    mainElement.scrollTop = savedPosition;
-                }
-            });
+            await nextTick()
+
+            const mainElement = getMainElement();
+            if (!mainElement) return;
+
+            const savedPosition =
+                scrollStore.scrolls[pageName][blocksStore.activeBlock[pageName]];
+            if (savedPosition > 0) {
+                mainElement.scrollTop = savedPosition;
+            }
         }
     };
 };

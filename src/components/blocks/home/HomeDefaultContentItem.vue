@@ -81,6 +81,7 @@ onMounted(() => {
 });
 
 onActivated(() => {
+  scrollManager.setup()
   scrollManager.restoreScroll();
 });
 
