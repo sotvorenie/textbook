@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, onMounted, onActivated, onDeactivated, VueElement} from "vue";
+import {computed, onActivated, onDeactivated, VueElement} from "vue";
 
 import {useSaveScroll} from "../../../composables/useSaveScroll.ts";
 
@@ -75,10 +75,6 @@ const changeItem = (id: number): void => {
 //=========================================================//
 //-- скролл --//
 const scrollManager = useSaveScroll(props.name)
-
-onMounted(() => {
-  scrollManager.setup();
-});
 
 onActivated(() => {
   scrollManager.setup()

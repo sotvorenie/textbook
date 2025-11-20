@@ -1,5 +1,5 @@
-import { debounce } from "../utils/debounce.ts";
-import { nextTick, watch } from "vue";
+import {debounce} from "../utils/debounce.ts";
+import {nextTick, watch} from "vue";
 
 import useScrollStore from "../store/useScrollStore.ts";
 import useBlocksStore from "../store/blocksStore.ts";
@@ -25,17 +25,15 @@ export const useSaveScroll = (pageName: string) => {
         if (!mainElement) return;
 
         mainElement.addEventListener('scroll', debouncedSaveScroll);
-
-        watch(() => blocksStore.activeBlock[pageName], async () => {
-            await nextTick(() => {
-                const savedPosition =
-                    scrollStore.scrolls[pageName][blocksStore.activeBlock[pageName]];
-                if (savedPosition > 0) {
-                    mainElement.scrollTop = savedPosition;
-                }
-            })
-        });
     };
+
+    const clearItem = () => {
+        scrollStore.scrolls[pageName].item = 0
+    }
+
+    const clearCreate = () => {
+        scrollStore.scrolls[pageName].create = 0
+    }
 
     const destroy = () => {
         const mainElement = getMainElement();
@@ -44,21 +42,38 @@ export const useSaveScroll = (pageName: string) => {
         mainElement.removeEventListener('scroll', debouncedSaveScroll);
     };
 
+    const restoreScroll = async () => {
+        await nextTick()
+
+        const mainElement = getMainElement();
+        if (!mainElement) return;
+
+        mainElement.scrollTop = scrollStore.scrolls[pageName][blocksStore.activeBlock[pageName]];
+    }
+
+    watch(
+        () => blocksStore.activeBlock[pageName],
+        async (val, oldVal) => {
+            if (val === 'list' && oldVal === 'item') {
+                await restoreScroll()
+                clearItem()
+            }
+
+            if (val === 'item' && oldVal === 'create') {
+                await restoreScroll()
+                clearCreate()
+            }
+
+            if (val === 'item' && oldVal === 'list') {
+                await restoreScroll()
+            }
+        }
+    );
+
     return {
         setup,
         destroy,
         saveScroll,
-        restoreScroll: async () => {
-            await nextTick()
-
-            const mainElement = getMainElement();
-            if (!mainElement) return;
-
-            const savedPosition =
-                scrollStore.scrolls[pageName][blocksStore.activeBlock[pageName]];
-            if (savedPosition > 0) {
-                mainElement.scrollTop = savedPosition;
-            }
-        }
+        restoreScroll,
     };
 };
