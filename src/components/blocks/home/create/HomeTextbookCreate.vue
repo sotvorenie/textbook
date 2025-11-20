@@ -3,18 +3,11 @@ import {computed, onMounted, reactive, ref} from "vue";
 
 import {Item} from "../../../../types/item.ts";
 
-import {showAsk, showConfirm, showError} from "../../../../utils/modals.ts";
-import {getCurrentDateTime} from "../../../../composables/useDate.ts";
-import {
-  blurInput, textareaAttributesList,
-  back, handleBack, setNewLanguages, convertTextToBlocks, convertBlocksToText, getTechnologies
-} from "../../../../composables/create/useCreatedFunctions.ts";
-
-import {sendToTelegram, TelegramEventType} from "../../../../api/telegram/telegram.ts";
-import {createItem, redactItem} from "../../../../api/posts/posts.ts";
+import {showConfirm} from "../../../../utils/modals.ts";
+import {textareaAttributesList} from "../../../../composables/create/useCreatedFunctions.ts";
 
 import {addLabelText} from "../../../../composables/useLabelText.ts";
-import {onInput, onSubmit} from "../../../../composables/useFormValidation.ts";
+import {onInput} from "../../../../composables/useFormValidation.ts";
 
 import Btn from "../../../ui/Btn.vue";
 
@@ -28,13 +21,11 @@ import useCreateStore from "../../../../store/useCreateStore.ts";
 const createStore = useCreateStore();
 import useUserStore from "../../../../store/userStore.ts";
 const userStore = useUserStore();
-import useItemMemoStore from "../../../../store/itemMemoStore.ts";
-const itemMemoStore = useItemMemoStore();
-import useItemsStore from "../../../../store/useItemsStore.ts";
-const itemsStore = useItemsStore();
 import useOnlineStore from "../../../../store/useOnlineStore.ts";
 import ToggleButton from "../../../ui/ToggleButton.vue";
 const onlineStore = useOnlineStore();
+
+import {useCreatedFunctions} from "../../../../composables/create/useCreatedFunctions.ts";
 
 const props = defineProps({
   apiUrl: {
@@ -56,104 +47,19 @@ defineOptions({
 
 //=========================================================//
 
-
-//=========================================================//
-//-- асинхронные функции --//
-// создание/редактирование записи
-const sendRequest = async () => {
-  const content: Record<string, string> = {};
-
-  for (const tab of tabs.value) {
-    const key = tab.name || `tab${tab.id}`;
-    content[key] = convertBlocksToText(newItems.value[tab.id] || []);
-  }
-
-  newItem.content = content;
-
-  const dateTime = getCurrentDateTime();
-  newItem.time = dateTime.time;
-  newItem.date = dateTime.date;
-  newItem.sort_date = dateTime.sort_date;
-
-  if (onlineStore.isOnlineMode) {
-    newItem.languages_and_technologies = technologies.value
-        ?.filter(item => item.checked)
-        ?.map(item => item.title)
-  } else {
-    newItem.languages_and_technologies = createStore.createData[props.name].languages_and_technologies
-  }
-
-
-  if (!createStore.createData[props.name].title.length) {
-    try {
-      const createInDB: boolean = onlineStore.isOnlineMode ? localCopyActive.value : true
-
-      const response: Item = await createItem(props.apiUrl, newItem, createInDB, createStore.isCanCreateInAPI[props.name])
-
-      if (response && response.id && (createStore.isCanCreateInAPI[props.name] || !onlineStore.isOnlineMode)) {
-        itemsStore.items[props.name].unshift({
-          id: response.id,
-          title: response.title,
-          date: response.date,
-          languages_and_technologies: response.languages_and_technologies,
-        })
-
-        const cacheElement = itemMemoStore.findItemById(response.id)
-
-        if (cacheElement) itemMemoStore.updateItemInCacheById(props.name, response.id, newItem)
-      }
-    } catch (_) {
-      await showError(
-          'Ошибка создания учебника',
-          'Не удалось создать учебник..'
-      )
-    }
-  } else {
-    try {
-      const response = await redactItem(
-          props.apiUrl,
-          newItem,
-          createStore.createData[props.name].id
-      )
-
-      if (response && response.id) {
-        setNewLanguages(props.name, technologies)
-
-        itemsStore.items[props.name] = itemsStore.items[props.name]?.map(el => {
-          if (el.id === response.id) {
-            return {
-              ...el,
-              title: response.title,
-            }
-          }
-
-          return el
-        })
-
-        itemMemoStore.updateLastItemInCache(props.name, newItem)
-      }
-    } catch (_) {
-      await showError(
-          'Ошибка редактирования учебника',
-          'Не удалось редактировать учебник..'
-      )
-    }
-  }
-
-  const blockNameToEventType: Record<string, TelegramEventType> = {
-    'hints': TelegramEventType.CREATE_HINTS,
-    'textbooks': TelegramEventType.CREATE_TEXTBOOKS,
-    'projects': TelegramEventType.CREATE_PROJECTS,
-    'advices': TelegramEventType.CREATE_ADVICES,
-  };
-
-  try {
-    await sendToTelegram(blockNameToEventType[props.name], newItem.title)
-  } catch (_) {}
-
-  back(props.name, 'textbooks')
-}
-//=========================================================//
+const {
+  handleBack,
+  blurInput,
+  save,
+  newItemsTextbook: newItems,
+  createTextarea,
+  removeTextarea,
+  technologies,
+  getTechnologies,
+  convertTextToBlocks,
+  localCopyActive,
+  handleLocalCopy
+} = useCreatedFunctions(props.name, props.apiUrl)
 
 
 //=========================================================//
@@ -173,7 +79,6 @@ const createTab = () => {
   activeTab.value = tabs.value.length - 1
 }
 
-// удаление tdb по индексу
 const removeTab = async () => {
   const confirm = await showConfirm(
       'Удаление раздела учебника',
@@ -195,6 +100,7 @@ const removeTab = async () => {
 //=========================================================//
 
 
+
 //=========================================================//
 //-- создаваемый элемент --//
 // создаваемый элемент для апи
@@ -207,66 +113,6 @@ const newItem = reactive<Item>({
   sort_date: '',
   time: ''
 })
-
-// элементы textarea
-const newItems = ref<Record<string, {
-  id: string;
-  type: string;
-  text: string;
-  attributes: {
-    name: string;
-    code: string;
-  }
-}[]>>({});
-//=========================================================//
-
-
-//=========================================================//
-//-- языки и технологии --//
-// список языков и технологий с полями checked для checkbox
-const technologies = ref<{title: string, checked: boolean}[]>([]);
-//=========================================================//
-
-
-//=========================================================//
-//-- поля ввода --//
-// создание нового поля ввода
-const createTextarea = (type: string): void => {
-  const id = tabId.value;
-
-  if (!newItems.value[id]) newItems.value[id] = [];
-
-  newItems.value[id].push({
-    id: crypto.randomUUID(),
-    type,
-    text: '',
-    attributes: textareaAttributesList[type]
-  });
-};
-
-// удаление поля ввода
-const removeTextarea = (index: number) => {
-  const id = tabId.value;
-  newItems.value[id]?.splice(index, 1);
-};
-//=========================================================//
-
-
-//=========================================================//
-//-- кнопки действий --//
-// клик по кнопке "Сохранить"
-const save = async (event: Event) => {
-  const valid: boolean = onSubmit(event)
-
-  if (!valid) return
-
-  const ask = await showAsk(
-      'Сохранение учебника',
-      'Вы действительно хотите сохранить учебник?'
-  )
-
-  if (ask) await sendRequest()
-}
 //=========================================================//
 
 
@@ -275,7 +121,7 @@ const save = async (event: Event) => {
 // для создания разметки при редактировании записи
 const initializeFromStore = () => {
   const storedContent = createStore.createData[props.name].content;
-  if (!storedContent) return;
+  if (!storedContent || !Object.keys(storedContent).length) return;
 
   let tabCounter = 0;
 
@@ -303,27 +149,10 @@ const initializeFromStore = () => {
 
 
 //=========================================================//
-//-- локальная копия --//
-// создавать ли локальную копию создаваемого поста
-const localCopyActive = ref<boolean>(true)
-
-
-// переключение значения локальной копии
-const handleLocalCopy = () => {
-  localCopyActive.value = !localCopyActive.value;
-}
-//=========================================================//
-
-
-//=========================================================//
 //-- хуки --//
 // получаем список всевозможных языков и технологий, чтобы отобразить их с checkbox
 onMounted(() => {
-  getTechnologies(
-      technologies,
-      initializeFromStore,
-      props.name
-  )
+  getTechnologies(initializeFromStore)
 })
 //=========================================================//
 </script>
@@ -335,7 +164,7 @@ onMounted(() => {
     <form class="create__form"
           novalidate
           method="post"
-          @submit.prevent="save"
+          @submit.prevent="save($event, newItem, tabs)"
           data-js-form
     >
       <label class="create__label label position-relative" @click.stop>
@@ -382,7 +211,7 @@ onMounted(() => {
                @focus="addLabelText"
                maxlength="100"
                required
-               v-model="tabs[activeTab].name"
+               v-model="tabs[activeTab]!.name"
         >
         <span class="create__error fields_error label__error position-absolute"
               id="title-error"
@@ -397,9 +226,9 @@ onMounted(() => {
 
       <div class="create__block position-relative">
         <div class="create__btn-bar position-sticky z-1000 flex">
-          <Btn @click="createTextarea('code')">Код <></Btn>
-          <Btn @click="createTextarea('text')">Текст</Btn>
-          <Btn @click="createTextarea('title')"
+          <Btn @click="createTextarea('code', tabId)">Код <></Btn>
+          <Btn @click="createTextarea('text', tabId)">Текст</Btn>
+          <Btn @click="createTextarea('title', tabId)"
                v-if="name === 'textbooks'"
           >
             Подзаголовок
@@ -415,7 +244,7 @@ onMounted(() => {
                               v-model:active-index="activeTab"
                               :name="item.attributes.name"
                               :code="item.attributes.code"
-                              @remove-textarea="removeTextarea(index)"
+                              @remove-textarea="removeTextarea(index, tabId)"
           />
         </TransitionGroup>
       </div>
@@ -450,7 +279,7 @@ onMounted(() => {
 
       <div class="create__btn-bar flex flex-justify-center">
         <Btn :is-submit="true">Сохранить</Btn>
-        <Btn @click="handleBack(name)">Отмена</Btn>
+        <Btn @click="handleBack">Отмена</Btn>
       </div>
 
     </form>
