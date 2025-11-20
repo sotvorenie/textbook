@@ -1,14 +1,14 @@
-import {showConfirm} from "../utils/modals.ts";
-import {onBlur} from "./useFormValidation.ts";
-import {removeLabelText} from "./useLabelText.ts";
+import {showConfirm} from "../../utils/modals.ts";
+import {onBlur} from "../useFormValidation.ts";
+import {removeLabelText} from "../useLabelText.ts";
 
-import useCreateStore from "../store/useCreateStore.ts";
-import useOnlineStore from "../store/useOnlineStore.ts";
-import useItemsStore from "../store/useItemsStore.ts";
-import useBlocksStore from "../store/blocksStore.ts";
-import useSettingsStore from "../store/settingsStore.ts";
-import useUserStore from "../store/userStore.ts";
-import useTechnologiesStore from "../store/technologiesStore.ts";
+import useCreateStore from "../../store/useCreateStore.ts";
+import useOnlineStore from "../../store/useOnlineStore.ts";
+import useItemsStore from "../../store/useItemsStore.ts";
+import useBlocksStore from "../../store/blocksStore.ts";
+import useSettingsStore from "../../store/settingsStore.ts";
+import useUserStore from "../../store/userStore.ts";
+import useTechnologiesStore from "../../store/technologiesStore.ts";
 
 const names: Record<string, string> = {
     hints: 'подсказки',

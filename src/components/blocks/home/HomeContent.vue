@@ -3,22 +3,22 @@ import {computed, ref, watch} from "vue";
 
 import {roundedButtonStyle} from "../../../data/styles.ts";
 
-import Messenger from "./HomeMenuItems/Messenger.vue";
-import Blog from "./HomeMenuItems/Blog.vue";
+import Messenger from "./items/Messenger.vue";
+import Blog from "./items/Blog.vue";
 
-import HomeDefaultSettings from "./HomeSettingsItems/HomeDefaultSettings.vue";
-import MessengerSettings from "./HomeSettingsItems/MessengerSettings.vue";
-import BlogSettings from "./HomeSettingsItems/BlogSettings.vue";
+import HomeDefaultSettings from "./settings/HomeDefaultSettings.vue";
+import MessengerSettings from "./settings/MessengerSettings.vue";
+import BlogSettings from "./settings/BlogSettings.vue";
 
 import HomeDefaultContentItem from "./HomeDefaultContentItem.vue";
-import HomeTextbookCreate from "./HomeCreate/HomeTextbookCreate.vue";
-import HomeTextbookItem from "./HomeMenuItems/HomeTextbookItem.vue";
+import HomeTextbookCreate from "./create/HomeTextbookCreate.vue";
+import HomeTextbookItem from "./items/HomeTextbookItem.vue";
 
-import AboutSettings from "./HomeSettingsItems/AboutSettings.vue";
-import About from "./HomeMenuItems/About.vue";
+import AboutSettings from "./settings/AboutSettings.vue";
+import About from "./items/About.vue";
 
 import HomeUserCard from "./HomeUserCard.vue";
-import HomeEmpty from "./HomeEmpty/HomeEmpty.vue";
+import HomeEmpty from "./empty/HomeEmpty.vue";
 
 import UserIcon from "../../../assets/icons/UserIcon.vue";
 import Modal from "../../common/Modal.vue";

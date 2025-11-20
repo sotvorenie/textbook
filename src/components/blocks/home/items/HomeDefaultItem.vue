@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {ref, watchEffect} from "vue";
 
-import {useItem} from "../../../../composables/useItem.ts";
+import {useItem} from "../../../../composables/item/useItem.ts";
 import decodeHtmlEntities from "../../../../composables/useDecodeHtmlEntities.ts";
 import {showConfirm, showError} from "../../../../utils/modals.ts";
 
@@ -9,7 +9,7 @@ import {checkPost, createItemInDB} from "../../../../api/posts/postsDB.ts";
 
 import {Item} from "../../../../types/item.ts";
 
-import DefaultItemSkeleton from "../HomeLoadings/DefaultItemSkeleton.vue";
+import DefaultItemSkeleton from "../loading/DefaultItemSkeleton.vue";
 import HomeItemCode from "../HomeItemCode.vue";
 import Message from "../../../common/Message.vue";
 import Btn from "../../../ui/Btn.vue";

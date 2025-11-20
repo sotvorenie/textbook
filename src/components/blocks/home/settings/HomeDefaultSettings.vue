@@ -4,7 +4,7 @@ import {computed, ref, watch} from "vue";
 import {FilterList} from "../../../../types/filter.ts";
 
 import {showConfirm, showError} from "../../../../utils/modals.ts";
-import {cancel} from "../../../../composables/useCreatedFunctions.ts";
+import {cancel} from "../../../../composables/create/useCreatedFunctions.ts";
 
 import {removeItem} from "../../../../api/posts/posts.ts";
 

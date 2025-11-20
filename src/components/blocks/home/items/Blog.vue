@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import HomeInDeveloping from "../HomeEmpty/HomeInDeveloping.vue";
+import HomeInDeveloping from "../empty/HomeInDeveloping.vue";
 
 </script>
 

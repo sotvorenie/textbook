@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import {computed, onMounted, reactive, ref} from "vue";
+import {onMounted, reactive, ref} from "vue";
 
 import {Item} from "../../../../types/item.ts";
 
-import {showAsk, showConfirm, showError} from "../../../../utils/modals.ts";
+import {showAsk, showError} from "../../../../utils/modals.ts";
 import {getCurrentDateTime} from "../../../../composables/useDate.ts";
 import {
-  blurInput, textareaAttributesList,
-  back, handleBack, setNewLanguages, convertTextToBlocks, convertBlocksToText, getTechnologies
-} from "../../../../composables/useCreatedFunctions.ts";
+  blurInput,
+  setNewLanguages, textareaAttributesList,
+  back, handleBack, convertTextToBlocks, convertBlocksToText, getTechnologies
+} from "../../../../composables/create/useCreatedFunctions.ts";
 
 import {sendToTelegram, TelegramEventType} from "../../../../api/telegram/telegram.ts";
 import {createItem, redactItem} from "../../../../api/posts/posts.ts";
@@ -19,7 +20,6 @@ import {onInput, onSubmit} from "../../../../composables/useFormValidation.ts";
 import Btn from "../../../ui/Btn.vue";
 
 import HomeCreateTextarea from "./HomeCreateTextarea.vue";
-import HomeTextbookSlider from "../HomeTextbookSlider.vue";
 
 import Modal from "../../../common/Modal.vue";
 import CheckboxList from "../../../ui/CheckboxList.vue";
@@ -61,19 +61,13 @@ defineOptions({
 //-- асинхронные функции --//
 // создание/редактирование записи
 const sendRequest = async () => {
-  const content: Record<string, string> = {};
+  newItem.text = convertBlocksToText(newItems.value)
 
-  for (const tab of tabs.value) {
-    const key = tab.name || `tab${tab.id}`;
-    content[key] = convertBlocksToText(newItems.value[tab.id] || []);
-  }
+  const dateTime = getCurrentDateTime()
 
-  newItem.content = content;
-
-  const dateTime = getCurrentDateTime();
-  newItem.time = dateTime.time;
-  newItem.date = dateTime.date;
-  newItem.sort_date = dateTime.sort_date;
+  newItem.time = dateTime.time
+  newItem.date = dateTime.date
+  newItem.sort_date = dateTime.sort_date
 
   if (onlineStore.isOnlineMode) {
     newItem.languages_and_technologies = technologies.value
@@ -82,7 +76,6 @@ const sendRequest = async () => {
   } else {
     newItem.languages_and_technologies = createStore.createData[props.name].languages_and_technologies
   }
-
 
   if (!createStore.createData[props.name].title.length) {
     try {
@@ -104,8 +97,8 @@ const sendRequest = async () => {
       }
     } catch (_) {
       await showError(
-          'Ошибка создания учебника',
-          'Не удалось создать учебник..'
+          'Ошибка создания записи',
+          'Не удалось создать запись..'
       )
     }
   } else {
@@ -134,8 +127,8 @@ const sendRequest = async () => {
       }
     } catch (_) {
       await showError(
-          'Ошибка редактирования учебника',
-          'Не удалось редактировать учебник..'
+          'Ошибка редактирования записи',
+          'Не удалось редактировать запись..'
       )
     }
   }
@@ -151,47 +144,10 @@ const sendRequest = async () => {
     await sendToTelegram(blockNameToEventType[props.name], newItem.title)
   } catch (_) {}
 
-  back(props.name, 'textbooks')
+  newItems.value = []
+
+  back(props.name)
 }
-//=========================================================//
-
-
-//=========================================================//
-//-- tabs --//
-const activeTab = ref<number>(0)
-
-const tabs = ref<{id: number, name: string}[]>([{
-  id: 0,
-  name: ''
-}])
-
-const tabId = computed(() => tabs.value[activeTab.value]?.id);
-
-
-const createTab = () => {
-  tabs.value.push({id: tabs.value.length, name: ''})
-  activeTab.value = tabs.value.length - 1
-}
-
-// удаление tdb по индексу
-const removeTab = async () => {
-  const confirm = await showConfirm(
-      'Удаление раздела учебника',
-      'Вы действительно хотите удалить этот раздел?'
-  )
-
-  if (confirm) {
-    const idToRemove = tabId.value;
-
-    tabs.value.splice(activeTab.value, 1);
-
-    delete newItems.value[idToRemove];
-
-    if (activeTab.value >= tabs.value.length) {
-      activeTab.value = tabs.value.length - 1;
-    }
-  }
-};
 //=========================================================//
 
 
@@ -202,22 +158,22 @@ const newItem = reactive<Item>({
   user_id: userStore.user.id,
   title: '',
   languages_and_technologies: [],
-  content: {},
+  text: '',
   date: '',
   sort_date: '',
   time: ''
 })
 
-// элементы textarea
-const newItems = ref<Record<string, {
-  id: string;
-  type: string;
-  text: string;
+// список textarea блоков
+const newItems= ref<{
+  id: string,
+  type: string,
+  text: string,
   attributes: {
-    name: string;
-    code: string;
-  }
-}[]>>({});
+    name: string,
+    code: string,
+  },
+}[]>([])
 //=========================================================//
 
 
@@ -232,23 +188,18 @@ const technologies = ref<{title: string, checked: boolean}[]>([]);
 //-- поля ввода --//
 // создание нового поля ввода
 const createTextarea = (type: string): void => {
-  const id = tabId.value;
-
-  if (!newItems.value[id]) newItems.value[id] = [];
-
-  newItems.value[id].push({
+  newItems.value.push({
     id: crypto.randomUUID(),
     type,
     text: '',
     attributes: textareaAttributesList[type]
-  });
-};
+  })
+}
 
 // удаление поля ввода
-const removeTextarea = (index: number) => {
-  const id = tabId.value;
-  newItems.value[id]?.splice(index, 1);
-};
+const removeTextarea = (id: string) => {
+  newItems.value = newItems.value?.filter(el => el.id !== id)
+}
 //=========================================================//
 
 
@@ -260,9 +211,21 @@ const save = async (event: Event) => {
 
   if (!valid) return
 
+  const names: Record<string, string> = {
+    hints: 'подсказки',
+    projects: 'проекта',
+    advices: 'совета',
+  }
+
+  const names_2: Record<string, string> = {
+    hints: 'подсказку',
+    projects: 'проект',
+    advices: 'совет',
+  }
+
   const ask = await showAsk(
-      'Сохранение учебника',
-      'Вы действительно хотите сохранить учебник?'
+      `Сохранение ${names[props.name]}`,
+      `Вы действительно хотите сохранить ${names_2[props.name]}?`
   )
 
   if (ask) await sendRequest()
@@ -274,26 +237,18 @@ const save = async (event: Event) => {
 //-- конвертация --//
 // для создания разметки при редактировании записи
 const initializeFromStore = () => {
-  const storedContent = createStore.createData[props.name].content;
-  if (!storedContent) return;
-
-  let tabCounter = 0;
-
-  tabs.value = []
+  const storedText = createStore.createData[props.name].text;
 
   newItem.title = createStore.createData[props.name].title
 
-  for (const tabName in storedContent) {
-    const id = tabCounter++;
-    tabs.value.push({ id, name: tabName });
-
-    const blocks = convertTextToBlocks(storedContent[tabName]);
-    newItems.value[id] = [];
+  if (storedText) {
+    const blocks = convertTextToBlocks(storedText);
 
     blocks.forEach(block => {
-      newItems.value[id].push({
+      newItems.value.push({
         id: crypto.randomUUID(),
-        ...block,
+        type: block.type,
+        text: block.text,
         attributes: textareaAttributesList[block.type]
       });
     });
@@ -363,38 +318,6 @@ onMounted(() => {
         <span class="label__counter position-absolute">{{newItem.title.length}}/100</span>
       </label>
 
-      <HomeTextbookSlider :items="tabs?.map(el => el.name)"
-                          :is-create="true"
-                          v-model:active-index="activeTab"
-                          @create-tab="createTab"
-      />
-
-      <label class="create__label label position-relative" @click.stop>
-        <span class="label__text position-absolute cursor-text user-select-none"
-              @click.stop
-        >
-          {{`Название ${activeTab + 1} темы`}}
-        </span>
-        <input class="create__input input"
-               aria-describedby="title-error"
-               @blur="blurInput"
-               @input="onInput"
-               @focus="addLabelText"
-               maxlength="100"
-               required
-               v-model="tabs[activeTab].name"
-        >
-        <span class="create__error fields_error label__error position-absolute"
-              id="title-error"
-              data-js-form-field-errors
-              @click.stop>
-        </span>
-
-        <span class="label__counter position-absolute">{{newItem.title.length}}/100</span>
-      </label>
-
-      <Btn @click="removeTab">Удалить этап</Btn>
-
       <div class="create__block position-relative">
         <div class="create__btn-bar position-sticky z-1000 flex">
           <Btn @click="createTextarea('code')">Код <></Btn>
@@ -409,14 +332,13 @@ onMounted(() => {
         <TransitionGroup name="textarea"
                          tag="div"
         >
-          <HomeCreateTextarea v-for="(item, index) in newItems[tabId] || []"
-                              :key="item.id"
+          <HomeCreateTextarea v-for="item in newItems"
                               v-model="item.text"
-                              v-model:active-index="activeTab"
                               :name="item.attributes.name"
                               :code="item.attributes.code"
-                              @remove-textarea="removeTextarea(index)"
+                              @remove-textarea="removeTextarea(item.id)"
           />
+
         </TransitionGroup>
       </div>
 

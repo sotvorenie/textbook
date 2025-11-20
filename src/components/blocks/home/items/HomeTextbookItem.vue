@@ -3,13 +3,13 @@ import {computed, ref, watchEffect} from "vue";
 
 import {Item} from "../../../../types/item.ts";
 
-import {useItem} from "../../../../composables/useItem.ts";
+import {useItem} from "../../../../composables/item/useItem.ts";
 import decodeHtmlEntities from "../../../../composables/useDecodeHtmlEntities.ts";
 import {showConfirm, showError} from "../../../../utils/modals.ts";
 
 import {checkPost, createItemInDB} from "../../../../api/posts/postsDB.ts";
 
-import TextbookSkeleton from "../HomeLoadings/TextbookSkeleton.vue";
+import TextbookSkeleton from "../loading/TextbookSkeleton.vue";
 
 import HomeTextbookSlider from "../HomeTextbookSlider.vue";
 import HomeItemCode from "../HomeItemCode.vue";

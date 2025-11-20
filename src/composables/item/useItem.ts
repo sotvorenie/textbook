@@ -1,16 +1,16 @@
 import {computed, onActivated, Ref} from "vue";
 
-import {Item} from "../types/item.ts";
+import {Item} from "../../types/item.ts";
 
-import {showError} from "../utils/modals.ts";
+import {showError} from "../../utils/modals.ts";
 
-import {getItem} from "../api/posts/posts.ts";
+import {getItem} from "../../api/posts/posts.ts";
 
-import useIdStore from "../store/idStore.ts";
-import useItemMemoStore from "../store/itemMemoStore.ts";
-import useSettingsStore from "../store/settingsStore.ts";
-import useUserStore from "../store/userStore.ts";
-import useBlocksStore from "../store/blocksStore.ts";
+import useIdStore from "../../store/idStore.ts";
+import useItemMemoStore from "../../store/itemMemoStore.ts";
+import useSettingsStore from "../../store/settingsStore.ts";
+import useUserStore from "../../store/userStore.ts";
+import useBlocksStore from "../../store/blocksStore.ts";
 
 export const useItem = (
     loading: Ref<boolean>,

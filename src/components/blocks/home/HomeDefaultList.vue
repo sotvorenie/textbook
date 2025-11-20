@@ -10,7 +10,7 @@ import {getList} from "../../../api/posts/posts.ts";
 import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.ts";
 import {like} from "../../../api/liked/liked.ts";
 
-import HomeEmptyList from "./HomeEmpty/HomeEmptyList.vue";
+import HomeEmptyList from "./empty/HomeEmptyList.vue";
 
 import {List} from "../../../types/list.ts";
 import Like from "../../ui/Like.vue";
