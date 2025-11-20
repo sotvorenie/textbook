@@ -4,7 +4,7 @@ import {computed, onMounted, reactive, ref} from "vue";
 import {Item} from "../../../../types/item.ts";
 
 import {showConfirm} from "../../../../utils/modals.ts";
-import {textareaAttributesList} from "../../../../composables/create/useCreatedFunctions.ts";
+import {textareaAttributesList} from "../../../../composables/create/useCreate.ts";
 
 import {addLabelText} from "../../../../composables/useLabelText.ts";
 import {onInput} from "../../../../composables/useFormValidation.ts";
@@ -25,7 +25,7 @@ import useOnlineStore from "../../../../store/useOnlineStore.ts";
 import ToggleButton from "../../../ui/ToggleButton.vue";
 const onlineStore = useOnlineStore();
 
-import {useCreatedFunctions} from "../../../../composables/create/useCreatedFunctions.ts";
+import {useCreate} from "../../../../composables/create/useCreate.ts";
 
 const props = defineProps({
   apiUrl: {
@@ -59,7 +59,7 @@ const {
   convertTextToBlocks,
   localCopyActive,
   handleLocalCopy
-} = useCreatedFunctions(props.name, props.apiUrl)
+} = useCreate(props.name, props.apiUrl)
 
 
 //=========================================================//

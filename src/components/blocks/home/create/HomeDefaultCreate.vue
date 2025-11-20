@@ -3,7 +3,7 @@ import {onMounted, reactive} from "vue";
 
 import {Item} from "../../../../types/item.ts";
 
-import {textareaAttributesList, useCreatedFunctions} from "../../../../composables/create/useCreatedFunctions.ts";
+import {textareaAttributesList, useCreate} from "../../../../composables/create/useCreate.ts";
 
 import {addLabelText} from "../../../../composables/useLabelText.ts";
 import {onInput} from "../../../../composables/useFormValidation.ts";
@@ -70,7 +70,7 @@ const {
   convertTextToBlocks,
   localCopyActive,
   handleLocalCopy
-} = useCreatedFunctions(props.name, props.apiUrl)
+} = useCreate(props.name, props.apiUrl)
 
 
 //=========================================================//

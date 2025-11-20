@@ -55,7 +55,7 @@ export const textareaAttributesList: Record<string, { name: string, code: string
     },
 }
 
-export const useCreatedFunctions = (name: string, apiUrl: string) => {
+export const useCreate = (name: string, apiUrl: string) => {
 
     //=========================================================//
     //-- кнопки действий --//
