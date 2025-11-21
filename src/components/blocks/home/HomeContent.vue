@@ -169,6 +169,12 @@ const userIconVisible = computed(() => {
 //-- модальное окно --//
 // видимость модального окна
 const modalVisible = ref<boolean>(false);
+
+// можно ли закрыть модальное окно (чтобы при загрузке аватарки нельзя было закрыть модальное окно)
+const isAvatarLoaded = ref<boolean>(true)
+
+// можно ли закрыть модальное окно (чтобы при загрузке данных при переключении на онлайн-режим нельзя было закрыть модальное окно)
+const isModeLoaded = ref<boolean>(true)
 //=========================================================//
 
 //=========================================================//
@@ -180,6 +186,12 @@ watch(
       const name: string = settingsComponentsAttributes[homeStore.activeMenuIndex - 1]?.props.blockName!
       settingsStore.settingsVisible[name] = blocksStore.activeBlock[name]
     }
+)
+
+// наблюдаем за значением видимости анимации загрузки при переключении online/offline режимов
+watch(
+    () => onlineStore.modeLoadingVisible,
+    (val) => isModeLoaded.value = !val
 )
 //=========================================================//
 </script>
@@ -198,7 +210,7 @@ watch(
         />
       </KeepAlive>
 
-      <Modal v-model="modalVisible" :size="600">
+      <Modal v-model="modalVisible" :size="600" :close-active="isAvatarLoaded && isModeLoaded">
         <template #activator="{open}">
           <Transition name="avatar" appear>
             <div class="home__user-wrapper position-relative" @click="open">
@@ -225,7 +237,9 @@ watch(
         </template>
 
         <template #default>
-          <HomeUserCard/>
+          <HomeUserCard @on-close="isAvatarLoaded = true"
+                        @off-close="isAvatarLoaded = false"
+          />
         </template>
       </Modal>
     </header>

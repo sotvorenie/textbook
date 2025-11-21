@@ -30,6 +30,8 @@ const messageStore = useMessageStore();
 
 //=========================================================//
 
+const emits = defineEmits(['onClose', 'offClose'])
+
 //=========================================================//
 //-- асинхронные функции --//
 // видимость анимации загрузки аватарки
@@ -42,6 +44,7 @@ const uploadFile = async (event: Event) => {
     if (isLoading.value) return
 
     isLoading.value = true
+    emits('offClose')
 
     const target = event.target as HTMLInputElement
 
@@ -81,6 +84,8 @@ const uploadFile = async (event: Event) => {
         'Ошибка загрузки файлов',
         'Не удалось загрузить аватар..'
     )
+  } finally {
+    emits('onClose')
   }
 }
 //=========================================================//

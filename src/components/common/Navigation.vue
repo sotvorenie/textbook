@@ -11,8 +11,9 @@ import Arrow from "../../assets/icons/Arrow.vue";
 import Reload from "../../assets/icons/Reload.vue";
 import Sun from "../../assets/icons/Sun.vue";
 
-import useOnlineStore from "../../store/useOnlineStore.ts";
 import Loading from "../ui/loading/Loading.vue";
+
+import useOnlineStore from "../../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();
 
 defineProps({
