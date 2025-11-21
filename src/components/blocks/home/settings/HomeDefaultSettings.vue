@@ -7,6 +7,7 @@ import {showConfirm, showError} from "../../../../utils/modals.ts";
 import {cancel} from "../../../../composables/create/useCreate.ts";
 
 import {removeItem} from "../../../../api/posts/posts.ts";
+import {handleLike} from "../../../../api/liked/liked.ts";
 
 import HomeSettingsMyOther from "../HomeSettingsMyOther.vue";
 
@@ -178,6 +179,8 @@ const handleRemove = async () => {
   if (confirm) {
     try {
       await removeItem(props.apiName, idStore.idValues[props.blockName])
+
+      await handleLike(props.blockName, idStore.idValues[props.blockName])
 
       const arr = itemsStore.items[props.blockName];
       const index = arr.findIndex(el => el.id === idStore.idValues[props.blockName]);

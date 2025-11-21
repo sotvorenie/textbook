@@ -7,8 +7,7 @@ import {debounce} from "../../../utils/debounce.ts";
 import {showError, showWarning} from "../../../utils/modals.ts";
 
 import {getList} from "../../../api/posts/posts.ts";
-import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.ts";
-import {like} from "../../../api/liked/liked.ts";
+import {handleLike} from "../../../api/liked/liked.ts";
 
 import HomeEmptyList from "./empty/HomeEmptyList.vue";
 
@@ -178,43 +177,9 @@ const likedItems = computed(() => {
 })
 
 
-// добавление элемента в избранное
-const handleLike = async (id: number) => {
-  try {
-    const element = itemsStore.items[props.name]?.find(el => el.id === id) ?? {title: ''}
-
-    let isLike: boolean = false
-
-    const userLikes = userStore.userLiked.items[props.name]
-
-    if (userLikes && userLikes?.includes(id)) {
-      userStore.userLiked.items[props.name] =
-          userLikes?.filter((item: number) => item !== id)
-    } else {
-      if (!userLikes) {
-        userStore.userLiked.items[props.name] = []
-      }
-      userStore.userLiked?.items[props.name].push(id)
-      isLike = true
-    }
-
-    const response = await like(props.name)
-
-    if (response) {
-      isLike ? await sendToTelegram(TelegramEventType.LIKE, element.title)
-          : await sendToTelegram(TelegramEventType.UNLIKE, element.title)
-
-      if (userStore.userLiked.id < 0) {
-        userStore.userLiked.id = response.id
-      }
-    }
-  } catch (_) {
-    await showError(
-        'Ошибка добавления в избранное',
-        'Не удалось добавить элемент в избранное'
-    )
-    userStore.userLiked?.items[props.name].pop()
-  }
+// добавление/удаление элемента из избранного
+const like = async (id: number) => {
+  await handleLike(props.name, id)
 }
 //=========================================================//
 
@@ -268,7 +233,7 @@ await getPosts()
                 v-if="onlineStore.isOnlineMode"
         >
           <Like :liked="likedItems?.includes(item.id)"
-                @click.stop="handleLike(item.id)"
+                @click.stop="like(item.id)"
           />
         </button>
 
