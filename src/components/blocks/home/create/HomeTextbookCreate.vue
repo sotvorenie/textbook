@@ -8,6 +8,7 @@ import {textareaAttributesList} from "../../../../composables/create/useCreate.t
 
 import {addLabelText} from "../../../../composables/useLabelText.ts";
 import {onInput} from "../../../../composables/useFormValidation.ts";
+import {useCreate} from "../../../../composables/create/useCreate.ts";
 
 import Btn from "../../../ui/Btn.vue";
 
@@ -15,17 +16,16 @@ import HomeCreateTextarea from "./HomeCreateTextarea.vue";
 import HomeTextbookSlider from "../HomeTextbookSlider.vue";
 
 import Modal from "../../../common/Modal.vue";
+import DragAndDrop from "../../../common/DragAndDrop.vue";
 import CheckboxList from "../../../ui/CheckboxList.vue";
+import ToggleButton from "../../../ui/ToggleButton.vue";
 
 import useCreateStore from "../../../../store/useCreateStore.ts";
 const createStore = useCreateStore();
 import useUserStore from "../../../../store/useUserStore.ts";
 const userStore = useUserStore();
 import useOnlineStore from "../../../../store/useOnlineStore.ts";
-import ToggleButton from "../../../ui/ToggleButton.vue";
 const onlineStore = useOnlineStore();
-
-import {useCreate} from "../../../../composables/create/useCreate.ts";
 
 const props = defineProps({
   apiUrl: {
@@ -242,18 +242,21 @@ onMounted(() => {
           </Btn>
         </div>
 
-        <TransitionGroup name="textarea"
-                         tag="div"
+        <DragAndDrop v-model="newItems[activeTab]"
+                     transition-name="textarea"
+                     handler="create__handler"
+                     css-class="create__label-container"
         >
-          <HomeCreateTextarea v-for="(item, index) in newItems[tabId] || []"
-                              :key="item.id"
-                              v-model="item.text"
-                              v-model:active-index="activeTab"
-                              :name="item.attributes.name"
-                              :code="item.attributes.code"
-                              @remove-textarea="removeTextarea(index, tabId)"
-          />
-        </TransitionGroup>
+          <template #item="{item}">
+            <HomeCreateTextarea
+                :key="item.id"
+                v-model="item.text"
+                :name="item.attributes.name"
+                :code="item.attributes.code"
+                @remove-textarea="removeTextarea(index)"
+            />
+          </template>
+        </DragAndDrop>
       </div>
 
       <div class="create__technologies" v-if="onlineStore.isOnlineMode">

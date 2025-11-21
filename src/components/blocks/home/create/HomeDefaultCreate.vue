@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {onMounted, reactive, ref} from "vue";
+import {onMounted, reactive} from "vue";
 
 import {Item} from "../../../../types/item.ts";
 
@@ -13,6 +13,7 @@ import Btn from "../../../ui/Btn.vue";
 import HomeCreateTextarea from "./HomeCreateTextarea.vue";
 
 import Modal from "../../../common/Modal.vue";
+import DragAndDrop from "../../../common/DragAndDrop.vue";
 import CheckboxList from "../../../ui/CheckboxList.vue";
 import ToggleButton from "../../../ui/ToggleButton.vue";
 
@@ -21,7 +22,6 @@ const createStore = useCreateStore();
 import useUserStore from "../../../../store/useUserStore.ts";
 const userStore = useUserStore();
 import useOnlineStore from "../../../../store/useOnlineStore.ts";
-import DragAndDrop from "../../../common/DragAndDrop.vue";
 const onlineStore = useOnlineStore();
 
 const props = defineProps({
@@ -170,19 +170,6 @@ onMounted(async () => {
             />
           </template>
         </DragAndDrop>
-
-<!--        <TransitionGroup name="textarea"-->
-<!--                         tag="div"-->
-<!--        >-->
-<!--          <HomeCreateTextarea v-for="(item, index) in newItems"-->
-<!--                              :key="item.id"-->
-<!--                              v-model="item.text"-->
-<!--                              :name="item.attributes.name"-->
-<!--                              :code="item.attributes.code"-->
-<!--                              @remove-textarea="removeTextarea(index)"-->
-<!--          />-->
-
-<!--        </TransitionGroup>-->
       </div>
 
       <div class="create__technologies" v-if="onlineStore.isOnlineMode">
