@@ -15,7 +15,6 @@ import Navigation from "../../common/Navigation.vue";
 import Btn from "../../ui/Btn.vue";
 import Loading from "../../ui/loading/Loading.vue";
 import Modal from "../../common/Modal.vue";
-import Message from "../../common/Message.vue";
 
 import Edit from "../../../assets/icons/Edit.vue";
 import UserIcon from "../../../assets/icons/UserIcon.vue";
@@ -26,11 +25,13 @@ import useUserStore from "../../../store/useUserStore.ts";
 const userStore = useUserStore();
 import useOnlineStore from "../../../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();
+import useMessageStore from "../../../store/useMessageStore.ts";
+const messageStore = useMessageStore();
 
 //=========================================================//
 
 //=========================================================//
-//-- аинхронные функции --//
+//-- асинхронные функции --//
 // видимость анимации загрузки аватарки
 const isLoading = ref(false)
 
@@ -162,35 +163,16 @@ const handleRemoveUser = async () => {
 
 //=========================================================//
 //-- синхронизация --//
-// видимость модалки синхронизации
+// видимость модального окна синхронизации
 const syncModalVisible = ref<boolean>(false)
 
-// возможность закрытия модалки синхронизации
+// возможность закрытия модального окна синхронизации
 const syncCloseActive = ref<boolean>(true)
-//=========================================================//
-
-
-//=========================================================//
-//-- message --//
-// видимость message
-const messageVisible = ref<boolean>(false)
-
-// текст message
-const messageText = ref<string>('')
-
-
-// показываем message
-const showMessage = (text: string) => {
-  messageText.value = text
-  messageVisible.value = true
-}
 //=========================================================//
 </script>
 
 <template>
   <div class="user-card">
-    <Message v-model="messageVisible">{{messageText}}</Message>
-
     <div class="user-card__top flex row user-select-none">
       <div class="user-card__img-container img-container position-relative col-6">
         <Loading class="user-card__loading" :size="50" v-if="isLoading"/>
@@ -251,7 +233,7 @@ const showMessage = (text: string) => {
         <HomeSync @close="close"
                   @off-close="syncCloseActive = false"
                   @on-close="syncCloseActive = true"
-                  @message="showMessage"
+                  @message="messageStore.show($event)"
         />
       </template>
     </Modal>

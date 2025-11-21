@@ -18,11 +18,12 @@ import {classes} from "../data/classes.ts";
 
 import Btn from "../components/ui/Btn.vue";
 import Navigation from "../components/common/Navigation.vue";
-import Message from "../components/common/Message.vue";
 import Loading from "../components/ui/loading/Loading.vue";
 
 import useOnlineStore from "../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();
+import useMessageStore from "../store/useMessageStore.ts";
+const messageStore = useMessageStore();
 
 //=========================================================//
 
@@ -90,8 +91,7 @@ const registerUser = async () => {
 }
 
 const successRegister = () => {
-  messageText.value = 'Регистрация прошла успешно!!';
-  messageVisible.value = true;
+  messageStore.show('Регистрация прошла успешно!!')
 
   const timer = setTimeout(() => {
     router.push('/main');
@@ -192,13 +192,6 @@ const handleRegister = (event: Event) => {
 }
 //=========================================================//
 
-//=========================================================//
-//-- message --//
-const messageText = ref<string>('');
-const messageVisible = ref<boolean>(false);
-const isError = ref<boolean>(false)
-//=========================================================//
-
 
 //=========================================================//
 //-- неверные попытки --//
@@ -206,7 +199,7 @@ const isError = ref<boolean>(false)
 const wrongCounter = ref<number>(0)
 
 
-// показ модального окна переключения на оффлайн режим
+// показ модального окна переключения на offline режим
 const showConfirmModal = async () => {
   let text: string = ''
 
@@ -230,30 +223,18 @@ const showConfirmModal = async () => {
 
 //=========================================================//
 //-- хуки --//
-// проверям: онлайн мы или нет
+// проверяем: онлайн мы или нет
 onMounted(() => {
   onlineStore.isOnline = navigator.onLine
 
   if (!onlineStore.isOnline) {
     onlineStore.isOnlineMode = false
 
-    isError.value = true;
-    messageText.value = 'Нет подключения к интернету..'
-    messageVisible.value = true;
+    messageStore.show('Нет подключения к интернету..', true)
   } else {
     onlineStore.getFromLocalStorage()
   }
 })
-
-// чтобы при исчезновении message - сбрасывать его isError
-watch(
-    () => messageVisible.value,
-    () => {
-      if (!messageVisible.value) {
-        isError.value = false
-      }
-    }
-)
 
 // наблюдаем за счетчиком неверных попыток
 watch(
@@ -269,8 +250,6 @@ watch(
 
 <template>
   <Navigation :back-visible="false"/>
-
-  <Message v-model="messageVisible" :is-error="isError">{{messageText}}</Message>
 
   <main class="auth flex-center" ref="authElement">
     <div class="auth__inner overflow-hidden" v-if="onlineStore.isOnlineMode">
