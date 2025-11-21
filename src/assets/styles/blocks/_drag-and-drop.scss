@@ -1,0 +1,13 @@
+@use '../helpers/index' as *;
+@use '../variables' as *;
+
+.drag-and-drop {
+
+  &__item {
+    &.dragging {
+      user-select: none;
+      opacity: 0.6;
+      cursor: grabbing !important;
+    }
+  }
+}

@@ -29,7 +29,7 @@
 
   &__remove {
     background: $color-dark-alt;
-    top: rem(-30);
+    top: rem(-20);
     right: rem(15);
   }
 
@@ -51,6 +51,34 @@
     &-btn {
       column-gap: rem(10);
       text-transform: uppercase;
+    }
+  }
+
+  &__label-container {
+    &:not(:last-child) {
+      margin-bottom: rem(40);
+    }
+  }
+
+  &__label {
+    width: 100%;
+
+    &.textarea {
+      padding-left: rem(20);
+    }
+  }
+
+  &__handler {
+    @include abs-y;
+    @include flex-center();
+
+    left: rem(-10);
+    height: 100%;
+
+    svg {
+      @include square(30);
+
+      pointer-events: none;
     }
   }
 }

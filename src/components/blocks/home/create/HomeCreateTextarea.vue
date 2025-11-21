@@ -8,6 +8,7 @@ import {removeLabelText} from "../../../../composables/useLabelText.ts";
 import {addLabelText} from "../../../../composables/useLabelText.ts";
 
 import Btn from "../../../ui/Btn.vue";
+import DragAndDropIcon from "../../../../assets/icons/DragAndDropIcon.vue";
 
 //=========================================================//
 
@@ -72,12 +73,13 @@ onMounted(() => {
 
 <template>
 
-  <label class="create__label label position-relative" @click="addLabelText">
+  <label class="create__label textarea label position-relative" @click="addLabelText">
         <span class="label__text is-active position-absolute cursor-text user-select-none"
               @click.stop
         >
           {{ name }}
         </span>
+    <button class="create__handler recolor-svg position-absolute hover-color-accent"><DragAndDropIcon/></button>
     <textarea class="create__textarea"
               :aria-describedby="`text-${code}`"
               @blur="blurInput"

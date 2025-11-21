@@ -1439,6 +1439,12 @@ a[class] {
   line-height: 1;
 }
 
+.drag-and-drop__item.dragging {
+  user-select: none;
+  opacity: 0.6;
+  cursor: grabbing !important;
+}
+
 .auth {
   height: 100vh;
 }
@@ -1930,7 +1936,7 @@ a[class] {
 }
 .create__remove {
   background: var(--color-dark-alt);
-  top: -1.875rem;
+  top: -1.25rem;
   right: 0.9375rem;
 }
 .create__technologies {
@@ -1946,6 +1952,32 @@ a[class] {
 .create__local-btn {
   column-gap: 0.625rem;
   text-transform: uppercase;
+}
+.create__label-container:not(:last-child) {
+  margin-bottom: 2.5rem;
+}
+.create__label {
+  width: 100%;
+}
+.create__label.textarea {
+  padding-left: 1.25rem;
+}
+.create__handler {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  left: -0.625rem;
+  height: 100%;
+}
+.create__handler svg {
+  width: 1.875rem !important;
+  min-width: 1.875rem !important;
+  height: 1.875rem !important;
+  min-height: 1.875rem !important;
+  pointer-events: none;
 }
 
 .textbook__search-btn {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {onMounted, reactive} from "vue";
+import {onMounted, reactive, ref} from "vue";
 
 import {Item} from "../../../../types/item.ts";
 
@@ -21,6 +21,7 @@ const createStore = useCreateStore();
 import useUserStore from "../../../../store/useUserStore.ts";
 const userStore = useUserStore();
 import useOnlineStore from "../../../../store/useOnlineStore.ts";
+import DragAndDrop from "../../../common/DragAndDrop.vue";
 const onlineStore = useOnlineStore();
 
 const props = defineProps({
@@ -154,18 +155,34 @@ onMounted(async () => {
           </Btn>
         </div>
 
-        <TransitionGroup name="textarea"
-                         tag="div"
+        <DragAndDrop v-model="newItems"
+                     transition-name="textarea"
+                     handler="create__handler"
+                     css-class="create__label-container"
         >
-          <HomeCreateTextarea v-for="(item, index) in newItems"
-                              :key="item.id"
-                              v-model="item.text"
-                              :name="item.attributes.name"
-                              :code="item.attributes.code"
-                              @remove-textarea="removeTextarea(index)"
-          />
+          <template #item="{item}">
+            <HomeCreateTextarea
+              :key="item.id"
+              v-model="item.text"
+              :name="item.attributes.name"
+              :code="item.attributes.code"
+              @remove-textarea="removeTextarea(index)"
+            />
+          </template>
+        </DragAndDrop>
 
-        </TransitionGroup>
+<!--        <TransitionGroup name="textarea"-->
+<!--                         tag="div"-->
+<!--        >-->
+<!--          <HomeCreateTextarea v-for="(item, index) in newItems"-->
+<!--                              :key="item.id"-->
+<!--                              v-model="item.text"-->
+<!--                              :name="item.attributes.name"-->
+<!--                              :code="item.attributes.code"-->
+<!--                              @remove-textarea="removeTextarea(index)"-->
+<!--          />-->
+
+<!--        </TransitionGroup>-->
       </div>
 
       <div class="create__technologies" v-if="onlineStore.isOnlineMode">
