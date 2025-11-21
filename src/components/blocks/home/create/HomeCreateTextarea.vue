@@ -43,11 +43,7 @@ const autoResize = () => {
 
 // максимальная длина строки в зависимости от типа поля ввода
 const maxLength = computed(() => {
-  if (props.code === textareaAttributesList.code.code || props.code === textareaAttributesList.text.code) {
-    return 10000
-  } else {
-    return 100
-  }
+  return props.code === textareaAttributesList.title.code ? 100 : 10000
 })
 
 // клик по полю ввода
