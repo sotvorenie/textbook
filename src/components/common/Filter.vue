@@ -5,7 +5,7 @@ import Absolute from "./Absolute.vue";
 import FilterIcon from "../../assets/icons/FilterIcon.vue";
 import Checkbox from "../ui/Checkbox.vue";
 
-import useTechnologiesStore from "../../store/technologiesStore.ts";
+import useTechnologiesStore from "../../store/useTechnologiesStore.ts";
 const technologiesStore = useTechnologiesStore();
 
 const emits = defineEmits(['change']);

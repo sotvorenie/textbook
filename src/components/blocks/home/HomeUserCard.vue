@@ -22,7 +22,7 @@ import UserIcon from "../../../assets/icons/UserIcon.vue";
 
 import HomeSync from "./HomeSync.vue";
 
-import useUserStore from "../../../store/userStore.ts";
+import useUserStore from "../../../store/useUserStore.ts";
 const userStore = useUserStore();
 import useOnlineStore from "../../../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();

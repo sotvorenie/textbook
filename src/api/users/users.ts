@@ -1,6 +1,6 @@
 import {del, get, patch, post} from "../base.ts";
 
-import useUserStore from "../../store/userStore.ts";
+import useUserStore from "../../store/useUserStore.ts";
 import {userAva} from "../../utils/ava.ts";
 import {getCurrentDateTime} from "../../composables/useDate.ts";
 

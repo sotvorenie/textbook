@@ -23,11 +23,11 @@ import HomeEmpty from "./empty/HomeEmpty.vue";
 import UserIcon from "../../../assets/icons/UserIcon.vue";
 import Modal from "../../common/Modal.vue";
 
-import useUserStore from "../../../store/userStore.ts";
+import useUserStore from "../../../store/useUserStore.ts";
 const userStore = useUserStore();
-import useSettingsStore from "../../../store/settingsStore.ts";
+import useSettingsStore from "../../../store/useSettingsStore.ts";
 const settingsStore = useSettingsStore();
-import useBlocksStore from "../../../store/blocksStore.ts";
+import useBlocksStore from "../../../store/useBlocksStore.ts";
 const blocksStore = useBlocksStore();
 import useOnlineStore from "../../../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();

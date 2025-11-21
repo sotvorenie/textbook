@@ -2,7 +2,7 @@ import {debounce} from "../utils/debounce.ts";
 import {nextTick, watch} from "vue";
 
 import useScrollStore from "../store/useScrollStore.ts";
-import useBlocksStore from "../store/blocksStore.ts";
+import useBlocksStore from "../store/useBlocksStore.ts";
 
 export const useSaveScroll = (pageName: string) => {
     const scrollStore = useScrollStore();

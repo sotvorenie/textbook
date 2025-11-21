@@ -17,11 +17,11 @@ import Like from "../../ui/Like.vue";
 import Absolute from "../../common/Absolute.vue";
 import Btn from "../../ui/Btn.vue";
 
-import useSearchStore from "../../../store/searchStore.ts";
+import useSearchStore from "../../../store/useSearchStore.ts";
 const searchStore = useSearchStore();
-import useSettingsStore from "../../../store/settingsStore.ts";
+import useSettingsStore from "../../../store/useSettingsStore.ts";
 const settingsStore = useSettingsStore();
-import useUserStore from "../../../store/userStore.ts";
+import useUserStore from "../../../store/useUserStore.ts";
 const userStore = useUserStore();
 import useItemsStore from "../../../store/useItemsStore.ts";
 const itemsStore = useItemsStore();

@@ -5,7 +5,7 @@ import {UnAuthorizedList} from "../types/list.ts";
 
 import {selectSQL} from "../api/database.ts";
 
-import useUserStore from "./userStore.ts";
+import useUserStore from "./useUserStore.ts";
 
 const useOnlineStore = defineStore("onlineStore", () => {
     // режим приложения

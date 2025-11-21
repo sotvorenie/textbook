@@ -1,6 +1,6 @@
 import Database from "@tauri-apps/plugin-sql";
 import { appLocalDataDir, join } from "@tauri-apps/api/path";
-import useUserStore from "../store/userStore.ts";
+import useUserStore from "../store/useUserStore.ts";
 import useOnlineStore from "../store/useOnlineStore.ts";
 
 export const tablesConfig: Record<string, Record<string, string>> = {

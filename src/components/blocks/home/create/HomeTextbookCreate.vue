@@ -19,7 +19,7 @@ import CheckboxList from "../../../ui/CheckboxList.vue";
 
 import useCreateStore from "../../../../store/useCreateStore.ts";
 const createStore = useCreateStore();
-import useUserStore from "../../../../store/userStore.ts";
+import useUserStore from "../../../../store/useUserStore.ts";
 const userStore = useUserStore();
 import useOnlineStore from "../../../../store/useOnlineStore.ts";
 import ToggleButton from "../../../ui/ToggleButton.vue";

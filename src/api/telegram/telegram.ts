@@ -1,4 +1,4 @@
-import useUserStore from "../../store/userStore.ts";
+import useUserStore from "../../store/useUserStore.ts";
 import useOnlineStore from "../../store/useOnlineStore.ts";
 
 const bot_token = import.meta.env.VITE_TELEGRAM_BOT_TOKEN

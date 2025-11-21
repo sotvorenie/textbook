@@ -1,4 +1,4 @@
-import useUserStore from "../store/userStore.ts";
+import useUserStore from "../store/useUserStore.ts";
 
 export const userAva = {
     set() {

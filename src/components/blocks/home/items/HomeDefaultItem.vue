@@ -1,23 +1,13 @@
 <script setup lang="ts">
-import {ref, watchEffect} from "vue";
-
-import {useItem} from "../../../../composables/item/useItem.ts";
-import decodeHtmlEntities from "../../../../composables/useDecodeHtmlEntities.ts";
-import {showConfirm, showError} from "../../../../utils/modals.ts";
-
-import {checkPost, createItemInDB} from "../../../../api/posts/postsDB.ts";
+import {ref} from "vue";
 
 import {Item} from "../../../../types/item.ts";
 
+import {useItem} from "../../../../composables/item/useItem.ts";
+
 import DefaultItemSkeleton from "../loading/DefaultItemSkeleton.vue";
 import HomeItemCode from "../HomeItemCode.vue";
-import Message from "../../../common/Message.vue";
 import Btn from "../../../ui/Btn.vue";
-
-import useIdStore from "../../../../store/idStore.ts";
-const idStore = useIdStore();
-import useOnlineStore from "../../../../store/useOnlineStore.ts";
-const onlineStore = useOnlineStore();
 
 const props = defineProps({
   apiUrl: {
@@ -33,6 +23,9 @@ const props = defineProps({
 
 //=========================================================//
 
+
+//=========================================================//
+//-- элемент списка --//
 // первоначальный вид элемента списка
 const item = ref<Item>({
   user_id: -1,
@@ -43,86 +36,29 @@ const item = ref<Item>({
   sort_date: '',
   time: '',
 })
+//=========================================================//
 
-// видимость анимации загрузки
-const isLoading = ref<boolean>(true)
 
-// вызываем функцию получения данных из кэша/апи, а также получаем в переменную текст для отрисовки
-const {text, itemElement} = useItem(
-    isLoading,
+//=========================================================//
+//-- вызов composable-функции --//
+const {
+  isLoading,
+  parsedText: text,
+  handleCopy,
+  downloadVisible,
+  isDownload,
+  handleDownload
+} = useItem(
     props.name,
     props.apiUrl,
     item
 )
-
-// видимость message
-const messageVisible = ref(false)
-
-// текст message
-const messageText = ref<string>('Скопировано')
-
-// ошибочный ли message
-const isErrorMessage = ref<boolean>(false)
-
-// копирование кода
-const handleCopy = async (code: string): Promise<void> => {
-  try {
-    await navigator.clipboard.writeText(decodeHtmlEntities(code));
-
-    messageText.value = 'Скопировано'
-    isErrorMessage.value = false
-    messageVisible.value = true
-  } catch (_) {
-    await showError(
-        'Ошибка копирования',
-        'Не удалось скопировать данные..'
-    )
-  }
-}
-
-// видимость кнопки "Скачать"
-const downloadVisible = ref<boolean>(false)
-
-// клик по кнопке "Скачать"
-const handleDownload = async () => {
-  const check = await showConfirm(
-      'Скачивание материала',
-      'Вы действительно хотите скачать данный материал?'
-  )
-
-  if (check) {
-    isDownload.value = true
-
-    try {
-      await createItemInDB(props.apiUrl, itemElement.value, itemElement.value.id)
-
-      isDownload.value = false
-    } catch (_) {
-      messageText.value = 'Не удалось скачать..'
-      isErrorMessage.value = true
-      messageVisible.value = true
-    } finally {
-      downloadVisible.value = false
-    }
-  }
-}
-
-// видимость анимации скачивания
-const isDownload =  ref<boolean>(false)
-
-// проверка наличие поста в бд
-watchEffect(async () => {
-  if (!onlineStore.isOnlineMode) return
-
-  downloadVisible.value = !await checkPost(props.apiUrl, idStore.idValues[props.name])
-})
+//=========================================================//
 </script>
 
 <template>
 
   <div class="item-root">
-    <Message v-model="messageVisible" :is-error="isErrorMessage">Скопировано</Message>
-
     <DefaultItemSkeleton v-if="isLoading"/>
 
     <div class="item" v-else>

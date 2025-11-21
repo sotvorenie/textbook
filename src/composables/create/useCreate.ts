@@ -13,11 +13,11 @@ import {createItem, redactItem} from "../../api/posts/posts.ts";
 import useCreateStore from "../../store/useCreateStore.ts";
 import useOnlineStore from "../../store/useOnlineStore.ts";
 import useItemsStore from "../../store/useItemsStore.ts";
-import useBlocksStore from "../../store/blocksStore.ts";
-import useSettingsStore from "../../store/settingsStore.ts";
-import useUserStore from "../../store/userStore.ts";
-import useTechnologiesStore from "../../store/technologiesStore.ts";
-import useItemMemoStore from "../../store/itemMemoStore.ts";
+import useBlocksStore from "../../store/useBlocksStore.ts";
+import useSettingsStore from "../../store/useSettingsStore.ts";
+import useUserStore from "../../store/useUserStore.ts";
+import useTechnologiesStore from "../../store/useTechnologiesStore.ts";
+import useItemMemoStore from "../../store/useItemMemoStore.ts";
 
 const names: Record<string, string> = {
     hints: 'подсказки',

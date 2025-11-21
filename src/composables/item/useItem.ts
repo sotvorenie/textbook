@@ -1,30 +1,37 @@
-import {computed, onActivated, Ref} from "vue";
+import {computed, onActivated, ref, watchEffect} from "vue";
 
 import {Item} from "../../types/item.ts";
 
-import {showError} from "../../utils/modals.ts";
+import {showConfirm, showError} from "../../utils/modals.ts";
+import decodeHtmlEntities from "../useDecodeHtmlEntities.ts";
 
 import {getItem} from "../../api/posts/posts.ts";
+import {checkPost, createItemInDB} from "../../api/posts/postsDB.ts";
 
-import useIdStore from "../../store/idStore.ts";
-import useItemMemoStore from "../../store/itemMemoStore.ts";
-import useSettingsStore from "../../store/settingsStore.ts";
-import useUserStore from "../../store/userStore.ts";
-import useBlocksStore from "../../store/blocksStore.ts";
+import useIdStore from "../../store/useIdStore.ts";
+import useItemMemoStore from "../../store/useItemMemoStore.ts";
+import useSettingsStore from "../../store/useSettingsStore.ts";
+import useUserStore from "../../store/useUserStore.ts";
+import useBlocksStore from "../../store/useBlocksStore.ts";
+import useMessageStore from "../../store/useMessageStore.ts";
+import useOnlineStore from "../../store/useOnlineStore.ts";
 
 export const useItem = (
-    loading: Ref<boolean>,
     name: string,
     apiName: string,
-    item: Ref<Item>,
-    index?: Ref<number>
+    item: {value: Item},
+    index?: {value: number}
 ) => {
     const idStore = useIdStore()
     const itemMemoStore = useItemMemoStore();
     const settingsStore = useSettingsStore();
     const userStore = useUserStore();
     const blocksStore = useBlocksStore();
+    const messageStore = useMessageStore();
+    const onlineStore = useOnlineStore();
 
+    //=========================================================//
+    //-- запросы к апи --//
     const getListItem = async () => {
         try {
             if (!idStore.idValues[name]) return
@@ -42,7 +49,18 @@ export const useItem = (
             throw err
         }
     }
+    //=========================================================//
 
+
+    //=========================================================//
+    //-- загрузка --//
+    // видимость анимации загрузки
+    const isLoading = ref<boolean>(true)
+    //=========================================================//
+
+
+    //=========================================================//
+    //-- работа с текстом --//
     const escapeHtml = (str: string) => {
         return str
             .replace(/&/g, "&amp;")
@@ -116,9 +134,64 @@ export const useItem = (
 
         return result;
     });
+    //=========================================================//
 
+
+    //=========================================================//
+    //-- блок с кодом --//
+    // копирование кода
+    const handleCopy = async (code: string): Promise<void> => {
+        try {
+            await navigator.clipboard.writeText(decodeHtmlEntities(code));
+
+            messageStore.show('Скопировано')
+        } catch (_) {
+            await showError(
+                'Ошибка копирования',
+                'Не удалось скопировать данные..'
+            )
+        }
+    }
+    //=========================================================//
+
+
+    //=========================================================//
+    //-- скачивание --//
+    // видимость кнопки "Скачать"
+    const downloadVisible = ref<boolean>(false)
+
+    // видимость анимации скачивания
+    const isDownload =  ref<boolean>(false)
+
+
+    // клик по кнопке "Скачать"
+    const handleDownload = async () => {
+        const check = await showConfirm(
+            'Скачивание материала',
+            'Вы действительно хотите скачать данный материал?'
+        )
+
+        if (check) {
+            isDownload.value = true
+
+            try {
+                await createItemInDB(apiName, item.value, item.value.id)
+
+                isDownload.value = false
+            } catch (_) {
+                messageStore.show('Не удалось скачать..', true)
+            } finally {
+                downloadVisible.value = false
+            }
+        }
+    }
+    //=========================================================//
+
+
+    //=========================================================//
+    //-- хуки --//
     onActivated(async () => {
-        loading.value = true
+        isLoading.value = true
 
         const data = itemMemoStore.getItem(
             name,
@@ -149,8 +222,27 @@ export const useItem = (
             userStore.isUserPost[name] = true
         }
 
-        loading.value = false
+        isLoading.value = false
     })
 
-    return {text: parsedText, itemElement: item}
+    // проверка наличие поста в бд
+    watchEffect(async () => {
+        if (!onlineStore.isOnlineMode) return
+
+        downloadVisible.value = !await checkPost(apiName, idStore.idValues[name])
+    })
+    //=========================================================//
+
+
+    return {
+        isLoading,
+
+        parsedText,
+
+        handleCopy,
+
+        downloadVisible,
+        isDownload,
+        handleDownload,
+    }
 }

@@ -15,8 +15,8 @@ import {getAva, getLastSession, setLastSession} from "../api/users/users.ts";
 import {sendToTelegram, TelegramEventType} from "../api/telegram/telegram.ts";
 
 import useOnlineStore from "./useOnlineStore.ts";
-import useUserStore from "./userStore.ts";
-import useTechnologiesStore from "./technologiesStore.ts";
+import useUserStore from "./useUserStore.ts";
+import useTechnologiesStore from "./useTechnologiesStore.ts";
 
 const useHomeStore = defineStore('homeStore', () => {
     const onlineStore = useOnlineStore();

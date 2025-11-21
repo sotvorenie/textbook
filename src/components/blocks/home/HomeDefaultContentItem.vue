@@ -9,9 +9,9 @@ import HomeDefaultCreate from "./create/HomeDefaultCreate.vue";
 
 import DefaultListSkeleton from "./loading/DefaulListSkeleton.vue";
 
-import useBlocksStore from "../../../store/blocksStore.ts";
+import useBlocksStore from "../../../store/useBlocksStore.ts";
 const blocksStore = useBlocksStore();
-import useIdStore from "../../../store/idStore.ts";
+import useIdStore from "../../../store/useIdStore.ts";
 const idStore = useIdStore();
 
 const props = defineProps({
@@ -89,7 +89,7 @@ onDeactivated(() => {
 
 <template>
 
-  <KeepAlive exclude="HomeDefaultCreate">
+  <KeepAlive :exclude="['HomeDefaultCreate', 'HomeTextbookCreate']">
     <Suspense>
       <Component
           :is="activeComponent"

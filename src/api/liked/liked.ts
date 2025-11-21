@@ -1,6 +1,6 @@
 import {patch, post} from "../base.ts";
 
-import useUserStore from "../../store/userStore.ts";
+import useUserStore from "../../store/useUserStore.ts";
 
 const userStore = useUserStore();
 
