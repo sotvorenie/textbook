@@ -56,6 +56,14 @@ export const textareaAttributesList: Record<string, { name: string, code: string
 }
 
 export const useCreate = (name: string, apiUrl: string) => {
+    const createStore = useCreateStore()
+    const onlineStore = useOnlineStore()
+    const itemsStore = useItemsStore()
+    const blocksStore = useBlocksStore()
+    const settingsStore = useSettingsStore()
+    const userStore = useUserStore()
+    const technologiesStore = useTechnologiesStore()
+    const itemMemoStore = useItemMemoStore()
 
     //=========================================================//
     //-- кнопки действий --//
@@ -63,10 +71,6 @@ export const useCreate = (name: string, apiUrl: string) => {
         name: string,
         type: string = 'no_textbooks'
     ) => {
-        const blocksStore = useBlocksStore()
-        const settingsStore = useSettingsStore()
-        const createStore = useCreateStore()
-
         blocksStore.activeBlock[name] = 'list';
         settingsStore.settingsVisible[name] = 'list'
 
@@ -122,10 +126,6 @@ export const useCreate = (name: string, apiUrl: string) => {
 
     // клик по кнопке "Отмена"
     const handleBack = async (): Promise<void> => {
-        const userStore = useUserStore()
-        const blocksStore = useBlocksStore()
-        const createStore = useCreateStore()
-
         if (userStore.isUserPost[name]
             && blocksStore.activeBlock[name] === 'create'
             && createStore.isRedact[name]
@@ -156,76 +156,19 @@ export const useCreate = (name: string, apiUrl: string) => {
         newItem: Item,
         tabs?: any
     ) => {
-        const itemMemoStore = useItemMemoStore();
-        const itemsStore = useItemsStore();
-        const onlineStore = useOnlineStore();
-        const createStore = useCreateStore();
+        checkTabsLength(newItem, tabs)
 
-        if (tabs && tabs?.length > 0) {
-            const content: Record<string, string> = {};
-            for (const tab of tabs) {
-                const key = tab.name || `tab${tab.id}`;
-                content[key] = convertBlocksToText(newItemsTextbook.value[String(tab.id)] || []);
-            }
-            newItem.content = content;
-        } else {
-            // Обычные страницы без вкладок
-            newItem.text = convertBlocksToText(newItems.value);
-        }
+        getDateData(newItem)
 
-        const dateTime = getCurrentDateTime();
-        newItem.time = dateTime.time;
-        newItem.date = dateTime.date;
-        newItem.sort_date = dateTime.sort_date;
+        setLanguages(newItem)
 
-        if (onlineStore.isOnlineMode) {
-            newItem.languages_and_technologies = technologies.value
-                ?.filter(item => item.checked)
-                ?.map(item => item.title);
-        } else {
-            newItem.languages_and_technologies =
-                createStore.createData[name].languages_and_technologies;
-        }
-
-        // Общая логика создания/редактирования
         const isCreating = !createStore.createData[name].title.length;
 
         try {
             if (isCreating) {
-                const createInDB: boolean = onlineStore.isOnlineMode ? localCopyActive.value : true;
-                const response: Item = await createItem(
-                    apiUrl,
-                    newItem,
-                    createInDB,
-                    createStore.isCanCreateInAPI[name]
-                );
-
-                if (response?.id && (createStore.isCanCreateInAPI[name] || !onlineStore.isOnlineMode)) {
-                    itemsStore.items[name].unshift({
-                        id: response.id,
-                        title: response.title,
-                        date: response.date,
-                        languages_and_technologies: response.languages_and_technologies,
-                    });
-
-                    const cacheElement = itemMemoStore.findItemById(response.id);
-                    if (cacheElement) itemMemoStore.updateItemInCacheById(name, response.id, newItem);
-                }
+                await create(newItem)
             } else {
-                const response = await redactItem(
-                    apiUrl,
-                    newItem,
-                    createStore.createData[name].id
-                );
-
-                if (response?.id) {
-                    setNewLanguages();
-                    itemsStore.items[name] = itemsStore.items[name]?.map(el =>
-                        el.id === response.id ? { ...el, title: response.title } : el
-                    );
-
-                    itemMemoStore.updateLastItemInCache(name, newItem);
-                }
+                await redact(newItem)
             }
         } catch (err) {
             await showError(
@@ -234,6 +177,91 @@ export const useCreate = (name: string, apiUrl: string) => {
             );
         }
 
+        await sendToTg(newItem)
+
+        newItems.value = [];
+
+        back(name, tabs ? 'textbooks' : undefined);
+    };
+
+    // проверка наличия tab-ов
+    const checkTabsLength = (newItem: Item, tabs: any) => {
+        if (tabs && tabs?.length > 0) {
+            const content: Record<string, string> = {};
+            for (const tab of tabs) {
+                const key = tab.name || `tab${tab.id}`;
+                content[key] = convertBlocksToText(newItemsTextbook.value[String(tab.id)] || []);
+            }
+            newItem.content = content;
+        } else {
+            newItem.text = convertBlocksToText(newItems.value);
+        }
+    }
+
+    // получаем данные о дате
+    const getDateData = (newItem: Item) => {
+        const dateTime = getCurrentDateTime();
+
+        newItem.time = dateTime.time;
+        newItem.date = dateTime.date;
+        newItem.sort_date = dateTime.sort_date;
+    }
+
+    // задаем языки и технологии
+    const setLanguages = (newItem: Item) => {
+         if (onlineStore.isOnlineMode) {
+             newItem.languages_and_technologies = technologies.value
+                 ?.filter(item => item.checked)
+                 ?.map(item => item.title);
+         } else {
+             newItem.languages_and_technologies =
+                 createStore.createData[name].languages_and_technologies;
+         }
+    }
+
+    // создание записи
+    const create = async (newItem: Item) => {
+        const createInDB: boolean = onlineStore.isOnlineMode ? localCopyActive.value : true;
+        const response: Item = await createItem(
+            apiUrl,
+            newItem,
+            createInDB,
+            createStore.isCanCreateInAPI[name]
+        );
+
+        if (response?.id && (createStore.isCanCreateInAPI[name] || !onlineStore.isOnlineMode)) {
+            itemsStore.items[name].unshift({
+                id: response.id,
+                title: response.title,
+                date: response.date,
+                languages_and_technologies: response.languages_and_technologies,
+            });
+
+            const cacheElement = itemMemoStore.findItemById(response.id);
+            if (cacheElement) itemMemoStore.updateItemInCacheById(name, response.id, newItem);
+        }
+    }
+
+    // редактирование записи
+    const redact = async (newItem: Item) => {
+        const response = await redactItem(
+            apiUrl,
+            newItem,
+            createStore.createData[name].id
+        );
+
+        if (response?.id) {
+            setNewLanguages();
+            itemsStore.items[name] = itemsStore.items[name]?.map(el =>
+                el.id === response.id ? { ...el, title: response.title } : el
+            );
+
+            itemMemoStore.updateLastItemInCache(name, newItem);
+        }
+    }
+
+    // отправка запроса в тг
+    const sendToTg = async (newItem: Item) => {
         const blockNameToEventType: Record<string, TelegramEventType> = {
             hints: TelegramEventType.CREATE_HINTS,
             textbooks: TelegramEventType.CREATE_TEXTBOOKS,
@@ -244,11 +272,7 @@ export const useCreate = (name: string, apiUrl: string) => {
         try {
             await sendToTelegram(blockNameToEventType[name], newItem.title);
         } catch {}
-
-        newItems.value = [];
-
-        back(name, tabs ? 'textbooks' : undefined);
-    };
+    }
     //=========================================================//
 
 
@@ -312,55 +336,40 @@ export const useCreate = (name: string, apiUrl: string) => {
 
     // выбор технологий при редактировании поста
     const getSearchTechnologies = () => {
-        const createStore = useCreateStore()
-
         let languages = createStore.createData[name].languages_and_technologies
 
         if (!languages.length) return
 
-        technologies.value = technologies.value?.map(el => {
-            if (languages.includes(el.title)) {
-                return {
-                    title: el.title,
-                    checked: true,
-                }
-            }
-
-            return el
-        })
+        technologies.value = technologies.value.map(t => ({
+            title: t.title,
+            checked: languages.includes(t.title)
+        }));
     }
 
     // если изменился список языков, то добавить в нужный элемент list
     const setNewLanguages = () => {
-        const onlineStore = useOnlineStore()
-        const itemsStore = useItemsStore()
-        const createStore = useCreateStore()
-
         if (!onlineStore.isOnlineMode) return
 
-        const redactLanguages: string[] = Object.values(createStore.createData[name].languages_and_technologies)
-        const filteredLanguages = technologies.value
-            ?.filter(el => el.checked)
-            ?.map(el => el.title)
+        const oldLanguages = createStore.createData[name].languages_and_technologies
+        const newLanguages = technologies.value
+            .filter(t => t.checked)
+            .map(t => t.title)
 
-        if (redactLanguages !== filteredLanguages) {
-            itemsStore.items[name] = itemsStore.items[name]?.map(el => {
-                if (el.id === createStore.createData[name].id) {
-                    return {
-                        ... el,
-                        languages_and_technologies: filteredLanguages,
-                    }
+        if (JSON.stringify(oldLanguages) === JSON.stringify(newLanguages)) return
+
+        itemsStore.items[name] = itemsStore.items[name].map(item => {
+            if (item.id === createStore.createData[name].id) {
+                return {
+                    ...item,
+                    languages_and_technologies: newLanguages
                 }
-
-                return el
-            })
-        }
+            }
+            return item
+        })
     }
 
     // получаем список всевозможных языков и технологий, чтобы отобразить их с checkbox
     const getTechnologies = (func: Function,) => {
-        const technologiesStore = useTechnologiesStore()
-
         technologiesStore.technologies?.forEach(el => {
             technologies.value.push({
                 title: el,
