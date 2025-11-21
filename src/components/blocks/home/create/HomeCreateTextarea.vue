@@ -4,8 +4,7 @@ import {computed, nextTick, onMounted, ref, watch} from "vue";
 import {textareaAttributesList} from "../../../../composables/create/useCreate.ts";
 
 import {onBlur, onInput} from "../../../../composables/useFormValidation.ts";
-import {removeLabelText} from "../../../../composables/useLabelText.ts";
-import {addLabelText} from "../../../../composables/useLabelText.ts";
+import {addLabelText, removeLabelText} from "../../../../composables/useLabelText.ts";
 
 import Btn from "../../../ui/Btn.vue";
 import DragAndDropIcon from "../../../../assets/icons/DragAndDropIcon.vue";
@@ -55,8 +54,92 @@ const maxLength = computed(() => {
 const handleInput = (event: Event) => {
   onInput(event)
 
-  autoResize()
+  nextTick(() => {
+    autoResize()
+  })
 }
+
+// для автоматической табуляции
+const handleKeyDown = (event: KeyboardEvent) => {
+  if (props.code !== textareaAttributesList.code.code) return; // только для code-полей
+  const textarea = textareaRef.value;
+  if (!textarea) return;
+
+  const key = event.key;
+  const indentSize = 3; // пробелов на уровень отступа
+
+  const selectionStart = textarea.selectionStart ?? 0;
+  const selectionEnd = textarea.selectionEnd ?? 0;
+  const value = textarea.value;
+
+  const getCurrentLineIndent = () => {
+    const lineStart = value.lastIndexOf('\n', selectionStart - 1) + 1;
+    const line = value.slice(lineStart, selectionStart);
+    const match = line.match(/^\s*/);
+    return match ? match[0] : '';
+  };
+
+  const apply = (newValue: string, newCursorPos: number) => {
+    textarea.value = newValue;
+    textarea.focus();
+    textarea.setSelectionRange(newCursorPos, newCursorPos);
+    text.value = newValue;
+    nextTick(() => autoResize());
+  };
+
+  const pairs: Record<string, string> = { '{': '}', '(': ')', '[': ']', '"': '"', "'": "'" };
+
+  if (Object.prototype.hasOwnProperty.call(pairs, key) && !event.ctrlKey && !event.metaKey) {
+    const closing = pairs[key];
+    const nextChar = value[selectionStart] ?? '';
+
+    event.preventDefault();
+
+    if (nextChar === closing) {
+      const newValue = value.slice(0, selectionStart) + key + value.slice(selectionEnd);
+      apply(newValue, selectionStart + 1);
+    } else {
+      const newValue = value.slice(0, selectionStart) + key + closing + value.slice(selectionEnd);
+      apply(newValue, selectionStart + 1);
+    }
+    return;
+  }
+
+  if (key === 'Enter') {
+    const prevChar = value[selectionStart - 1] ?? '';
+    const nextChar = value[selectionStart] ?? '';
+    const currentIndent = getCurrentLineIndent();
+
+    if (['{', '(', '['].includes(prevChar) && nextChar === pairs[prevChar]) {
+      event.preventDefault();
+
+      const innerIndent = ' '.repeat(indentSize);
+      const insertText = `\n${currentIndent}${innerIndent}\n${currentIndent}`;
+      const newValue = value.slice(0, selectionStart) + insertText + value.slice(selectionEnd);
+
+      const newCursorPos = selectionStart + 1 + currentIndent.length + innerIndent.length;
+      apply(newValue, newCursorPos);
+      return;
+    }
+
+    event.preventDefault();
+    const insertText = `\n${currentIndent}`;
+    const newValue = value.slice(0, selectionStart) + insertText + value.slice(selectionEnd);
+    const newCursorPos = selectionStart + 1 + currentIndent.length;
+    apply(newValue, newCursorPos);
+    return;
+  }
+
+  if (key === 'Tab') {
+    event.preventDefault();
+    const spaces = ' '.repeat(indentSize);
+    const newValue = value.slice(0, selectionStart) + spaces + value.slice(selectionEnd);
+    const newCursorPos = selectionStart + spaces.length;
+    apply(newValue, newCursorPos);
+    return;
+  }
+};
+
 
 watch(() => activeTab.value,
     () => nextTick(() => {
@@ -85,6 +168,7 @@ onMounted(() => {
               @blur="blurInput"
               @input="handleInput"
               @focus="addLabelText"
+              @keydown="handleKeyDown"
               v-model="text"
               required
               :maxlength="maxLength"

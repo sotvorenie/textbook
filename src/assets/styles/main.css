@@ -1962,6 +1962,9 @@ a[class] {
 .create__label.textarea {
   padding-left: 1.25rem;
 }
+.create__label.textarea .label__text {
+  margin-left: 1.25rem;
+}
 .create__handler {
   position: absolute;
   top: 50%;

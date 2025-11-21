@@ -65,6 +65,10 @@
 
     &.textarea {
       padding-left: rem(20);
+
+      .label__text {
+        margin-left: rem(20);
+      }
     }
   }
 
