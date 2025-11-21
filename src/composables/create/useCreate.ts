@@ -289,6 +289,7 @@ export const useCreate = (name: string, apiName: string) => {
             code: string,
         },
     }[]>([])
+
     // элементы textarea textbooks
     const newItemsTextbook = ref<Record<string, {
         id: string;
@@ -299,6 +300,17 @@ export const useCreate = (name: string, apiName: string) => {
             code: string;
         }
     }[]>>({});
+
+    // видимость кнопок создания новых textarea (чтобы ограничить число textarea)
+    const isVisibleCreateBtnBar = (id?: number) => {
+        const mainLimit = newItems.value.length < 10
+        const tabLimit = id !== undefined
+            ? (newItemsTextbook.value[id]?.length ?? 0) < 10
+            : true
+
+        return mainLimit && tabLimit
+    }
+
 
     // создание нового поля ввода
     const createTextarea = (type: string, tabId?: number): void => {
@@ -519,6 +531,7 @@ export const useCreate = (name: string, apiName: string) => {
 
         newItems,
         newItemsTextbook,
+        isVisibleCreateBtnBar,
         createTextarea,
         removeTextarea,
 

@@ -38,9 +38,10 @@
   }
 
   &__counter {
-    top: 70%;
+    bottom: rem(-10);
     background: $color-dark-alt;
     padding: rem(5);
     right: rem(15);
+    line-height: 1;
   }
 }

@@ -52,6 +52,7 @@ const {
   blurInput,
   save,
   newItemsTextbook: newItems,
+  isVisibleCreateBtnBar,
   createTextarea,
   removeTextarea,
   technologies,
@@ -73,6 +74,11 @@ const tabs = ref<{id: number, name: string}[]>([{
 }])
 
 const tabId = computed(() => tabs.value[activeTab.value]?.id);
+
+// возможность создания нового tab-а (чтобы был лимит tab-ов)
+const isVisibleCreateTab = computed(() => {
+  return tabs.value.length < 250
+})
 
 
 const createTab = () => {
@@ -194,7 +200,7 @@ onMounted(() => {
       </label>
 
       <HomeTextbookSlider :items="tabs?.map(el => el.name)"
-                          :is-create="true"
+                          :is-create="isVisibleCreateTab"
                           v-model:active-index="activeTab"
                           @create-tab="createTab"
       />
@@ -226,7 +232,7 @@ onMounted(() => {
       <Btn @click="removeTab">Удалить этап</Btn>
 
       <div class="create__block position-relative">
-        <div class="create__btn-bar position-sticky z-1000 flex">
+        <div class="create__btn-bar position-sticky z-1000 flex" v-if="isVisibleCreateBtnBar(activeTab)">
           <Btn @click="createTextarea('code', tabId)">Код <></Btn>
           <Btn @click="createTextarea('text', tabId)">Текст</Btn>
           <Btn @click="createTextarea('title', tabId)"

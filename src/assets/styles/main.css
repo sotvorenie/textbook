@@ -1095,10 +1095,11 @@ a[class] {
   color: #fe7971;
 }
 .label__counter {
-  top: 70%;
+  bottom: -0.625rem;
   background: var(--color-dark-alt);
   padding: 0.3125rem;
   right: 0.9375rem;
+  line-height: 1;
 }
 
 .button {

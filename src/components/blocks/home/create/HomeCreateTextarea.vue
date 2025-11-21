@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import {nextTick, onMounted, ref, watch} from "vue";
+import {computed, nextTick, onMounted, ref, watch} from "vue";
+
+import {textareaAttributesList} from "../../../../composables/create/useCreate.ts";
 
 import {onBlur, onInput} from "../../../../composables/useFormValidation.ts";
 import {removeLabelText} from "../../../../composables/useLabelText.ts";
@@ -9,7 +11,7 @@ import Btn from "../../../ui/Btn.vue";
 
 //=========================================================//
 
-defineProps({
+const props = defineProps({
   name: String,
   code: String,
 })
@@ -38,6 +40,15 @@ const autoResize = () => {
     textarea.style.height = textarea.scrollHeight + 'px'
   }
 }
+
+// максимальная длина строки в зависимости от типа поля ввода
+const maxLength = computed(() => {
+  if (props.code === textareaAttributesList.code.code || props.code === textareaAttributesList.text.code) {
+    return 10000
+  } else {
+    return 100
+  }
+})
 
 // клик по полю ввода
 const handleInput = (event: Event) => {
@@ -74,8 +85,11 @@ onMounted(() => {
               @focus="addLabelText"
               v-model="text"
               required
+              :maxlength="maxLength"
               ref="textareaRef"
     />
+
+    <span class="label__counter position-absolute">{{text.length}}/{{maxLength}}</span>
 
     <Btn class="create__remove button-small position-absolute"
          @click="emits('removeTextarea')"

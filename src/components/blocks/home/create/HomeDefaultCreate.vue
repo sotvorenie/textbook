@@ -63,6 +63,7 @@ const {
   blurInput,
   save,
   newItems,
+  isVisibleCreateBtnBar,
   createTextarea,
   removeTextarea,
   technologies,
@@ -143,7 +144,7 @@ onMounted(async () => {
       </label>
 
       <div class="create__block position-relative">
-        <div class="create__btn-bar position-sticky z-1000 flex">
+        <div class="create__btn-bar position-sticky z-1000 flex" v-if="isVisibleCreateBtnBar()">
           <Btn @click="createTextarea('code')">Код <></Btn>
           <Btn @click="createTextarea('text')">Текст</Btn>
           <Btn @click="createTextarea('title')"
@@ -157,6 +158,7 @@ onMounted(async () => {
                          tag="div"
         >
           <HomeCreateTextarea v-for="(item, index) in newItems"
+                              :key="item.id"
                               v-model="item.text"
                               :name="item.attributes.name"
                               :code="item.attributes.code"
