@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref} from "vue";
+import {nextTick, ref} from "vue";
 
 import {UnAuthorizedList} from "../../../types/list.ts";
 import {Item} from "../../../types/item.ts";
@@ -20,13 +20,13 @@ const emits = defineEmits(['onClose', 'offClose', 'close', 'message'])
 
 // синхронизировать данные для одного элемента списка
 const syncItem = async (item: UnAuthorizedList, isAll: boolean = false) => {
-  isLoading.value = true
-
-  if (!isAll) {
-    emits('offClose')
-  }
-
   try {
+    isLoading.value = true
+
+    if (!isAll) {
+      emits('offClose')
+    }
+
     const response: Item = await getItemFromDB(item.block_name, item.id)
 
     if (item.offline === 'create') {
@@ -43,6 +43,16 @@ const syncItem = async (item: UnAuthorizedList, isAll: boolean = false) => {
       return !(el.id === item.id && el.block_name === item.block_name)
     })
 
+    if (!isAll) emits('onClose')
+
+    if (onlineStore.offlinePosts.length === 0 && !isAll) {
+      emits('message', 'Все записи синхронизированы!!')
+      await nextTick()
+      emits('close')
+
+      return
+    }
+
     if (!isAll) {
       emits('message', 'Запись синхронизирована')
     }
@@ -53,10 +63,7 @@ const syncItem = async (item: UnAuthorizedList, isAll: boolean = false) => {
         'Не удалось синхронизировать данные..'
     )
   } finally {
-    if (!isAll) {
-      isLoading.value = false
-      emits('onClose')
-    }
+    isLoading.value = false
   }
 }
 
@@ -78,7 +85,7 @@ const syncAll = async () => {
     onlineStore.offlinePosts = []
 
     emits('message', 'Все записи синхронизированы!!')
-
+    emits('onClose');
     emits('close')
 
   } catch (_) {

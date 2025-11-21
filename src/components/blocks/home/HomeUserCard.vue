@@ -230,7 +230,7 @@ const syncCloseActive = ref<boolean>(true)
       </template>
 
       <template #default="{close}">
-        <HomeSync @close="close"
+        <HomeSync @close="() => close()"
                   @off-close="syncCloseActive = false"
                   @on-close="syncCloseActive = true"
                   @message="messageStore.show($event)"
