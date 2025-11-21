@@ -1,4 +1,4 @@
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 
 import {Item} from "../../types/item.ts";
 
@@ -9,6 +9,7 @@ import {getCurrentDateTime} from "../useDate.ts";
 
 import {sendToTelegram, TelegramEventType} from "../../api/telegram/telegram.ts";
 import {createItem, redactItem} from "../../api/posts/posts.ts";
+import {checkPost} from "../../api/posts/postsDB.ts";
 
 import useCreateStore from "../../store/useCreateStore.ts";
 import useOnlineStore from "../../store/useOnlineStore.ts";
@@ -55,7 +56,7 @@ export const textareaAttributesList: Record<string, { name: string, code: string
     },
 }
 
-export const useCreate = (name: string, apiUrl: string) => {
+export const useCreate = (name: string, apiName: string) => {
     const createStore = useCreateStore()
     const onlineStore = useOnlineStore()
     const itemsStore = useItemsStore()
@@ -223,7 +224,7 @@ export const useCreate = (name: string, apiUrl: string) => {
     const create = async (newItem: Item) => {
         const createInDB: boolean = onlineStore.isOnlineMode ? localCopyActive.value : true;
         const response: Item = await createItem(
-            apiUrl,
+            apiName,
             newItem,
             createInDB,
             createStore.isCanCreateInAPI[name]
@@ -245,7 +246,7 @@ export const useCreate = (name: string, apiUrl: string) => {
     // редактирование записи
     const redact = async (newItem: Item) => {
         const response = await redactItem(
-            apiUrl,
+            apiName,
             newItem,
             createStore.createData[name].id
         );
@@ -485,11 +486,28 @@ export const useCreate = (name: string, apiUrl: string) => {
     // создавать ли локальную копию создаваемого поста
     const localCopyActive = ref<boolean>(true)
 
+    // видимость переключателя (в случае если мы редактируем запись которой нет в бд)
+    const isVisibleLocalHandler = ref<boolean>(false)
+
 
     // переключение значения локальной копии
     const handleLocalCopy = () => {
         localCopyActive.value = !localCopyActive.value;
     }
+    //=========================================================//
+
+    //=========================================================//
+    //-- хуки --//
+    //проверка наличия поста в БД для редактирования (если данный пост в БД есть то показывать переключать сохранять/не сохранять запись локально при редактировании)
+    onMounted(async () => {
+        if (!onlineStore.isOnlineMode || !createStore.isCanCreateInAPI[name]) {
+            isVisibleLocalHandler.value = false
+        } else if (!createStore.isRedact[name]) {
+            isVisibleLocalHandler.value = true
+        } else {
+            isVisibleLocalHandler.value = await checkPost(name, apiName)
+        }
+    })
     //=========================================================//
 
 
@@ -511,6 +529,7 @@ export const useCreate = (name: string, apiUrl: string) => {
         convertTextToBlocks,
 
         localCopyActive,
+        isVisibleLocalHandler,
         handleLocalCopy,
     }
 }

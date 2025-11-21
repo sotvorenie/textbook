@@ -58,6 +58,7 @@ const {
   getTechnologies,
   convertTextToBlocks,
   localCopyActive,
+  isVisibleLocalHandler,
   handleLocalCopy
 } = useCreate(props.name, props.apiUrl)
 
@@ -264,9 +265,11 @@ onMounted(() => {
       </div>
 
       <div class="create__local flex flex-column flex-align-center"
-           v-if="onlineStore.isOnlineMode && createStore.isCanCreateInAPI[props.name]"
+           v-if="isVisibleLocalHandler"
       >
-        <p class="create__local-title h5">Создать локальную копию?</p>
+        <p class="create__local-title h5">
+          {{createStore.isRedact[name] ? 'Редактировать' : 'Создать'}} локальную копию?
+        </p>
 
         <div class="create__local-btn flex flex-align-center"
              title="Создать локальную копию?"

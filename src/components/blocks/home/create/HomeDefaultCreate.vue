@@ -14,13 +14,13 @@ import HomeCreateTextarea from "./HomeCreateTextarea.vue";
 
 import Modal from "../../../common/Modal.vue";
 import CheckboxList from "../../../ui/CheckboxList.vue";
+import ToggleButton from "../../../ui/ToggleButton.vue";
 
 import useCreateStore from "../../../../store/useCreateStore.ts";
 const createStore = useCreateStore();
 import useUserStore from "../../../../store/useUserStore.ts";
 const userStore = useUserStore();
 import useOnlineStore from "../../../../store/useOnlineStore.ts";
-import ToggleButton from "../../../ui/ToggleButton.vue";
 const onlineStore = useOnlineStore();
 
 const props = defineProps({
@@ -69,6 +69,7 @@ const {
   getTechnologies,
   convertTextToBlocks,
   localCopyActive,
+  isVisibleLocalHandler,
   handleLocalCopy
 } = useCreate(props.name, props.apiUrl)
 
@@ -100,8 +101,8 @@ const initializeFromStore = () => {
 //=========================================================//
 //-- хуки --//
 // получаем список всевозможных языков и технологий, чтобы отобразить их с checkbox
-onMounted(() => {
-  getTechnologies(initializeFromStore,)
+onMounted(async () => {
+  getTechnologies(initializeFromStore)
 })
 //=========================================================//
 </script>
@@ -180,9 +181,11 @@ onMounted(() => {
       </div>
 
       <div class="create__local flex flex-column flex-align-center"
-           v-if="onlineStore.isOnlineMode && createStore.isCanCreateInAPI[props.name]"
+           v-if="isVisibleLocalHandler"
       >
-        <p class="create__local-title h5">Создать локальную копию?</p>
+        <p class="create__local-title h5">
+          {{createStore.isRedact[name] ? 'Редактировать' : 'Создать'}} локальную копию?
+        </p>
 
         <div class="create__local-btn flex flex-align-center"
              title="Создать локальную копию?"

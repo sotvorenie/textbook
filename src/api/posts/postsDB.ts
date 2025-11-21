@@ -2,6 +2,7 @@ import {List} from "../../types/list.ts";
 import {Item} from "../../types/item.ts";
 import {executeSQL, selectSQL, tablesConfig} from "../database.ts";
 import {showError} from "../../utils/modals.ts";
+import useIdStore from "../../store/useIdStore.ts";
 
 export const getListFromDB = async (
     name: string,
@@ -225,11 +226,13 @@ export const removeFromDB = async (name: string, id: number) => {
 };
 
 
-export const checkPost = async (name: string, id: number): Promise<boolean> => {
+export const checkPost = async (name: string, apiName: string): Promise<boolean> => {
+    const idStore = useIdStore()
 
-
-    const config = tablesConfig[name];
+    const config = tablesConfig[apiName];
     if (!config) return false
+
+    const id = idStore.idValues[name]
 
     try {
         const item = await selectSQL<any>(`SELECT * FROM ${config.table} WHERE id = ?`, [id])

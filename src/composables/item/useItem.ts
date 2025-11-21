@@ -229,7 +229,7 @@ export const useItem = (
     watchEffect(async () => {
         if (!onlineStore.isOnlineMode) return
 
-        downloadVisible.value = !await checkPost(apiName, idStore.idValues[name])
+        downloadVisible.value = !await checkPost(name, apiName)
     })
     //=========================================================//
 
