@@ -82,10 +82,10 @@ const useCreateStore = defineStore('createStore', () => {
         isRedact.projects = false
         isRedact.textbooks = false
 
-        isRedact.hints = true
-        isRedact.advices = true
-        isRedact.projects = true
-        isRedact.textbooks = true
+        isCanCreateInAPI.hints = true
+        isCanCreateInAPI.advices = false
+        isCanCreateInAPI.projects = true
+        isCanCreateInAPI.textbooks = true
     }
 
     return {
