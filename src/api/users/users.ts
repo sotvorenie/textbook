@@ -116,6 +116,8 @@ export const setLastSession = async ():Promise<void> => {
     try {
         const dateTime = getCurrentDateTime()
 
+        if (dateTime.date === userStore.lastSession) return
+
         await patch(`users/${userStore.user.id}`, {
             last_session: dateTime.date
         })
