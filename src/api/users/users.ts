@@ -1,7 +1,6 @@
-import {del, get, patch, post} from "../base.ts";
+import {del, patch, post} from "../base.ts";
 
 import useUserStore from "../../store/useUserStore.ts";
-import {userAva} from "../../utils/ava.ts";
 import {getCurrentDateTime} from "../../composables/useDate.ts";
 
 import useOnlineStore from "../../store/useOnlineStore.ts";
@@ -64,48 +63,6 @@ export const deletePredLastFile = async (id: number) => {
             onlineStore.isOnlineMode = false;
         }
         throw err;
-    }
-}
-
-export const getAva = async (): Promise<void> => {
-    const onlineStore = useOnlineStore()
-    const userStore = useUserStore();
-
-    try {
-        const response: {ava: {url: string, id: number}}[] = await get(`/users?id=${userStore.user.id}&_select=ava`)
-
-        if (response) {
-            userStore.user.ava = response[0]?.ava
-
-            userAva.set()
-        }
-    } catch (err: any) {
-        if (err.message === "Network Error" || err.code === "ECONNABORTED") {
-            onlineStore.isOnline = false;
-            onlineStore.isOnlineMode = false;
-            return
-        }
-
-        return
-    }
-}
-
-export const getLastSession = async (): Promise<void> => {
-    const onlineStore = useOnlineStore()
-    const userStore = useUserStore();
-
-    try {
-        const response: {last_session: string} = await get(`/users/${userStore.user.id}?_select=last_session`)
-
-        if (response?.last_session) {
-            userStore.lastSession = response?.last_session
-        }
-    } catch (err: any) {
-        if (err.message === "Network Error" || err.code === "ECONNABORTED") {
-            onlineStore.isOnline = false;
-            onlineStore.isOnlineMode = false;
-        }
-        return
     }
 }
 

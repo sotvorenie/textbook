@@ -11,7 +11,7 @@ import {resetAllStores} from "../utils/resetAllStores.ts";
 
 import {check} from "../api/auth/auth.ts";
 import {get} from "../api/base.ts";
-import {getAva, getLastSession, setLastSession} from "../api/users/users.ts";
+import {setLastSession} from "../api/users/users.ts";
 import {sendToTelegram, TelegramEventType} from "../api/telegram/telegram.ts";
 
 import useOnlineStore from "./useOnlineStore.ts";
@@ -138,24 +138,42 @@ const useHomeStore = defineStore('homeStore', () => {
         }
         await getLiked()
 
-        const getUserAvatar = async () => {
+        const getUserAvatar = (response: string): string => {
+            const ava = userAva.get()
+            if (!ava?.url) {
+                response += ',ava'
+            } else {
+                userStore.user.ava = ava
+            }
+
+            return response
+        }
+        const getUserInfo = async () => {
             try {
-                const ava = userAva.get()
-                if (!ava?.url) {
-                    await getAva()
-                } else {
-                    userStore.user.ava = ava
+                let responseData: string = '_select=last_session'
+
+                responseData = getUserAvatar(responseData)
+
+                const response: {last_session: string, ava: {url: string, id: number}} =
+                    await get(`/users/${userStore.user.id}?${responseData}`)
+
+                if (response?.last_session) {
+                    userStore.lastSession = response?.last_session
+                }
+                if (response?.ava) {
+                    userStore.user.ava = response?.ava
+
+                    userAva.set()
                 }
             } catch (_) {
                 await showError(
-                    'Ошибка загрузки аватара',
-                    'Не удалось загрузить аватар пользователя'
+                    'Ошибка загрузки данных пользователя',
+                    'Не удалось загрузить данные пользователя'
                 )
             }
         }
-        await getUserAvatar()
+        await getUserInfo()
 
-        await getLastSession()
         await setLastSession()
 
         const date = getCurrentDateTime()
