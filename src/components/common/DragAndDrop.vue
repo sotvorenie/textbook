@@ -65,7 +65,7 @@ const mouseEnd = () => {
   window.removeEventListener('mouseup', mouseEnd)
 }
 
-// если передвинули на половину props.height вверх/вниз - меняем элементы местами
+// если передвинули на половину props.height вверх/вниз - задаем новый индекс
 function calculateNewIndex(currentIndex: number) {
   const itemHeight = props.height
 
