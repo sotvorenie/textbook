@@ -281,7 +281,7 @@ onMounted(() => {
         </p>
 
         <div class="create__local-btn flex flex-align-center"
-             title="Создать локальную копию?"
+             :title="`${createStore.isRedact[name] ? 'Редактировать' : 'Создать'} локальную копию?`"
         >
           нет
           <ToggleButton :active="localCopyActive" @click="handleLocalCopy"/>

@@ -13,9 +13,11 @@
     height: 90%;
     background: $color-light;
     border-radius: 50%;
+    transform: translateX(0);
+    transition-duration: $transition-duration;
 
     &.is-active {
-      margin-left: auto;
+      transform: translateX(calc(100% - 4px));;
     }
   }
 }

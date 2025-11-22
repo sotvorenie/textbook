@@ -18,6 +18,7 @@ const props = defineProps({
 const items = defineModel({type:Array as PropType<{id: number}[]>, required: true})
 
 const draggableIndex = ref<number | null>(null)
+const newDraggableIndex = ref<number | null>(null)
 
 // стартовая позиция мыши
 const startY = ref(0);
@@ -45,19 +46,28 @@ const updateMouse = (event: MouseEvent) => {
 
   offsetY.value = event.clientY - startY.value;
 
-  const newIndex = calculateNewIndex(draggableIndex.value);
+  newDraggableIndex.value = calculateNewIndex(draggableIndex.value);
 
-  if (newIndex !== draggableIndex.value) {
-    const draggedItem = items.value.splice(draggableIndex.value, 1)[0];
-    items.value.splice(newIndex, 0, draggedItem);
-    draggableIndex.value = newIndex;
-    startY.value = event.clientY;
-    offsetY.value = 0;
-  }
+  // if (newIndex !== draggableIndex.value) {
+  //   const draggedItem = items.value.splice(draggableIndex.value, 1)[0];
+  //   items.value.splice(newIndex, 0, draggedItem);
+  //   draggableIndex.value = newIndex;
+  //   startY.value = event.clientY;
+  //   offsetY.value = 0;
+  // }
 }
 
 // отпускаем мышь - конец перетаскивания
 const mouseEnd = () => {
+  if (
+      draggableIndex.value !== null &&
+      newDraggableIndex.value !== null &&
+      draggableIndex.value !== newDraggableIndex.value
+  ) {
+    const draggableItem = items.value.splice(draggableIndex.value, 1)[0]
+    items.value.splice(newDraggableIndex.value, 0, draggableItem)
+  }
+
   draggableIndex.value = null
   offsetY.value = 0
 
@@ -74,6 +84,14 @@ function calculateNewIndex(currentIndex: number) {
 
   return currentIndex
 }
+
+// стили элемента списка
+const getItemStyle = (index: number) => {
+  if (draggableIndex.value === index) {
+    return { transform: `translateY(${offsetY.value}px)` };
+  }
+  return {};
+};
 </script>
 
 <template>
@@ -88,7 +106,7 @@ function calculateNewIndex(currentIndex: number) {
              },
              cssClass
          ]"
-         :style="draggableIndex === index ? {transform: `translateY(${offsetY}px)`} : {}"
+         :style="getItemStyle(index)"
          @mousedown="mouseDown($event, index)"
     >
       <slot name="item" :item="item"/>
