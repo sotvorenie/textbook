@@ -13,6 +13,7 @@ const messageStore = useMessageStore();
 
 onMounted(async () => {
   await homeStore.loadInfo(true)
+  homeStore.getNumberPage()
 })
 </script>
 

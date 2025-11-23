@@ -222,7 +222,7 @@ await getPosts()
 
   <div class="list-wrapper">
     <ul class="list flex row" v-if="itemsStore.items[name]?.length">
-      <li class="list__item cursor-pointer col-4 ds-col-3 position-relative"
+      <li class="list__item cursor-pointer ks-col-2 ds-col-3 col-4 position-relative"
           v-for="(item, index) in itemsStore.items[name]"
           :key="item.id"
           @click="handleItem(item.id)"

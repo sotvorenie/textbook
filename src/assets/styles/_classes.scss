@@ -1,8 +1,9 @@
 $breakpoints: (
-        'ms': 480px,
-        'mb': 767px,
-        'ls': 1023px,
-        'ds': 1440px
+        'ms': 481px,
+        'mb': 768px,
+        'ls': 1024px,
+        'ds': 1441px,
+        'ks': 1921px,
 );
 $grid-columns: 12 !default;
 
@@ -77,7 +78,7 @@ $grid-columns: 12 !default;
   @media (min-width: $value) {
     @for $i from 1 through $grid-columns {
       .#{$breakpoint}-col-#{$i} {
-        grid-column: span $i;
+        grid-column: span $i !important;
       }
     }
   }

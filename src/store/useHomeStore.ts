@@ -25,7 +25,11 @@ const useHomeStore = defineStore('homeStore', () => {
     // видимость анимации на HomePage
     const loadingVisible = ref<boolean>(true)
 
+    // индекс активного aside-меню
     const activeMenuIndex = ref<number>(0)
+
+    // значение page для апи в зависимости от разрешения экрана при onMounted в Home Page
+    const pageNumberForAPI = ref<number>(9)
 
     // функция при инициализации HomePage
     const loadInfo = async (isFirstRender: boolean = false) => {
@@ -188,6 +192,17 @@ const useHomeStore = defineStore('homeStore', () => {
         loadingVisible.value = false
     }
 
+    // изменяем page-number-api в зависимости от разрешения экрана
+    const getNumberPage = () => {
+        if (window.innerWidth <= 1440) {
+            pageNumberForAPI.value = 9
+        } else if (window.innerWidth <= 1920 && window.innerWidth > 1440) {
+            pageNumberForAPI.value = 12
+        } else {
+            pageNumberForAPI.value = 18
+        }
+    }
+
     watch(
         () => onlineStore.isOnlineMode,
         async () => {
@@ -198,8 +213,10 @@ const useHomeStore = defineStore('homeStore', () => {
     return {
         loadingVisible,
         activeMenuIndex,
+        pageNumberForAPI,
 
         loadInfo,
+        getNumberPage,
     }
 })
 

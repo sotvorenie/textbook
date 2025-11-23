@@ -3,6 +3,7 @@ import {List} from "../../types/list.ts";
 import {Item} from "../../types/item.ts";
 import {GetList} from "./types.ts";
 import useOnlineStore from "../../store/useOnlineStore.ts";
+import useHomeStore from "../../store/useHomeStore.ts";
 
 import {getListFromDB, getItemFromDB, createItemInDB, removeFromDB, redactItemInDB} from "./postsDB.ts";
 
@@ -16,13 +17,14 @@ export const getList = async (
     id: number[] = []
 ): Promise<{ meta: any; items: List[] | [] }> => {
     const onlineStore = useOnlineStore();
+    const homeStore = useHomeStore();
 
     try {
         if (onlineStore.isOnlineMode) {
             const params: GetList = {
                 _select: "id,title,languages_and_technologies,date",
                 page,
-                limit: 9,
+                limit: homeStore.pageNumberForAPI ?? 9,
                 user_id,
                 sortBy,
             };
