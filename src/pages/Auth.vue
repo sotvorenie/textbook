@@ -331,11 +331,14 @@ watch(
                      @focus="addLabelText"
                      v-model="registerForm.name"
                      required
+                     maxlength="20"
               >
               <span class="auth__error fields_error label__error position-absolute"
                     id="name-error"
                     data-js-form-field-errors
-                    @click.stop></span>
+                    @click.stop>
+              </span>
+              <span class="label__counter position-absolute">{{registerForm.name.length}}/20</span>
             </label>
             <label class="auth__label label position-relative" @click="addLabelText">
               <span class="label__text position-absolute cursor-text user-select-none" @click.stop>Email</span>
