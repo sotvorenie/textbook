@@ -109,15 +109,7 @@ const {
           </template>
         </Suspense>
 
-        <Suspense>
-          <template #default>
-            <HomeItemComments :name="name"/>
-          </template>
-
-          <template #fallback>
-            <CommentsSkeleton/>
-          </template>
-        </Suspense>
+        <HomeItemComments :name="name" />
       </div>
 
       <Transition name="scale" appear>

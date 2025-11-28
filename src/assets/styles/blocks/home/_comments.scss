@@ -19,6 +19,10 @@
     &:not(:last-child) {
       margin-bottom: rem(10);
     }
+
+    &.is-active {
+      border: $border-accent;
+    }
   }
 
   &__avatar {

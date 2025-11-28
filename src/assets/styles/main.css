@@ -2278,6 +2278,9 @@ a[class] {
 .comments__item:not(:last-child) {
   margin-bottom: 0.625rem;
 }
+.comments__item.is-active {
+  border: 1px solid #fe7971;
+}
 .comments__avatar {
   width: 3.125rem !important;
   min-width: 3.125rem !important;

@@ -8,7 +8,7 @@ import useOnlineStore from "../../store/useOnlineStore.ts";
 import useIdStore from "../../store/useIdStore.ts";
 import useUserStore from "../../store/useUserStore.ts";
 
-export const getComments = async (name: string): Promise<Comment[] | undefined> => {
+export const getComments = async (name: string, page: number = 1): Promise<any> => {
     const onlineStore = useOnlineStore();
     const idStore = useIdStore();
 
@@ -17,7 +17,14 @@ export const getComments = async (name: string): Promise<Comment[] | undefined> 
     try {
         const id: number = idStore.idValues[name]
 
-        return await get(`/comments?post_id=${id}`)
+        const params = {
+            page,
+            limit: 9,
+            post_id: id,
+            sortBy: '-date',
+        }
+
+        return await get(`/comments`, params)
     } catch (err) {
         throw err;
     }
