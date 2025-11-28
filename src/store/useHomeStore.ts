@@ -31,7 +31,7 @@ const useHomeStore = defineStore('homeStore', () => {
     // значение page для апи в зависимости от разрешения экрана при onMounted в Home Page
     const pageNumberForAPI = ref<number>(9)
 
-    // функция при инициализации HomePage
+    // функция при инициализации HomePage (и при переключении режимов online/offline)
     const loadInfo = async (isFirstRender: boolean = false) => {
         const userStore = useUserStore()
         const technologiesStore = useTechnologiesStore()
@@ -67,7 +67,7 @@ const useHomeStore = defineStore('homeStore', () => {
                 if (err.message === 'NO_TOKEN') {
                     loadingVisible.value = false
                     await router.push('/')
-                    return
+                    throw new Error('STOP')
                 }
 
                 if (err.message === 'OFFLINE') {
@@ -78,15 +78,28 @@ const useHomeStore = defineStore('homeStore', () => {
                     onlineStore.isOnline = false
                     onlineStore.isOnlineMode = false
                     loadingVisible.value = false
-                    return
+                    throw new Error('STOP')
                 }
 
                 loadingVisible.value = false
                 await router.push('/')
-                return
+                throw new Error('STOP')
             }
         }
-        await checkUser()
+
+        try {
+            await checkUser()
+        } catch (err) {
+            onlineStore.modeLoadingVisible = false
+            loadingVisible.value = false
+            return
+        }
+
+        if (!onlineStore.isOnline || !onlineStore.isOnlineMode) {
+            onlineStore.modeLoadingVisible = false
+            loadingVisible.value = false
+            return
+        }
 
         const getAdmins = async () => {
             try {

@@ -25,6 +25,9 @@ const startY = ref(0);
 // значение для translate
 const offsetY = ref(0);
 
+// перетаскиваем ли мы сейчас элемент или нет
+const isDragging = ref<boolean>(false)
+
 // клик мышью - начало перетаскивания
 const mouseDown = (event: MouseEvent, index: number) => {
   const target = event.target as HTMLElement
@@ -35,6 +38,8 @@ const mouseDown = (event: MouseEvent, index: number) => {
 
   startY.value = event.clientY
   offsetY.value = 0
+
+  isDragging.value = true
 
   window.addEventListener('mousemove', updateMouse)
   window.addEventListener('mouseup', mouseEnd)
@@ -70,6 +75,8 @@ const mouseEnd = () => {
 
   draggableIndex.value = null
   offsetY.value = 0
+
+  isDragging.value = false
 
   window.removeEventListener('mousemove', updateMouse)
   window.removeEventListener('mouseup', mouseEnd)

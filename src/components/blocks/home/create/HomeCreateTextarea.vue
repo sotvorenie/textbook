@@ -182,6 +182,7 @@ watch(() => activeTab.value,
 onMounted(() => {
   nextTick(() => {
     autoResize()
+    updateCloseBtnVisible()
   })
 })
 </script>
