@@ -1,0 +1,26 @@
+@use '../../helpers/index' as *;
+@use '../../variables' as *;
+
+.statistics {
+  margin-bottom: rem(30);
+
+  &__title {
+    margin-bottom: rem(10);
+  }
+
+  &__item {
+    column-gap: rem(10);
+
+    &:not(:last-child) {
+      margin-bottom: rem(8);
+    }
+  }
+
+  &__number {
+    column-gap: rem(5);
+
+    svg {
+      @include square(20);
+    }
+  }
+}

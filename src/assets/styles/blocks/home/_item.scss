@@ -58,4 +58,16 @@
   &__comment {
     color: $color-accent;
   }
+
+  &__up {
+    @include fluid-square(70, 50);
+
+    background: $color-light-alt;
+    border-radius: 50%;
+    rotate: 90deg;
+    bottom: rem(10);
+    right: rem(30);
+    color: $color-dark-alt;
+    opacity: 0.75;
+  }
 }

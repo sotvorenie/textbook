@@ -22,8 +22,8 @@ const props = defineProps({
   },
 })
 
-let showTimeout: number | null = null
-let hideTimeout: number | null = null
+let showTimeout: any = null
+let hideTimeout: any = null
 
 const clearTimeouts = () => {
   if (showTimeout) {
@@ -73,11 +73,11 @@ watch(() => props.isVisible, (newVal) => {
 
 <template>
 
-  <div class="absolute" @mouseenter="addMouse" @mouseleave="removeMouse">
+  <div class="absolute position-relative" @mouseenter="addMouse" @mouseleave="removeMouse">
     <slot name="activator"/>
 
-    <Transition :name="position === 'top' ? 'fade-top' : 'fade-bottom'">
-      <div class="absolute__content" v-if="visible && isVisible">
+    <Transition :name="position === 'top' ? 'fade-top' : position === 'left' ? 'fade-left' : 'fade-bottom'">
+      <div class="absolute__content position-absolute" v-if="visible && isVisible">
         <slot/>
       </div>
     </Transition>

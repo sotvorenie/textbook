@@ -14,7 +14,7 @@ onMounted(() =>{
 <template>
 
   <ul class="skeleton skeleton-default-list row">
-    <li class="skeleton-default-list__item col-4 ds-col-3 position-relative"
+    <li class="skeleton-default-list__item loading-line col-4 ds-col-3 position-relative"
         v-for="_ in colElements"
     >
       <div class="skeleton-default-list__title">

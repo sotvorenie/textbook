@@ -19,6 +19,20 @@
   opacity: 0;
 }
 
+.fade-left-enter-active,
+.fade-left-leave-active,
+.fade-left-enter-from,
+.fade-left-leave-to {
+  backdrop-filter: blur(3px);
+}
+.fade-left-enter-active, .fade-left-leave-active {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.fade-left-enter-from, .fade-left-leave-to {
+  transform: translateX(10%);
+  opacity: 0;
+}
+
 .fade-bottom-enter-active,
 .fade-bottom-leave-active,
 .fade-bottom-enter-from,

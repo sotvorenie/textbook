@@ -1,4 +1,4 @@
-import {computed, onActivated, ref, watchEffect} from "vue";
+import {computed, nextTick, onActivated, onDeactivated, onMounted, ref, watchEffect} from "vue";
 
 import {Item} from "../../types/item.ts";
 
@@ -15,6 +15,7 @@ import useUserStore from "../../store/useUserStore.ts";
 import useBlocksStore from "../../store/useBlocksStore.ts";
 import useMessageStore from "../../store/useMessageStore.ts";
 import useOnlineStore from "../../store/useOnlineStore.ts";
+import useScrollStore from "../../store/useScrollStore.ts";
 
 export const useItem = (
     name: string,
@@ -29,6 +30,9 @@ export const useItem = (
     const blocksStore = useBlocksStore();
     const messageStore = useMessageStore();
     const onlineStore = useOnlineStore();
+    const scrollStore = useScrollStore();
+
+    let mainElement: HTMLElement | null = null
 
     //=========================================================//
     //-- запросы к апи --//
@@ -189,9 +193,55 @@ export const useItem = (
 
 
     //=========================================================//
+    //-- подъем наверх --//
+    // видимость кнопки подъема наверх
+    const upBtnVisible = ref<boolean>(true)
+
+
+    // кли по кнопке подъема
+    const clickToUp = () => {
+        if (mainElement) {
+            mainElement.scrollTo({
+                top: 0,
+                behavior: 'smooth',
+            })
+            scrollStore.scrolls[name].item = 0
+        }
+    }
+
+    // при scroll-е показываем кнопку поднятия наверх
+    const updateScrollBtnVisible = () => {
+        if (!mainElement) return
+
+        const topPosition: number = mainElement.scrollTop
+
+        upBtnVisible.value = topPosition > 0
+    }
+    //=========================================================//
+
+
+    //=========================================================//
+    //-- статистика и комментарии --//
+    // видимость блока статистики и комментариев
+    const statisticsAndCommentsVisible = ref<boolean>(false)
+
+
+    // добавление видимости блока, когда мы до-листали до низа
+    const updateBlocksVisible = () => {
+        if (!mainElement || statisticsAndCommentsVisible.value) return
+
+        statisticsAndCommentsVisible.value =
+            mainElement.scrollHeight - mainElement.scrollTop - mainElement.clientHeight <= 100
+    }
+    //=========================================================//
+
+
+    //=========================================================//
     //-- хуки --//
     onActivated(async () => {
         isLoading.value = true
+        upBtnVisible.value = false
+        statisticsAndCommentsVisible.value = false
 
         const data = itemMemoStore.getItem(
             name,
@@ -223,6 +273,29 @@ export const useItem = (
         }
 
         isLoading.value = false
+
+        await nextTick()
+        updateBlocksVisible()
+
+        if (mainElement) {
+            mainElement.addEventListener('scroll', () => {
+                updateScrollBtnVisible()
+                updateBlocksVisible()
+            })
+        }
+    })
+
+    onDeactivated(() => {
+        if (mainElement) {
+            mainElement.removeEventListener('scroll', () => {
+                updateScrollBtnVisible()
+                updateBlocksVisible()
+            })
+        }
+    })
+
+    onMounted(() => {
+        mainElement = document.querySelector('.home__main')
     })
 
     // проверка наличие поста в бд
@@ -244,5 +317,11 @@ export const useItem = (
         downloadVisible,
         isDownload,
         handleDownload,
+
+        upBtnVisible,
+        clickToUp,
+
+        statisticsAndCommentsVisible,
+        updateBlocksVisible,
     }
 }

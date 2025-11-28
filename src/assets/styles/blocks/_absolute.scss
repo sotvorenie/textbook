@@ -2,16 +2,26 @@
 @use '../variables' as *;
 
 .absolute {
-  position: relative;
 
   &.is-left {
+    height: 0;
+
     .absolute__content {
-      position: absolute;
       left: rem(-50);
     }
   }
 
-  &:not(.is-left) {
+  &.is-left-center {
+    height: 100%;
+
+    .absolute__content {
+      @include abs-y;
+
+      right: 100%;
+    }
+  }
+
+  &:not(.is-left):not(.is-left-center) {
     .absolute__content {
       @include abs-x;
     }
