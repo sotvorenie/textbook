@@ -57,6 +57,7 @@ const handleInput = (event: Event) => {
 
   nextTick(() => {
     autoResize()
+    updateCloseBtnVisible()
   })
 }
 
@@ -85,7 +86,10 @@ const handleKeyDown = (event: KeyboardEvent) => {
     textarea.focus();
     textarea.setSelectionRange(newCursorPos, newCursorPos);
     text.value = newValue;
-    nextTick(() => autoResize());
+    nextTick(() => {
+      autoResize()
+      updateCloseBtnVisible()
+    });
   };
 
   const pairs: Record<string, string> = { '{': '}', '(': ')', '[': ']', '"': '"', "'": "'" };
@@ -154,9 +158,18 @@ const handleCloseTextarea = () => {
     textareaRef.value.style.height = '100px'
     textareaRef.value.style.overflow = 'hidden'
   } else {
-    textareaRef.value.style.overflow = 'auto'
     autoResize()
   }
+}
+
+// видимость кнопки "развернуть/свернуть"
+const closeBtnVisible = ref<boolean>(false);
+
+// изменить видимость кнопки "развернуть/свернуть"
+const updateCloseBtnVisible = () => {
+  if (!textareaRef.value) return false
+
+  closeBtnVisible.value = textareaRef.value.offsetHeight > 100;
 }
 
 
@@ -196,14 +209,17 @@ onMounted(() => {
 
     <span class="label__counter position-absolute">{{text.length}}/{{maxLength}}</span>
 
-    <Btn :class="{
+    <Transition name="scale">
+      <Btn :class="{
             'create__close button-small position-absolute recolor-svg': true,
             'is-active': isClosed,
           }"
-         @click.stop="handleCloseTextarea"
-    >
-      <ArrowTextarea/>
-    </Btn>
+           @click.stop="handleCloseTextarea"
+           v-if="closeBtnVisible"
+      >
+        <ArrowTextarea/>
+      </Btn>
+    </Transition>
 
     <Btn class="create__remove button-small position-absolute"
          @click="emits('removeTextarea')"

@@ -212,7 +212,7 @@ watch(
 
       <Modal v-model="modalVisible" :size="600" :close-active="isAvatarLoaded && isModeLoaded">
         <template #activator="{open}">
-          <Transition name="avatar" appear>
+          <Transition name="scale" appear>
             <div class="home__user-wrapper position-relative" @click="open">
               <button :class="['home__user', 'img-container', ...roundedButtonStyle]"
                       :title="userName"
