@@ -27,6 +27,27 @@
     overflow: hidden;
   }
 
+  &__close {
+    @include square(40);
+    @include flex-center();
+
+    padding: 0;
+    border-radius: 50%;
+    top: rem(-20);
+    background: var(--color-dark-alt);
+    right: fluid(150, 140);
+    rotate: 0deg;
+
+    &.is-active {
+      rotate: 180deg;
+    }
+
+    svg {
+      width: rem(20);
+      height: auto;
+    }
+  }
+
   &__remove {
     background: $color-dark-alt;
     top: rem(-20);

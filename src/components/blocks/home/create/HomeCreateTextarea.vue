@@ -8,6 +8,7 @@ import {addLabelText, removeLabelText} from "../../../../composables/useLabelTex
 
 import Btn from "../../../ui/Btn.vue";
 import DragAndDropIcon from "../../../../assets/icons/DragAndDropIcon.vue";
+import ArrowTextarea from "../../../../assets/icons/ArrowTextarea.vue";
 
 //=========================================================//
 
@@ -38,6 +39,10 @@ const autoResize = () => {
   if (textarea) {
     textarea.style.height = 'auto'
     textarea.style.height = textarea.scrollHeight + 'px'
+
+    if (isClosed.value) {
+      isClosed.value = false
+    }
   }
 }
 
@@ -136,6 +141,24 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 };
 
+// свернут ли textarea
+const isClosed = ref<boolean>(false)
+
+// сворачивание/разворачивание textarea
+const handleCloseTextarea = () => {
+  isClosed.value = !isClosed.value
+
+  if (!textareaRef.value) return
+
+  if (isClosed.value) {
+    textareaRef.value.style.height = '100px'
+    textareaRef.value.style.overflow = 'hidden'
+  } else {
+    textareaRef.value.style.overflow = 'auto'
+    autoResize()
+  }
+}
+
 
 watch(() => activeTab.value,
     () => nextTick(() => {
@@ -172,6 +195,15 @@ onMounted(() => {
     />
 
     <span class="label__counter position-absolute">{{text.length}}/{{maxLength}}</span>
+
+    <Btn :class="{
+            'create__close button-small position-absolute recolor-svg': true,
+            'is-active': isClosed,
+          }"
+         @click.stop="handleCloseTextarea"
+    >
+      <ArrowTextarea/>
+    </Btn>
 
     <Btn class="create__remove button-small position-absolute"
          @click="emits('removeTextarea')"

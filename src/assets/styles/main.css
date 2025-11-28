@@ -1976,6 +1976,28 @@ a[class] {
   height: auto;
   overflow: hidden;
 }
+.create__close {
+  width: 2.5rem !important;
+  min-width: 2.5rem !important;
+  height: 2.5rem !important;
+  min-height: 2.5rem !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  border-radius: 50%;
+  top: -1.25rem;
+  background: var(--color-dark-alt);
+  right: clamp(8.75rem, 8.0706521739rem + 1.0869565217vw, 9.375rem);
+  rotate: 0deg;
+}
+.create__close.is-active {
+  rotate: 180deg;
+}
+.create__close svg {
+  width: 1.25rem;
+  height: auto;
+}
 .create__remove {
   background: var(--color-dark-alt);
   top: -1.25rem;
