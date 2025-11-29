@@ -101,7 +101,7 @@ const {
       <div v-if="statisticsAndCommentsVisible">
         <Suspense>
           <template #default>
-            <HomeItemStatistics :name="name"/>
+            <HomeItemStatistics :name="name" :api-name="apiUrl"/>
           </template>
 
           <template #fallback>
@@ -109,7 +109,7 @@ const {
           </template>
         </Suspense>
 
-        <HomeItemComments :name="name" />
+        <HomeItemComments :name="name" :api-name="apiUrl" />
       </div>
 
       <Transition name="scale" appear>

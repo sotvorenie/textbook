@@ -1,4 +1,4 @@
-import {get, patch, post} from "../base.ts";
+import {del, get, patch, post} from "../base.ts";
 
 import {Comment} from "./types.ts";
 
@@ -8,7 +8,11 @@ import useOnlineStore from "../../store/useOnlineStore.ts";
 import useIdStore from "../../store/useIdStore.ts";
 import useUserStore from "../../store/useUserStore.ts";
 
-export const getComments = async (name: string, page: number = 1): Promise<any> => {
+export const getComments = async (
+    name: string,
+    apiName: string,
+    page: number = 1
+): Promise<any> => {
     const onlineStore = useOnlineStore();
     const idStore = useIdStore();
 
@@ -24,13 +28,17 @@ export const getComments = async (name: string, page: number = 1): Promise<any> 
             sortBy: '-date',
         }
 
-        return await get(`/comments`, params)
+        return await get(`/comments_${apiName}`, params)
     } catch (err) {
         throw err;
     }
 }
 
-export const setComment = async (name: string, text: string): Promise<Comment | undefined> => {
+export const setComment = async (
+    name: string,
+    apiName: string,
+    text: string
+): Promise<Comment | undefined> => {
     const onlineStore = useOnlineStore();
     const userStore = useUserStore();
     const idStore = useIdStore();
@@ -52,13 +60,17 @@ export const setComment = async (name: string, text: string): Promise<Comment | 
             is_redact: false
         }
 
-        return await post(`/comments`, comment)
+        return await post(`/comments_${apiName}`, comment)
     } catch (err) {
         throw err;
     }
 }
 
-export const redactComment = async (id: number, text: string): Promise<Comment | undefined> => {
+export const redactComment = async (
+    apiName: string,
+    id: number,
+    text: string
+): Promise<Comment | undefined> => {
     const onlineStore = useOnlineStore();
     const userStore = useUserStore();
 
@@ -77,14 +89,17 @@ export const redactComment = async (id: number, text: string): Promise<Comment |
             is_redact: true
         }
 
-        return await patch(`/comments/${id}`, comment)
+        return await patch(`/comments_${apiName}/${id}`, comment)
     } catch (err) {
         throw err;
     }
 }
 
 // проверяем: оставлял ли пользователь комментарий у этой записи (чтобы скрывать блок написания нового комментария)
-export const checkComment = async (name: string): Promise<boolean | undefined> => {
+export const checkComment = async (
+    name: string,
+    apiName: string
+): Promise<boolean | undefined> => {
     const userStore = useUserStore();
     const idStore = useIdStore();
     const onlineStore = useOnlineStore();
@@ -94,11 +109,27 @@ export const checkComment = async (name: string): Promise<boolean | undefined> =
     try {
         const id: number = idStore.idValues[name]
 
-        const check: Comment[] | undefined = await get(`/comments?post_id=${id}&user_id=${userStore.user.id}`)
+        const check: Comment[] | undefined =
+            await get(`/comments_${apiName}?post_id=${id}&user_id=${userStore.user.id}`)
 
         return !(!check || check.length === 0);
 
 
+    } catch (err) {
+        throw err;
+    }
+}
+
+export const removeComment = async (
+    apiName: string,
+    id: number
+): Promise<void> => {
+    const onlineStore = useOnlineStore();
+
+    if (!onlineStore.isOnlineMode) return
+
+    try {
+        await del(`/comments_${apiName}/${id}`)
     } catch (err) {
         throw err;
     }

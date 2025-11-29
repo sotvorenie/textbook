@@ -45,7 +45,10 @@ client.interceptors.response.use(
         const isNetworkError =
             error.code === 'ECONNABORTED' ||
             error.message === 'Network Error' ||
-            !error.response
+            error.message.includes('network') ||
+            error.message.includes('ECONN') ||
+            (error.request && !error.response)
+
         if (isNetworkError) {
             onlineStore.isOnline = false
             onlineStore.isOnlineMode = false

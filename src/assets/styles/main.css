@@ -2312,6 +2312,9 @@ a[class] {
   height: 2.5rem !important;
   min-height: 2.5rem !important;
 }
+.comments__actions-btn:not(:last-child) {
+  margin-bottom: 0.625rem;
+}
 .comments__form {
   bottom: 0;
 }
@@ -2323,6 +2326,9 @@ a[class] {
 }
 .comments__btn-bar {
   column-gap: 0.625rem;
+}
+.comments__button {
+  background: var(--color-dark-alt);
 }
 
 /*# sourceMappingURL=main.css.map */

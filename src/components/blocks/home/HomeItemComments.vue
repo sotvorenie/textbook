@@ -2,8 +2,8 @@
 import {onMounted, ref} from "vue";
 
 import {Comment} from "../../../api/comments/types.ts";
-import {getComments, setComment, checkComment, redactComment} from "../../../api/comments/comments.ts";
-import {showError} from "../../../utils/modals.ts";
+import {getComments, setComment, checkComment, redactComment, removeComment} from "../../../api/comments/comments.ts";
+import {showConfirm, showError} from "../../../utils/modals.ts";
 import Btn from "../../ui/Btn.vue";
 import Absolute from "../../common/Absolute.vue";
 import Dots from "../../../assets/icons/Dots.vue";
@@ -14,6 +14,10 @@ const userStore = useUserStore();
 
 const props = defineProps({
   name: {
+    type: String,
+    required: true,
+  },
+  apiName: {
     type: String,
     required: true,
   },
@@ -51,6 +55,16 @@ const handleClear = () => {
   commentText.value = ''
 }
 
+// очистка поля ввода и закрытие формы
+const clearAndRemoveForm = (redacted: boolean = false) => {
+  handleClear()
+  visibleCreateComment.value = false
+
+  if (redacted) {
+    redactedComment.value = null
+  }
+}
+
 // клик по "Редактировать"
 const handleRedact = (comment: Comment) => {
   redactedComment.value = comment
@@ -63,10 +77,13 @@ const getData = async (getVisible: boolean = false) => {
   try {
     skeletonVisible.value = true
 
-    const data: {meta: any, items: Comment[]} = await getComments(props.name, page.value)
+    const data: {meta: any, items: Comment[]} =
+        await getComments(props.name, props.apiName, page.value)
 
     if (getVisible) {
-      const visibleData: boolean | undefined = await checkComment(props.name)
+      console.log(props.name, props.apiName)
+      const visibleData: boolean | undefined =
+          await checkComment(props.name, props.apiName)
 
       visibleCreateComment.value = !visibleData
     }
@@ -92,6 +109,7 @@ const createComment = async () => {
   try {
     if (redactedComment.value) {
       const comment: Comment | undefined = await redactComment(
+          props.apiName,
           redactedComment.value.id as number,
           commentText.value
       )
@@ -101,17 +119,16 @@ const createComment = async () => {
           return item.id === redactedComment.value!.id ? comment : item
         })
 
-        redactedComment.value = null
-        handleClear()
-        visibleCreateComment.value = false
+        clearAndRemoveForm(true)
       }
     } else {
-      const comment: Comment | undefined = await setComment(props.name, commentText.value)
+      const comment: Comment | undefined =
+          await setComment(props.name, props.apiName, commentText.value)
 
       if (comment) {
         comments.value.push(comment)
-        handleClear()
-        visibleCreateComment.value = false
+
+        clearAndRemoveForm()
       }
     }
   } catch (err) {
@@ -133,6 +150,27 @@ const getFromScroll = async () => {
 
   if (check) {
     await getData()
+  }
+}
+
+// удаление комментария
+const handleRemoveComment = async (id: number) => {
+  const check = await showConfirm(
+      'Удаление комментария',
+      'Вы действительно хотите удалить комментарий?'
+  )
+
+  if (check) {
+    try {
+      await removeComment(props.apiName, id)
+
+      comments.value = comments.value.filter(comment => comment.id !== id)
+    } catch (err) {
+      await showError(
+          'Ошибка удаления комментария',
+          'Не удалось удалить комментарий..'
+      )
+    }
   }
 }
 
@@ -184,7 +222,10 @@ onMounted(() => {
               </template>
 
               <template #default>
-                <Btn class="button-small" @click="handleRedact(comment)">Редактировать</Btn>
+                <div class="comments__actions flex flex-column">
+                  <Btn class="comments__actions-btn button-small" @click="handleRedact(comment)">Редактировать</Btn>
+                  <Btn class="comments__actions-btn button-small" @click="handleRemoveComment(comment.id!)">Удалить</Btn>
+                </div>
               </template>
             </Absolute>
           </div>
@@ -210,18 +251,25 @@ onMounted(() => {
         </label>
 
         <div class="comments__btn-bar flex">
-          <Btn class="button-small"
+          <Btn class="comments__button button-small"
                :is-disabled="!commentText.length"
                :is-loading="isLoading"
                @click="createComment"
           >
             Отправить
           </Btn>
-          <Btn class="button-small"
+          <Btn class="comments__button button-small"
                :is-disabled="isLoading"
                @click="handleClear"
           >
             Очистить
+          </Btn>
+          <Btn class="comments__button button-small"
+               v-if="redactedComment"
+               :is-disabled="isLoading"
+               @click="clearAndRemoveForm(true)"
+          >
+            Отмена
           </Btn>
         </div>
       </form>

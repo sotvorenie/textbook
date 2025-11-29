@@ -59,6 +59,16 @@
     @include square(40);
   }
 
+  &__actions {
+
+    &-btn {
+
+      &:not(:last-child) {
+        margin-bottom: rem(10);
+      }
+    }
+  }
+
   &__form {
     bottom: 0;
 
@@ -73,5 +83,9 @@
 
   &__btn-bar {
     column-gap: rem(10);
+  }
+
+  &__button {
+    background: $color-dark-alt;
   }
 }

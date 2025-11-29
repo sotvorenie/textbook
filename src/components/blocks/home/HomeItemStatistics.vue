@@ -16,6 +16,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  apiName: {
+    type: String,
+    required: true,
+  },
 })
 
 interface StatisticsList {
@@ -28,7 +32,8 @@ const statistics = ref<StatisticsList[]>([])
 
 const getData = async () => {
   try {
-    const data: Statistic | undefined = await getStatistics(props.name)
+    const data: Statistic | undefined =
+        await getStatistics(props.name, props.apiName)
 
     if (data) {
       statistics.value = [
