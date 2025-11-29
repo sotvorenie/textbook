@@ -105,6 +105,19 @@ const {
         </template>
       </TransitionGroup>
 
+      <ul class="item__date flex flex-align-center">
+        <li class="item__date-item flex flex-align-center">
+          <p class="h5">Дата создания:</p>
+          <p class="h6">{{item.date}}</p>
+          <p class="h6">{{item.time}}</p>
+        </li>
+        <li class="item__date-item flex flex-align-center" v-if="item.redacted">
+          <p class="h5">Редактировано:</p>
+          <p class="h6">{{item.redacted.date}}</p>
+          <p class="h6">{{item.redacted.time}}</p>
+        </li>
+      </ul>
+
       <Suspense v-if="onlineStore.isOnlineMode">
         <template #default>
           <HomeItemStatistics :name="name"

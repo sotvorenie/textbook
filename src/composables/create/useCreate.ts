@@ -79,7 +79,10 @@ export const useCreate = (name: string, apiName: string) => {
             title: '',
             [type]: type === 'textbooks' ? {} : '',
             id: -1,
-            languages_and_technologies: []
+            languages_and_technologies: [],
+            date: '',
+            sort_date: '',
+            time: ''
         }
         createStore.isRedact[name] = false
     }
@@ -138,7 +141,10 @@ export const useCreate = (name: string, apiName: string) => {
                     title: '',
                     content: {},
                     id: -1,
-                    languages_and_technologies: []
+                    languages_and_technologies: [],
+                    date: '',
+                    sort_date: '',
+                    time: ''
                 }
 
                 createStore.isRedact[name] = false
@@ -159,16 +165,28 @@ export const useCreate = (name: string, apiName: string) => {
     ) => {
         checkTabsLength(newItem, tabs)
 
-        getDateData(newItem)
-
         setLanguages(newItem)
 
         const isCreating = !createStore.createData[name].title.length;
 
         try {
             if (isCreating) {
+                getDateData(newItem)
+
                 await create(newItem)
             } else {
+                const redactedDate = getCurrentDateTime()
+                const date = redactedDate.date
+                const time = redactedDate.time
+
+                newItem.redacted = {
+                    date,
+                    time
+                }
+
+                newItem.date = createStore.createData[name].date
+                newItem.sort_date = createStore.createData[name].sort_date
+                newItem.time = createStore.createData[name].time
                 await redact(newItem)
             }
         } catch (err) {
@@ -236,6 +254,11 @@ export const useCreate = (name: string, apiName: string) => {
                 title: response.title,
                 date: response.date,
                 languages_and_technologies: response.languages_and_technologies,
+                statistics: {
+                    views: 0,
+                    downloads: 0,
+                    likes: 0,
+                }
             });
 
             const cacheElement = itemMemoStore.findItemById(response.id);

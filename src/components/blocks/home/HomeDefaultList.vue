@@ -180,7 +180,7 @@ const likedItems = computed(() => {
 
 // добавление/удаление элемента из избранного
 const like = async (id: number, statistics: Item['statistics']) => {
-  await handleLike(props.name, props.apiUrl, id, statistics)
+  await handleLike(props.name, id, props.apiUrl, statistics)
 }
 //=========================================================//
 

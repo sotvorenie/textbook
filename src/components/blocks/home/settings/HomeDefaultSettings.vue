@@ -102,7 +102,10 @@ const handleBack = () => {
         title: '',
         text: '',
         id: -1,
-        languages_and_technologies: []
+        languages_and_technologies: [],
+        date: '',
+        sort_date: '',
+        time: ''
       }
     }, 'редактирование')
 
@@ -165,6 +168,9 @@ const handleRedact = () => {
     id: item?.id ?? -1,
     languages_and_technologies: item?.languages_and_technologies ?? [],
     content: item?.content ?? {},
+    date: item?.date ?? '',
+    sort_date: item?.sort_date ?? '',
+    time: item?.time ?? '',
   }
 
   createStore.isRedact[props.blockName] = true

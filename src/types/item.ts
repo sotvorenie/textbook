@@ -8,8 +8,7 @@ export interface Item {
     date: string,
     sort_date: string,
     time: string,
-    redact?: {
-        value: boolean,
+    redacted?: {
         time: string,
         date: string
     },

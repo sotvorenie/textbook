@@ -32,6 +32,7 @@
 
   &__comment {
     white-space: pre-wrap;
+    color: $color-accent;
   }
 
   &__code {
@@ -55,8 +56,13 @@
     }
   }
 
-  &__comment {
-    color: $color-accent;
+  &__date {
+    column-gap: rem(60);
+    margin-bottom: rem(10);
+
+    &-item {
+      column-gap: rem(10);
+    }
   }
 
   &__up {

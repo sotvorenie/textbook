@@ -11,9 +11,9 @@ import {Item} from "../../types/item.ts";
 
 export const handleLike = async (
     name: string,
-    apiName: string,
     id: number,
-    statistics: Item['statistics']
+    apiName?: string,
+    statistics?: Item['statistics']
 ): Promise<any> => {
     const userStore = useUserStore();
     const itemsStore = useItemsStore();
@@ -42,7 +42,7 @@ export const handleLike = async (
 
         const response = await like(name)
 
-        if (isLike) await updateStatistics(apiName, id, 'likes', statistics)
+        if (isLike) await updateStatistics(apiName!, id, 'likes', statistics!)
 
         if (response) {
             isLike ? await sendToTelegram(TelegramEventType.LIKE, element.title)

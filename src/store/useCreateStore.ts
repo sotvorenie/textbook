@@ -8,6 +8,9 @@ const useCreateStore = defineStore('createStore', () => {
         text?: string,
         id: number,
         languages_and_technologies: string[],
+        date: string,
+        sort_date: string,
+        time: string,
         content?: Record<string, string>
     }>>({
         hints: {
@@ -15,24 +18,36 @@ const useCreateStore = defineStore('createStore', () => {
             text: '',
             id: -1,
             languages_and_technologies: [],
+            date: '',
+            sort_date: '',
+            time: '',
         },
         advices: {
             title: '',
             text: '',
             id: -1,
             languages_and_technologies: [],
+            date: '',
+            sort_date: '',
+            time: '',
         },
         projects: {
             title: '',
             text: '',
             id: -1,
             languages_and_technologies: [],
+            date: '',
+            sort_date: '',
+            time: '',
         },
         textbooks: {
             title: '',
             content: {},
             id: -1,
             languages_and_technologies: [],
+            date: '',
+            sort_date: '',
+            time: '',
         },
     })
 
@@ -57,24 +72,36 @@ const useCreateStore = defineStore('createStore', () => {
             text: '',
             id: -1,
             languages_and_technologies: [],
+            date: '',
+            sort_date: '',
+            time: '',
         }
         createData.advices = {
             title: '',
             text: '',
             id: -1,
             languages_and_technologies: [],
+            date: '',
+            sort_date: '',
+            time: '',
         }
         createData.projects = {
             title: '',
             text: '',
             id: -1,
             languages_and_technologies: [],
+            date: '',
+            sort_date: '',
+            time: '',
         }
         createData.textbooks = {
             title: '',
             content: {},
             id: -1,
             languages_and_technologies: [],
+            date: '',
+            sort_date: '',
+            time: '',
         }
 
         isRedact.hints = false

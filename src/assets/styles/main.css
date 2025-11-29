@@ -1977,6 +1977,7 @@ a[class] {
 }
 .item__comment {
   white-space: pre-wrap;
+  color: #fe7971;
 }
 .item__code {
   font-size: clamp(1.125rem, 0.9891304348rem + 0.2173913043vw, 1.25rem);
@@ -1995,8 +1996,12 @@ a[class] {
   top: -1.25rem;
   background: var(--color-dark-alt);
 }
-.item__comment {
-  color: #fe7971;
+.item__date {
+  column-gap: 3.75rem;
+  margin-bottom: 0.625rem;
+}
+.item__date-item {
+  column-gap: 0.625rem;
 }
 .item__up {
   aspect-ratio: 1/1;
@@ -2106,6 +2111,9 @@ a[class] {
   pointer-events: none;
 }
 
+.textbook__content {
+  margin-bottom: 1.875rem;
+}
 .textbook__search-btn {
   margin-bottom: 1.25rem !important;
 }

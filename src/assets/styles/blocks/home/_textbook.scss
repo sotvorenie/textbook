@@ -3,6 +3,10 @@
 
 .textbook {
 
+  &__content {
+    margin-bottom: rem(30);
+  }
+
   &__search {
 
     &-btn {
