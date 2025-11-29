@@ -118,7 +118,12 @@ const newItem = reactive<Item>({
   content: {},
   date: '',
   sort_date: '',
-  time: ''
+  time: '',
+  statistics: {
+    views: 0,
+    downloads: 0,
+    likes: 0,
+  },
 })
 //=========================================================//
 

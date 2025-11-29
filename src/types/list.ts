@@ -1,8 +1,11 @@
+import {Item} from "./item.ts";
+
 export interface List {
     id: number,
     title: string,
     date: string,
     languages_and_technologies: string[],
+    statistics: Item['statistics']
 }
 
 export interface UnAuthorizedList extends Omit<List, 'languages_and_technologies'> {

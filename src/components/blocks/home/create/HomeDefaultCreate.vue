@@ -55,7 +55,12 @@ const newItem = reactive<Item>({
   text: '',
   date: '',
   sort_date: '',
-  time: ''
+  time: '',
+  statistics: {
+    views: 0,
+    downloads: 0,
+    likes: 0,
+  },
 })
 //=========================================================//
 

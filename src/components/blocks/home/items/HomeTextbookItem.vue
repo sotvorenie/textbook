@@ -6,6 +6,8 @@ import {Item} from "../../../../types/item.ts";
 import {useItem} from "../../../../composables/item/useItem.ts";
 
 import TextbookSkeleton from "../loading/TextbookSkeleton.vue";
+import StatisticsSkeleton from "../loading/StatisticsSkeleton.vue";
+import HomeItemStatistics from "../HomeItemStatistics.vue";
 
 import HomeTextbookSlider from "../HomeTextbookSlider.vue";
 import HomeItemCode from "../HomeItemCode.vue";
@@ -13,6 +15,11 @@ import Modal from "../../../common/Modal.vue";
 import Btn from "../../../ui/Btn.vue";
 
 import SearchIcon from "../../../../assets/icons/SearchIcon.vue";
+
+import useOnlineStore from "../../../../store/useOnlineStore.ts";
+import Arrow from "../../../../assets/icons/Arrow.vue";
+import HomeItemComments from "../HomeItemComments.vue";
+const onlineStore = useOnlineStore();
 
 const props = defineProps({
   apiUrl: {
@@ -40,6 +47,11 @@ const item = ref<Item>({
   date: '',
   sort_date: '',
   time: '',
+  statistics: {
+    views: 0,
+    downloads: 0,
+    likes: 0,
+  }
 })
 //=========================================================//
 
@@ -87,7 +99,10 @@ const {
   handleCopy,
   downloadVisible,
   isDownload,
-  handleDownload
+  handleDownload,
+  upBtnVisible,
+  clickToUp,
+  commentsVisible,
 } = useItem(
     props.name,
     props.apiUrl,
@@ -166,6 +181,34 @@ const {
                         v-else/>
         </template>
       </div>
+
+      <Suspense v-if="onlineStore.isOnlineMode">
+        <template #default>
+          <HomeItemStatistics :name="name"
+                              :api-name="apiUrl"
+                              :statistics="item.statistics"
+          />
+        </template>
+
+        <template #fallback>
+          <StatisticsSkeleton/>
+        </template>
+      </Suspense>
+
+      <HomeItemComments v-if="commentsVisible && onlineStore.isOnlineMode"
+                        :name="name"
+                        :api-name="apiUrl"
+      />
+
+      <Transition name="scale" appear>
+        <button class="item__up flex-center button-width-svg recolor-svg position-fixed"
+                type="button"
+                @click="clickToUp"
+                v-if="upBtnVisible"
+        >
+          <Arrow/>
+        </button>
+      </Transition>
     </div>
   </div>
 

@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import {ref} from "vue";
+import {computed, PropType} from "vue";
 
-import {Statistic} from "../../../api/statistics/types.ts";
-
-import {getStatistics} from "../../../api/statistics/statistics.ts";
-
-import {showError} from "../../../utils/modals.ts";
+import {Item} from "../../../types/item.ts";
 
 import DownloadIcon from "../../../assets/icons/DownloadIcon.vue";
 import EyeIcon from "../../../assets/icons/EyeIcon.vue";
@@ -20,6 +16,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  statistics: {
+    type: Object as PropType<Item['statistics']>,
+    required: true,
+  },
 })
 
 interface StatisticsList {
@@ -28,58 +28,25 @@ interface StatisticsList {
   number: Number | String
 }
 
-const statistics = ref<StatisticsList[]>([])
-
-const getData = async () => {
-  try {
-    const data: Statistic | undefined =
-        await getStatistics(props.name, props.apiName)
-
-    if (data) {
-      statistics.value = [
-        {
-          name: 'Кол-во просмотров: ',
-          icon: EyeIcon,
-          number: data?.statistic.views || 0,
-        },
-        {
-          name: 'Кол-во скачиваний: ',
-          icon: DownloadIcon,
-          number: data?.statistic.downloads || 0,
-        },
-        {
-          name: 'Кол-во добавления в избранное: ',
-          icon: Heart,
-          number: data?.statistic.likes || 0,
-        },
-      ]
-    }
-  } catch (err) {
-    statistics.value = [
-      {
-        name: 'Кол-во просмотров: ',
-        icon: EyeIcon,
-        number: 'Неизвестно',
-      },
-      {
-        name: 'Кол-во скачиваний: ',
-        icon: DownloadIcon,
-        number: 'Неизвестно',
-      },
-      {
-        name: 'Кол-во добавления в избранное: ',
-        icon: Heart,
-        number: 'Неизвестно',
-      },
-    ]
-    await showError(
-        'Ошибка загрузки статистики поста',
-        'Не удалось загрузить данные статистики..'
-    )
-  }
-}
-
-await getData()
+const statistics = computed((): StatisticsList[] => {
+  return [
+    {
+      name: 'Кол-во просмотров: ',
+      icon: EyeIcon,
+      number: props?.statistics?.views || 0,
+    },
+    {
+      name: 'Кол-во скачиваний: ',
+      icon: DownloadIcon,
+      number: props?.statistics?.downloads || 0,
+    },
+    {
+      name: 'Кол-во добавления в избранное: ',
+      icon: Heart,
+      number: props?.statistics?.likes || 0,
+    },
+  ]
+})
 </script>
 
 <template>

@@ -4,7 +4,6 @@ import {Comment} from "./types.ts";
 
 import {getCurrentDateTime} from "../../composables/useDate.ts";
 
-import useOnlineStore from "../../store/useOnlineStore.ts";
 import useIdStore from "../../store/useIdStore.ts";
 import useUserStore from "../../store/useUserStore.ts";
 
@@ -13,10 +12,7 @@ export const getComments = async (
     apiName: string,
     page: number = 1
 ): Promise<any> => {
-    const onlineStore = useOnlineStore();
     const idStore = useIdStore();
-
-    if (!onlineStore.isOnlineMode) return
 
     try {
         const id: number = idStore.idValues[name]
@@ -39,11 +35,8 @@ export const setComment = async (
     apiName: string,
     text: string
 ): Promise<Comment | undefined> => {
-    const onlineStore = useOnlineStore();
     const userStore = useUserStore();
     const idStore = useIdStore();
-
-    if (!onlineStore.isOnlineMode) return
 
     try {
         const dateInfo = getCurrentDateTime()
@@ -71,10 +64,7 @@ export const redactComment = async (
     id: number,
     text: string
 ): Promise<Comment | undefined> => {
-    const onlineStore = useOnlineStore();
     const userStore = useUserStore();
-
-    if (!onlineStore.isOnlineMode) return
 
     try {
         const dateInfo = getCurrentDateTime()
@@ -102,9 +92,6 @@ export const checkComment = async (
 ): Promise<boolean | undefined> => {
     const userStore = useUserStore();
     const idStore = useIdStore();
-    const onlineStore = useOnlineStore();
-
-    if (!onlineStore.isOnlineMode) return
 
     try {
         const id: number = idStore.idValues[name]
@@ -124,10 +111,6 @@ export const removeComment = async (
     apiName: string,
     id: number
 ): Promise<void> => {
-    const onlineStore = useOnlineStore();
-
-    if (!onlineStore.isOnlineMode) return
-
     try {
         await del(`/comments_${apiName}/${id}`)
     } catch (err) {

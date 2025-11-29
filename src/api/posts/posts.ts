@@ -22,7 +22,7 @@ export const getList = async (
     try {
         if (onlineStore.isOnlineMode) {
             const params: GetList = {
-                _select: "id,title,languages_and_technologies,date",
+                _select: "id,title,languages_and_technologies,date,statistics",
                 page,
                 limit: homeStore.pageNumberForAPI ?? 9,
                 user_id,
@@ -147,3 +147,24 @@ export const removeItem = async (name: string, id: number): Promise<any> => {
         throw err;
     }
 };
+
+export const updateStatistics = async (
+    name: string,
+    id: number,
+    type: keyof Item['statistics'],
+    statistics: Item['statistics']
+) => {
+    const onlineStore = useOnlineStore();
+
+    try {
+        if  (!onlineStore.isOnlineMode) return
+
+        statistics[type] = +statistics[type] + 1
+
+        await patch(`/${name}/${id}`, {
+            statistics
+        })
+    } catch (_) {
+        return
+    }
+}

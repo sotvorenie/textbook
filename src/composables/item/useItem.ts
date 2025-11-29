@@ -5,7 +5,7 @@ import {Item} from "../../types/item.ts";
 import {showConfirm, showError} from "../../utils/modals.ts";
 import decodeHtmlEntities from "../useDecodeHtmlEntities.ts";
 
-import {getItem} from "../../api/posts/posts.ts";
+import {getItem, updateStatistics} from "../../api/posts/posts.ts";
 import {checkPost, createItemInDB} from "../../api/posts/postsDB.ts";
 
 import useIdStore from "../../store/useIdStore.ts";
@@ -181,6 +181,13 @@ export const useItem = (
             try {
                 await createItemInDB(apiName, item.value, item.value.id)
 
+                await updateStatistics(
+                    apiName,
+                    item.value.id!,
+                    'downloads',
+                    item.value.statistics
+                )
+
                 isDownload.value = false
             } catch (_) {
                 messageStore.show('Не удалось скачать..', true)
@@ -222,15 +229,15 @@ export const useItem = (
 
     //=========================================================//
     //-- статистика и комментарии --//
-    // видимость блока статистики и комментариев
-    const statisticsAndCommentsVisible = ref<boolean>(false)
+    // видимость блока комментариев
+    const commentsVisible = ref<boolean>(false)
 
 
     // добавление видимости блока, когда мы до-листали до низа
     const updateBlocksVisible = () => {
-        if (!mainElement || statisticsAndCommentsVisible.value) return
+        if (!mainElement || commentsVisible.value) return
 
-        statisticsAndCommentsVisible.value =
+        commentsVisible.value =
             mainElement.scrollHeight - mainElement.scrollTop - mainElement.clientHeight <= 100
     }
     //=========================================================//
@@ -241,7 +248,7 @@ export const useItem = (
     onActivated(async () => {
         isLoading.value = true
         upBtnVisible.value = false
-        statisticsAndCommentsVisible.value = false
+        commentsVisible.value = false
 
         const data = itemMemoStore.getItem(
             name,
@@ -258,7 +265,15 @@ export const useItem = (
 
                 itemMemoStore.setItem(
                     name,
-                    idStore.idValues[name], item.value
+                    idStore.idValues[name],
+                    item.value
+                )
+
+                await updateStatistics(
+                    apiName,
+                    item.value.id!,
+                    'views',
+                    item.value.statistics
                 )
             } catch (_) {
                 blocksStore.activeBlock[name] = 'list'
@@ -321,7 +336,7 @@ export const useItem = (
         upBtnVisible,
         clickToUp,
 
-        statisticsAndCommentsVisible,
+        commentsVisible,
         updateBlocksVisible,
     }
 }

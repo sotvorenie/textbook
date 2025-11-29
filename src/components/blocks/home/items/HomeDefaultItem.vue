@@ -10,9 +10,11 @@ import HomeItemCode from "../HomeItemCode.vue";
 import Btn from "../../../ui/Btn.vue";
 import Arrow from "../../../../assets/icons/Arrow.vue";
 import StatisticsSkeleton from "../loading/StatisticsSkeleton.vue";
-import CommentsSkeleton from "../loading/CommentsSkeleton.vue";
 import HomeItemComments from "../HomeItemComments.vue";
 import HomeItemStatistics from "../HomeItemStatistics.vue";
+
+import useOnlineStore from "../../../../store/useOnlineStore.ts";
+const onlineStore = useOnlineStore();
 
 const props = defineProps({
   apiUrl: {
@@ -40,6 +42,11 @@ const item = ref<Item>({
   date: '',
   sort_date: '',
   time: '',
+  statistics: {
+    views: 0,
+    downloads: 0,
+    likes: 0,
+  },
 })
 //=========================================================//
 
@@ -55,7 +62,7 @@ const {
   handleDownload,
   upBtnVisible,
   clickToUp,
-  statisticsAndCommentsVisible,
+  commentsVisible,
 } = useItem(
     props.name,
     props.apiUrl,
@@ -98,19 +105,23 @@ const {
         </template>
       </TransitionGroup>
 
-      <div v-if="statisticsAndCommentsVisible">
-        <Suspense>
-          <template #default>
-            <HomeItemStatistics :name="name" :api-name="apiUrl"/>
-          </template>
+      <Suspense v-if="onlineStore.isOnlineMode">
+        <template #default>
+          <HomeItemStatistics :name="name"
+                              :api-name="apiUrl"
+                              :statistics="item.statistics"
+          />
+        </template>
 
-          <template #fallback>
-            <StatisticsSkeleton/>
-          </template>
-        </Suspense>
+        <template #fallback>
+          <StatisticsSkeleton/>
+        </template>
+      </Suspense>
 
-        <HomeItemComments :name="name" :api-name="apiUrl" />
-      </div>
+      <HomeItemComments v-if="commentsVisible && onlineStore.isOnlineMode"
+                        :name="name"
+                        :api-name="apiUrl"
+      />
 
       <Transition name="scale" appear>
         <button class="item__up flex-center button-width-svg recolor-svg position-fixed"

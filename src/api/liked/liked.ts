@@ -6,8 +6,15 @@ import useUserStore from "../../store/useUserStore.ts";
 import useOnlineStore from "../../store/useOnlineStore.ts";
 import useItemsStore from "../../store/useItemsStore.ts";
 import {showError} from "../../utils/modals.ts";
+import {updateStatistics} from "../posts/posts.ts";
+import {Item} from "../../types/item.ts";
 
-export const handleLike = async (name: string, id: number): Promise<any> => {
+export const handleLike = async (
+    name: string,
+    apiName: string,
+    id: number,
+    statistics: Item['statistics']
+): Promise<any> => {
     const userStore = useUserStore();
     const itemsStore = useItemsStore();
 
@@ -34,6 +41,8 @@ export const handleLike = async (name: string, id: number): Promise<any> => {
         }
 
         const response = await like(name)
+
+        if (isLike) await updateStatistics(apiName, id, 'likes', statistics)
 
         if (response) {
             isLike ? await sendToTelegram(TelegramEventType.LIKE, element.title)

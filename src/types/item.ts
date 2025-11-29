@@ -12,5 +12,10 @@ export interface Item {
         value: boolean,
         time: string,
         date: string
+    },
+    statistics: {
+        views: number;
+        downloads: number;
+        likes: number;
     }
 }

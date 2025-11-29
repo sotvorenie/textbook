@@ -27,6 +27,7 @@ const itemsStore = useItemsStore();
 import useOnlineStore from "../../../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();
 import useCreateStore from "../../../store/useCreateStore.ts";
+import {Item} from "../../../types/item.ts";
 const createStore = useCreateStore();
 
 const props = defineProps({
@@ -178,8 +179,8 @@ const likedItems = computed(() => {
 
 
 // добавление/удаление элемента из избранного
-const like = async (id: number) => {
-  await handleLike(props.name, id)
+const like = async (id: number, statistics: Item['statistics']) => {
+  await handleLike(props.name, props.apiUrl, id, statistics)
 }
 //=========================================================//
 
@@ -233,7 +234,7 @@ await getPosts()
                 v-if="onlineStore.isOnlineMode"
         >
           <Like :liked="likedItems?.includes(item.id)"
-                @click.stop="like(item.id)"
+                @click.stop="like(item.id, item.statistics)"
           />
         </button>
 
