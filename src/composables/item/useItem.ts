@@ -19,7 +19,6 @@ import useScrollStore from "../../store/useScrollStore.ts";
 
 export const useItem = (
     name: string,
-    apiName: string,
     item: {value: Item},
     index?: {value: number}
 ) => {
@@ -40,7 +39,7 @@ export const useItem = (
         try {
             if (!idStore.idValues[name]) return
 
-            const response = await getItem(apiName, idStore.idValues[name]);
+            const response = await getItem(name, idStore.idValues[name]);
             if (response) {
                 item.value = response;
             }
@@ -179,10 +178,10 @@ export const useItem = (
             isDownload.value = true
 
             try {
-                await createItemInDB(apiName, item.value, item.value.id)
+                await createItemInDB(name, item.value, item.value.id)
 
                 await updateStatistics(
-                    apiName,
+                    name,
                     item.value.id!,
                     'downloads',
                     item.value.statistics
@@ -270,7 +269,7 @@ export const useItem = (
                 )
 
                 await updateStatistics(
-                    apiName,
+                    name,
                     item.value.id!,
                     'views',
                     item.value.statistics
@@ -317,7 +316,7 @@ export const useItem = (
     watchEffect(async () => {
         if (!onlineStore.isOnlineMode) return
 
-        downloadVisible.value = !await checkPost(name, apiName)
+        downloadVisible.value = !await checkPost(name)
     })
     //=========================================================//
 

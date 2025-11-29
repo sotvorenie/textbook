@@ -8,14 +8,6 @@ import EyeIcon from "../../../assets/icons/EyeIcon.vue";
 import Heart from "../../../assets/icons/Heart.vue";
 
 const props = defineProps({
-  name: {
-    type: String,
-    required: true,
-  },
-  apiName: {
-    type: String,
-    required: true,
-  },
   statistics: {
     type: Object as PropType<Item['statistics']>,
     required: true,

@@ -56,7 +56,7 @@ export const textareaAttributesList: Record<string, { name: string, code: string
     },
 }
 
-export const useCreate = (name: string, apiName: string) => {
+export const useCreate = (name: string) => {
     const createStore = useCreateStore()
     const onlineStore = useOnlineStore()
     const itemsStore = useItemsStore()
@@ -242,7 +242,7 @@ export const useCreate = (name: string, apiName: string) => {
     const create = async (newItem: Item) => {
         const createInDB: boolean = onlineStore.isOnlineMode ? localCopyActive.value : true;
         const response: Item = await createItem(
-            apiName,
+            name,
             newItem,
             createInDB,
             createStore.isCanCreateInAPI[name]
@@ -269,7 +269,7 @@ export const useCreate = (name: string, apiName: string) => {
     // редактирование записи
     const redact = async (newItem: Item) => {
         const response = await redactItem(
-            apiName,
+            name,
             newItem,
             createStore.createData[name].id
         );
@@ -540,7 +540,7 @@ export const useCreate = (name: string, apiName: string) => {
         } else if (!createStore.isRedact[name]) {
             isVisibleLocalHandler.value = true
         } else {
-            isVisibleLocalHandler.value = await checkPost(name, apiName)
+            isVisibleLocalHandler.value = await checkPost(name)
         }
     })
     //=========================================================//

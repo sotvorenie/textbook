@@ -22,11 +22,6 @@ import HomeItemComments from "../HomeItemComments.vue";
 const onlineStore = useOnlineStore();
 
 const props = defineProps({
-  apiUrl: {
-    type: String,
-    required: true,
-    default: ''
-  },
   name: {
     type: String,
     required: true
@@ -105,7 +100,6 @@ const {
   commentsVisible,
 } = useItem(
     props.name,
-    props.apiUrl,
     item,
     activeIndex
 )
@@ -198,7 +192,6 @@ const {
       <Suspense v-if="onlineStore.isOnlineMode">
         <template #default>
           <HomeItemStatistics :name="name"
-                              :api-name="apiUrl"
                               :statistics="item.statistics"
           />
         </template>
@@ -210,7 +203,6 @@ const {
 
       <HomeItemComments v-if="commentsVisible && onlineStore.isOnlineMode"
                         :name="name"
-                        :api-name="apiUrl"
       />
 
       <Transition name="scale" appear>

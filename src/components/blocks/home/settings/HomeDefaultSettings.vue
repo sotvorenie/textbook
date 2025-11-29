@@ -37,15 +37,11 @@ import useOnlineStore from "../../../../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();
 
 const props = defineProps({
+  name: {
+    type: String,
+    required: true,
+  },
   createName: String,
-  blockName: {
-    type: String,
-    required: true,
-  },
-  apiName: {
-    type: String,
-    required: true,
-  },
 })
 
 //=========================================================//
@@ -58,7 +54,7 @@ const buttonsVisible = ref(true)
 
 // видимость кнопки "Мои"
 const myBtnVisible = computed(() => {
-  if (props.blockName === 'textbooks') {
+  if (props.name === 'textbooks') {
     return userStore.isFullAdmin
   }
 
@@ -69,12 +65,12 @@ const myBtnVisible = computed(() => {
 // выбор языков и технологий
 const handleFilterChange = (list: FilterList): void => {
   let checkedItems = list?.filter(item => item.checked)
-  searchStore.filterTechnologies[props?.blockName] = checkedItems?.map(item => item.name)
+  searchStore.filterTechnologies[props?.name] = checkedItems?.map(item => item.name)
 }
 
 // выбор: сначала старые/новые
 const handleSort = (value: string): void => {
-  searchStore.sortBy[props?.blockName] = value;
+  searchStore.sortBy[props?.name] = value;
 }
 //=========================================================//
 
@@ -83,22 +79,22 @@ const handleSort = (value: string): void => {
 //-- кнопка "Назад" --//
 // возврат на страницу списка
 const goToList = () => {
-  blocksStore.activeBlock[props.blockName]= 'list'
-  settingsStore.settingsVisible[props.blockName] = 'list'
-  userStore.isUserPost[props.blockName] = false
+  blocksStore.activeBlock[props.name]= 'list'
+  settingsStore.settingsVisible[props.name] = 'list'
+  userStore.isUserPost[props.name] = false
 }
 
 // клик по кнопке "Назад"
 const handleBack = () => {
-  if (userStore.isUserPost[props.blockName]
-      && blocksStore.activeBlock[props.blockName] === 'create'
-      && createStore.isRedact[props.blockName]
+  if (userStore.isUserPost[props.name]
+      && blocksStore.activeBlock[props.name] === 'create'
+      && createStore.isRedact[props.name]
   ) {
 
-    cancel(props.blockName, () => {
-      blocksStore.activeBlock[props.blockName] = 'item'
+    cancel(props.name, () => {
+      blocksStore.activeBlock[props.name] = 'item'
 
-      createStore.createData[props.blockName] = {
+      createStore.createData[props.name] = {
         title: '',
         text: '',
         id: -1,
@@ -109,9 +105,9 @@ const handleBack = () => {
       }
     }, 'редактирование')
 
-    createStore.isRedact[props.blockName] = false
-  } else if (blocksStore.activeBlock[props.blockName] === 'create') {
-    cancel(props.blockName, goToList)
+    createStore.isRedact[props.name] = false
+  } else if (blocksStore.activeBlock[props.name] === 'create') {
+    cancel(props.name, goToList)
   } else {
     goToList()
   }
@@ -123,7 +119,7 @@ const handleBack = () => {
 //-- страница списка --//
 // видимость кнопки "Создать"
 const createVisible = computed(() => {
-  if (props.blockName === 'textbooks') {
+  if (props.name === 'textbooks') {
     return userStore.isFullAdmin || !onlineStore.isOnlineMode
   }
 
@@ -133,8 +129,8 @@ const createVisible = computed(() => {
 
 // клик по кнопке "Создать"
 const handleCreate = () => {
-  blocksStore.activeBlock[props.blockName] = 'create'
-  settingsStore.settingsVisible[props?.blockName] = 'create'
+  blocksStore.activeBlock[props.name] = 'create'
+  settingsStore.settingsVisible[props?.name] = 'create'
 }
 //=========================================================//
 
@@ -145,24 +141,24 @@ const handleCreate = () => {
 const removeRedactBtnVisible = computed(() => {
   let userStatus
 
-  if (props.blockName === 'textbooks') {
+  if (props.name === 'textbooks') {
     userStatus = userStore.isFullAdmin
   } else {
     userStatus = userStore.isAdmin
   }
 
-  return ((userStore.isUserPost[props.blockName] && userStatus) || !onlineStore.isOnlineMode)
-      && blocksStore.activeBlock[props.blockName] === 'item'
+  return ((userStore.isUserPost[props.name] && userStatus) || !onlineStore.isOnlineMode)
+      && blocksStore.activeBlock[props.name] === 'item'
 })
 
 
 // клик по кнопке "Редактировать"
 const handleRedact = () => {
-  blocksStore.activeBlock[props.blockName] = 'create'
+  blocksStore.activeBlock[props.name] = 'create'
 
-  let item = itemMemoStore.getLastFromCache(props.blockName)?.value
+  let item = itemMemoStore.getLastFromCache(props.name)?.value
 
-  createStore.createData[props.blockName] = {
+  createStore.createData[props.name] = {
     title: item?.title ?? '',
     text: item?.text ?? '',
     id: item?.id ?? -1,
@@ -173,7 +169,7 @@ const handleRedact = () => {
     time: item?.time ?? '',
   }
 
-  createStore.isRedact[props.blockName] = true
+  createStore.isRedact[props.name] = true
 }
 
 // клик по кнопке "Удалить"
@@ -184,12 +180,12 @@ const handleRemove = async () => {
   )
   if (confirm) {
     try {
-      await removeItem(props.apiName, idStore.idValues[props.blockName])
+      await removeItem(props.name, idStore.idValues[props.name])
 
-      await handleLike(props.blockName, idStore.idValues[props.blockName])
+      await handleLike(props.name, idStore.idValues[props.name])
 
-      const arr = itemsStore.items[props.blockName];
-      const index = arr.findIndex(el => el.id === idStore.idValues[props.blockName]);
+      const arr = itemsStore.items[props.name];
+      const index = arr.findIndex(el => el.id === idStore.idValues[props.name]);
       if (index !== -1) arr.splice(index, 1);
     } catch (_) {
       await showError(
@@ -208,7 +204,7 @@ const handleRemove = async () => {
 //-- наблюдатели --//
 // следим за изменением активного элемента (list, item и т.д.), чтобы показывать кнопки в header-е
 watch(
-    () => blocksStore.activeBlock[props.blockName],
+    () => blocksStore.activeBlock[props.name],
     () => buttonsVisible.value = true
 )
 //=========================================================//
@@ -217,17 +213,17 @@ watch(
 <template>
 
   <div class="settings flex"
-       v-if="settingsStore.settingsVisible[props.blockName] === 'list'"
+       v-if="settingsStore.settingsVisible[props.name] === 'list'"
   >
-    <Search v-model="searchStore.searchNames[props.blockName]"
+    <Search v-model="searchStore.searchNames[props.name]"
             v-model:buttons-visible="buttonsVisible"
     />
 
     <Filter v-show="buttonsVisible" @change="handleFilterChange"/>
 
     <HomeSettingsMyOther v-if="buttonsVisible && onlineStore.isOnlineMode"
-                         v-model="searchStore.myOtherFilter[blockName]"
-                         :block-name="blockName"
+                         v-model="searchStore.myOtherFilter[name]"
+                         :block-name="name"
                          :my-visible="myBtnVisible"
     />
 

@@ -15,7 +15,16 @@ const props = defineProps({
   },
 })
 
-const items = defineModel({type:Array as PropType<{id: number}[]>, required: true})
+const items = defineModel({
+  type:Array as PropType<
+      {
+        id: number,
+        text: string,
+        attributes: {
+          name: string;
+          code: string;
+        }
+      }[]>, required: true})
 
 const draggableIndex = ref<number | null>(null)
 const newDraggableIndex = ref<number | null>(null)
@@ -116,7 +125,7 @@ const getItemStyle = (index: number) => {
          :style="getItemStyle(index)"
          @mousedown="mouseDown($event, index)"
     >
-      <slot name="item" :item="item"/>
+      <slot name="item" :item="item" :index="index"/>
     </div>
   </TransitionGroup>
 

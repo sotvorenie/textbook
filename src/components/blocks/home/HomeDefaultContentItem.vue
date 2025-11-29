@@ -20,11 +20,6 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  // название url апи (posts, textbooks и т.д.)
-  apiUrl: {
-    type: String,
-    required: true,
-  },
   // компонент списка
   listComponent: {
     type: VueElement,
@@ -58,7 +53,7 @@ const activeComponent = computed(() => {
 })
 
 // пропсы активного компонента
-const componentProps = { apiUrl: props.apiUrl, name: props.name }
+const componentProps = { name: props.name }
 //=========================================================//
 
 
@@ -73,7 +68,7 @@ const changeItem = (id: number): void => {
 
 
 //=========================================================//
-//-- скролл --//
+//-- scroll --//
 const scrollManager = useSaveScroll(props.name)
 
 onActivated(() => {

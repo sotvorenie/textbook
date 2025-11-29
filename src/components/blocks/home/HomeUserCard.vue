@@ -2,6 +2,8 @@
 import {computed, ref} from "vue";
 import router from "../../../router";
 
+const myEmail = import.meta.env.VITE_MY_EMAIL;
+
 import {authToken} from "../../../utils/auth.ts";
 import {showConfirm, showError, showWarning} from "../../../utils/modals.ts";
 import {userAva} from "../../../utils/ava.ts";
@@ -119,7 +121,7 @@ const triggerInput = async () => {
 // роль/статус пользователя
 const role = computed(() => {
   if (userStore.isFullAdmin
-      && userStore.user.email === 'vitalikabrosimov00@gmail.com'
+      && userStore.user.email === myEmail
   ) return 'Владелец'
   if (userStore.isFullAdmin) return 'Совладелец'
   if (userStore.isAdmin) return 'Админ'

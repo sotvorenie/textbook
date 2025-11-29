@@ -9,7 +9,6 @@ import useUserStore from "../../store/useUserStore.ts";
 
 export const getComments = async (
     name: string,
-    apiName: string,
     page: number = 1
 ): Promise<any> => {
     const idStore = useIdStore();
@@ -24,7 +23,7 @@ export const getComments = async (
             sortBy: '-date',
         }
 
-        return await get(`/comments_${apiName}`, params)
+        return await get(`/comments_${name}`, params)
     } catch (err) {
         throw err;
     }
@@ -60,7 +59,7 @@ export const setComment = async (
 }
 
 export const redactComment = async (
-    apiName: string,
+    name: string,
     id: number,
     text: string
 ): Promise<Comment | undefined> => {
@@ -79,7 +78,7 @@ export const redactComment = async (
             is_redact: true
         }
 
-        return await patch(`/comments_${apiName}/${id}`, comment)
+        return await patch(`/comments_${name}/${id}`, comment)
     } catch (err) {
         throw err;
     }
@@ -88,7 +87,6 @@ export const redactComment = async (
 // проверяем: оставлял ли пользователь комментарий у этой записи (чтобы скрывать блок написания нового комментария)
 export const checkComment = async (
     name: string,
-    apiName: string
 ): Promise<boolean | undefined> => {
     const userStore = useUserStore();
     const idStore = useIdStore();
@@ -97,7 +95,7 @@ export const checkComment = async (
         const id: number = idStore.idValues[name]
 
         const check: Comment[] | undefined =
-            await get(`/comments_${apiName}?post_id=${id}&user_id=${userStore.user.id}`)
+            await get(`/comments_${name}?post_id=${id}&user_id=${userStore.user.id}`)
 
         return !(!check || check.length === 0);
 
@@ -108,11 +106,11 @@ export const checkComment = async (
 }
 
 export const removeComment = async (
-    apiName: string,
+    name: string,
     id: number
 ): Promise<void> => {
     try {
-        await del(`/comments_${apiName}/${id}`)
+        await del(`/comments_${name}/${id}`)
     } catch (err) {
         throw err;
     }

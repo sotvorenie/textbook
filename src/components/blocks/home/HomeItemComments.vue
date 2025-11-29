@@ -16,11 +16,7 @@ const props = defineProps({
   name: {
     type: String,
     required: true,
-  },
-  apiName: {
-    type: String,
-    required: true,
-  },
+  }
 })
 
 // список комментариев
@@ -78,12 +74,12 @@ const getData = async (getVisible: boolean = false) => {
     skeletonVisible.value = true
 
     const data: {meta: any, items: Comment[]} =
-        await getComments(props.name, props.apiName, page.value)
+        await getComments(props.name, page.value)
 
     if (getVisible) {
-      console.log(props.name, props.apiName)
+      console.log(props.name)
       const visibleData: boolean | undefined =
-          await checkComment(props.name, props.apiName)
+          await checkComment(props.name)
 
       visibleCreateComment.value = !visibleData
     }
@@ -109,7 +105,7 @@ const createComment = async () => {
   try {
     if (redactedComment.value) {
       const comment: Comment | undefined = await redactComment(
-          props.apiName,
+          props.name,
           redactedComment.value.id as number,
           commentText.value
       )
@@ -123,7 +119,7 @@ const createComment = async () => {
       }
     } else {
       const comment: Comment | undefined =
-          await setComment(props.name, props.apiName, commentText.value)
+          await setComment(props.name, commentText.value)
 
       if (comment) {
         comments.value.push(comment)
@@ -162,7 +158,7 @@ const handleRemoveComment = async (id: number) => {
 
   if (check) {
     try {
-      await removeComment(props.apiName, id)
+      await removeComment(props.name, id)
 
       comments.value = comments.value.filter(comment => comment.id !== id)
     } catch (err) {

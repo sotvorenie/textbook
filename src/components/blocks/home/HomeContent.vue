@@ -55,32 +55,28 @@ const settingsComponentsAttributes = [
     component: HomeDefaultSettings,
     props: {
       createName: 'подсказку',
-      blockName: 'hints',
-      apiName: 'posts',
+      name: 'hints'
     }
   },
   {
     component: HomeDefaultSettings,
     props: {
       createName: 'учебник',
-      blockName: 'textbooks',
-      apiName: 'textbooks',
+      name: 'textbooks',
     }
   },
   {
     component: HomeDefaultSettings,
     props: {
       createName: 'проект',
-      blockName: 'projects',
-      apiName: 'projects',
+      name: 'projects',
     }
   },
   {
     component: HomeDefaultSettings,
     props: {
       createName: 'совет',
-      blockName: 'advices',
-      apiName: 'advices',
+      name: 'advices',
     }
   },
   {
@@ -107,14 +103,12 @@ const contentComponents = ref<ContentComponent[]>([
     component: HomeDefaultContentItem,
     props: {
       name: 'hints',
-      apiUrl: 'posts',
     },
   },
   {
     component: HomeDefaultContentItem,
     props: {
       name: 'textbooks',
-      apiUrl: 'textbooks',
       createComponent: HomeTextbookCreate,
       itemComponent: HomeTextbookItem,
     },
@@ -123,14 +117,12 @@ const contentComponents = ref<ContentComponent[]>([
     component: HomeDefaultContentItem,
     props: {
       name: 'projects',
-      apiUrl: 'projects',
     },
   },
   {
     component: HomeDefaultContentItem,
     props: {
       name: 'advices',
-      apiUrl: 'advices',
     },
   },
   {
@@ -183,7 +175,7 @@ const isModeLoaded = ref<boolean>(true)
 watch(
     () => homeStore.activeMenuIndex,
     () => {
-      const name: string = settingsComponentsAttributes[homeStore.activeMenuIndex - 1]?.props.blockName!
+      const name: string = settingsComponentsAttributes[homeStore.activeMenuIndex - 1]?.props.name!
       settingsStore.settingsVisible[name] = blocksStore.activeBlock[name]
     }
 )

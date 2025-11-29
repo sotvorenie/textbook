@@ -205,7 +205,7 @@ const useHomeStore = defineStore('homeStore', () => {
         loadingVisible.value = false
     }
 
-    // изменяем page-number-api в зависимости от разрешения экрана
+    // изменяем page-number для api в зависимости от разрешения экрана
     const getNumberPage = () => {
         if (window.innerWidth <= 1440) {
             pageNumberForAPI.value = 9

@@ -85,7 +85,10 @@ export const getListFromDB = async (
     }
 };
 
-export const getItemFromDB = async (name: string, id: number): Promise<Item> => {
+export const getItemFromDB = async (
+    name: string,
+    id: number
+): Promise<Item> => {
     try {
         const config = tablesConfig[name];
 
@@ -215,7 +218,10 @@ export const redactItemInDB = async (
     }
 };
 
-export const removeFromDB = async (name: string, id: number) => {
+export const removeFromDB = async (
+    name: string,
+    id: number
+) => {
     try {
         const config = tablesConfig[name];
 
@@ -226,10 +232,12 @@ export const removeFromDB = async (name: string, id: number) => {
 };
 
 
-export const checkPost = async (name: string, apiName: string): Promise<boolean> => {
+export const checkPost = async (
+    name: string
+): Promise<boolean> => {
     const idStore = useIdStore()
 
-    const config = tablesConfig[apiName];
+    const config = tablesConfig[name];
     if (!config) return false
 
     const id = idStore.idValues[name]

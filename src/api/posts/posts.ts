@@ -102,7 +102,12 @@ export const createItem = async (
     }
 };
 
-export const redactItem = async (name: string, item: Item, id: number, redactInDB: boolean = true): Promise<any> => {
+export const redactItem = async (
+    name: string,
+    item: Item,
+    id: number,
+    redactInDB: boolean = true
+): Promise<any> => {
     const onlineStore = useOnlineStore();
 
     try {

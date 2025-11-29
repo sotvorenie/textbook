@@ -14,8 +14,8 @@ export const tablesConfig: Record<string, Record<string, string>> = {
         techTable: "project_technologies",
         idField: "project_id",
     },
-    posts: {
-        table: "posts",
+    hints: {
+        table: "hints",
         techTable: "post_technologies",
         idField: "post_id",
     },
@@ -127,7 +127,7 @@ export const initDB = async () => {
   `);
 
     await executeSQL(`
-    CREATE TABLE IF NOT EXISTS posts (
+    CREATE TABLE IF NOT EXISTS hints (
       id INTEGER,
       user_id INTEGER,
       title TEXT,

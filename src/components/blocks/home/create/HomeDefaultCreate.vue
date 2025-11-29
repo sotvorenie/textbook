@@ -25,11 +25,6 @@ import useOnlineStore from "../../../../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();
 
 const props = defineProps({
-  apiUrl: {
-    type: String,
-    required: true,
-    default: ''
-  },
   name: {
     type: String,
     required: true
@@ -78,7 +73,7 @@ const {
   localCopyActive,
   isVisibleLocalHandler,
   handleLocalCopy
-} = useCreate(props.name, props.apiUrl)
+} = useCreate(props.name)
 
 
 //=========================================================//
@@ -165,7 +160,7 @@ onMounted(async () => {
                      handler="create__handler"
                      css-class="create__label-container"
         >
-          <template #item="{item}">
+          <template #item="{item, index}">
             <HomeCreateTextarea
               :key="item.id"
               v-model="item.text"

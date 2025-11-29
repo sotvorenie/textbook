@@ -34,12 +34,7 @@ const props = defineProps({
   name: {
     type: String,
     required: true
-  },
-  apiUrl: {
-    type: String,
-    required: true,
-    default: ''
-  },
+  }
 })
 
 const emits = defineEmits(['changeItem']);
@@ -78,7 +73,7 @@ const getPosts = async(push: boolean = true) => {
      }
 
     const response: {meta: any, items: List[]} = await getList(
-        props.apiUrl,
+        props.name,
         page.value,
         searchStore.searchNames[props?.name],
         searchStore.filterTechnologies[props?.name],
@@ -180,7 +175,7 @@ const likedItems = computed(() => {
 
 // добавление/удаление элемента из избранного
 const like = async (id: number, statistics: Item['statistics']) => {
-  await handleLike(props.name, id, props.apiUrl, statistics)
+  await handleLike(props.name, id, props.name, statistics)
 }
 //=========================================================//
 
