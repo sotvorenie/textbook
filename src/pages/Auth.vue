@@ -13,6 +13,7 @@ import {AuthResponse, LoginData, RegisterData} from "../api/auth/types.ts";
 import {sendToTelegram, TelegramEventType} from "../api/telegram/telegram.ts";
 
 import {showConfirm, showError, showWarning} from "../utils/modals.ts";
+import {resetAllStores} from "../utils/resetAllStores.ts";
 
 import {classes} from "../data/classes.ts";
 
@@ -234,6 +235,11 @@ onMounted(() => {
   } else {
     onlineStore.getFromLocalStorage()
   }
+})
+
+// сбрасываем все stores
+onMounted(() => {
+  resetAllStores()
 })
 
 // наблюдаем за счетчиком неверных попыток
