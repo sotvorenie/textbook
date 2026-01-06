@@ -70,11 +70,9 @@ svg * {
 }
 
 button, input, textarea {
-  transition-duration: $transition-duration;
-}
-
-button, input, textarea {
   @include reset_button;
+
+  transition-duration: $transition-duration;
 }
 
 input::placeholder, textarea::placeholder {
@@ -91,4 +89,9 @@ a {
   &[class] {
     text-decoration: none;
   }
+}
+
+button:disabled {
+  pointer-events: none;
+  opacity: .6;
 }

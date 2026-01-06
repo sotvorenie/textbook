@@ -31,16 +31,16 @@ client.interceptors.response.use(
     async (error) => {
         const onlineStore = useOnlineStore()
 
-        if (error.response?.status === 401) {
-            authToken.remove()
-            await showError(
-                'Ошибка авторизации',
-                'Вы будете перенаправлены на страницу авторизации'
-            )
-            await router.push('/')
-
-            return Promise.reject(error)
-        }
+        // if (error.response?.status === 401) {
+        //     authToken.remove()
+        //     await showError(
+        //         'Ошибка авторизации',
+        //         'Вы будете перенаправлены на страницу авторизации'
+        //     )
+        //     await router.push('/')
+        //
+        //     throw error;
+        // }
 
         const isNetworkError =
             error.code === 'ECONNABORTED' ||

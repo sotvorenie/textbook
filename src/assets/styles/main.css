@@ -376,13 +376,10 @@ svg * {
 }
 
 button, input, textarea {
-  transition-duration: 0.2s;
-}
-
-button, input, textarea {
   padding: 0;
   background-color: transparent;
   border: none;
+  transition-duration: 0.2s;
 }
 
 input::placeholder, textarea::placeholder {
@@ -404,6 +401,11 @@ a {
 }
 a[class] {
   text-decoration: none;
+}
+
+button:disabled {
+  pointer-events: none;
+  opacity: 0.6;
 }
 
 .text-center {

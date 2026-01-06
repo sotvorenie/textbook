@@ -20,11 +20,14 @@ import {classes} from "../data/classes.ts";
 import Btn from "../components/ui/Btn.vue";
 import Navigation from "../components/common/Navigation.vue";
 import Loading from "../components/ui/loading/Loading.vue";
+import AppSkeleton from "../components/ui/loading/AppSkeleton.vue";
 
 import useOnlineStore from "../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();
 import useMessageStore from "../store/useMessageStore.ts";
 const messageStore = useMessageStore();
+import useIpStore from "../store/useIpStore.ts";
+const ipStore = useIpStore();
 
 //=========================================================//
 
@@ -35,6 +38,8 @@ const isLoading = ref<boolean>(false);
 
 const loginUser = async () => {
   try {
+    if (ipStore.inBlackList) return
+
     isLoading.value = true;
 
     let data: LoginData = {
@@ -45,6 +50,8 @@ const loginUser = async () => {
     let response: AuthResponse = await login(data);
 
     if (response.token) {
+      await ipStore.checkUserIp(response.data.id)
+
       await sendToTelegram(TelegramEventType.LOGIN, response.data.name)
 
       await router.push('/main').catch(() => {});
@@ -64,12 +71,15 @@ const loginUser = async () => {
 
 const registerUser = async () => {
   try {
+    if (ipStore.inBlackList) return
+
     isLoading.value = true;
 
     let data: RegisterData = {
       email: registerForm.email,
       password: registerForm.password,
-      name: registerForm.name
+      name: registerForm.name,
+      ip: [ipStore.userIp]
     }
 
     let response: AuthResponse = await register(data);
@@ -100,7 +110,20 @@ const successRegister = () => {
 
   onUnmounted(() => clearTimeout(timer));
 }
+
+// проверка ip-адреса
+const checkIP = async () => {
+  await ipStore.checkIP(skeletonVisible)
+}
 //=========================================================//
+
+
+//=========================================================//
+//-- skeleton --//
+// видимость скелетона загрузки
+const skeletonVisible = ref<boolean>(true)
+//=========================================================//
+
 
 //=========================================================//
 //-- auth-блок --//
@@ -225,21 +248,20 @@ const showConfirmModal = async () => {
 //=========================================================//
 //-- хуки --//
 // проверяем: онлайн мы или нет
-onMounted(() => {
+onMounted(async () => {
   onlineStore.isOnline = navigator.onLine
 
-  if (!onlineStore.isOnline) {
+  if (onlineStore.isOnline) {
+    onlineStore.getFromLocalStorage()
+  } else {
     onlineStore.isOnlineMode = false
 
     messageStore.show('Нет подключения к интернету..', true)
-  } else {
-    onlineStore.getFromLocalStorage()
   }
-})
 
-// сбрасываем все stores
-onMounted(() => {
   resetAllStores()
+
+  await checkIP()
 })
 
 // наблюдаем за счетчиком неверных попыток
@@ -255,141 +277,145 @@ watch(
 </script>
 
 <template>
-  <Navigation :back-visible="false"/>
+  <div v-if="!skeletonVisible" style="height: 100%">
+    <Navigation :back-visible="false"/>
 
-  <main class="auth flex-center" ref="authElement">
-    <div class="auth__inner overflow-hidden" v-if="onlineStore.isOnlineMode">
-      <div class="auth__header flex flex-around">
-        <button class="auth__title is-active"
-                type="button"
-                @click="changeSwiper(0)"
-                :ref="el => titleElements[0] = el as HTMLButtonElement"
-        >Войти</button>
-        <button class="auth__title"
-                type="button"
-                @click="changeSwiper(1)"
-                :ref="el => titleElements[1] = el as HTMLButtonElement"
-        >Зарегистрироваться</button>
-      </div>
-      <Swiper class="auth__swiper"
-              :allow-touch-move="false"
-              @init="swiperElement = $event"
-      >
-        <SwiperSlide class="auth__slide">
-          <form class="auth__form flex flex-column"
-                novalidate
-                method="post"
-                @submit.prevent="handleLogin"
-                data-js-form
-          >
-            <label class="auth__label label position-relative" @click="addLabelText">
-              <span class="label__text position-absolute cursor-text user-select-none" @click.stop>Email</span>
-              <input class="auth__input input"
-                     type="email"
-                     aria-describedby="email-error"
-                     pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
-                     @blur="blurInput"
-                     @input="onInput"
-                     @focus="addLabelText"
-                     v-model="loginForm.email"
-                     required
-              >
-              <span class="auth__error fields_error label__error position-absolute"
-                    id="email-error"
-                    data-js-form-field-errors
-                    @click.stop></span>
-            </label>
-            <label class="auth__label label position-relative" @click="addLabelText">
-              <span class="label__text position-absolute cursor-text user-select-none" @click.stop>Пароль</span>
-              <input class="auth__input input"
-                     type="password"
-                     aria-describedby="password-error"
-                     minlength="4"
-                     maxlength="11"
-                     @blur="blurInput"
-                     @input="onInput"
-                     @focus="addLabelText"
-                     v-model="loginForm.password"
-                     required
-              >
-              <span class="auth__error fields_error label__error position-absolute" id="password-error" data-js-form-field-errors @click.stop></span>
-            </label>
+    <main class="auth flex-center" ref="authElement">
+      <div class="auth__inner overflow-hidden" v-if="onlineStore.isOnlineMode && !ipStore.inBlackList">
+        <div class="auth__header flex flex-around">
+          <button class="auth__title is-active"
+                  type="button"
+                  @click="changeSwiper(0)"
+                  :ref="el => titleElements[0] = el as HTMLButtonElement"
+          >Войти</button>
+          <button class="auth__title"
+                  type="button"
+                  @click="changeSwiper(1)"
+                  :ref="el => titleElements[1] = el as HTMLButtonElement"
+          >Зарегистрироваться</button>
+        </div>
+        <Swiper class="auth__swiper"
+                :allow-touch-move="false"
+                @init="swiperElement = $event"
+        >
+          <SwiperSlide class="auth__slide">
+            <form class="auth__form flex flex-column"
+                  novalidate
+                  method="post"
+                  @submit.prevent="handleLogin"
+                  data-js-form
+            >
+              <label class="auth__label label position-relative" @click="addLabelText">
+                <span class="label__text position-absolute cursor-text user-select-none" @click.stop>Email</span>
+                <input class="auth__input input"
+                       type="email"
+                       aria-describedby="email-error"
+                       pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
+                       @blur="blurInput"
+                       @input="onInput"
+                       @focus="addLabelText"
+                       v-model="loginForm.email"
+                       required
+                >
+                <span class="auth__error fields_error label__error position-absolute"
+                      id="email-error"
+                      data-js-form-field-errors
+                      @click.stop></span>
+              </label>
+              <label class="auth__label label position-relative" @click="addLabelText">
+                <span class="label__text position-absolute cursor-text user-select-none" @click.stop>Пароль</span>
+                <input class="auth__input input"
+                       type="password"
+                       aria-describedby="password-error"
+                       minlength="4"
+                       maxlength="11"
+                       @blur="blurInput"
+                       @input="onInput"
+                       @focus="addLabelText"
+                       v-model="loginForm.password"
+                       required
+                >
+                <span class="auth__error fields_error label__error position-absolute" id="password-error" data-js-form-field-errors @click.stop></span>
+              </label>
 
-            <Btn class="auth__btn button-big-radius" :is-submit="true" :is-disabled="isLoading">
-              <Loading v-if="isLoading"/>
-              <span v-else>Войти</span>
-            </Btn>
-          </form>
-        </SwiperSlide>
-        <SwiperSlide class="auth__slide">
-          <form class="auth__form flex flex-column"
-                novalidate
-                method="post"
-                @submit.prevent="handleRegister"
-                data-js-form
-          >
-            <label class="auth__label label position-relative" @click="addLabelText">
-              <span class="label__text position-absolute cursor-text user-select-none" @click.stop>Имя</span>
-              <input class="auth__input input"
-                     aria-describedby="name-error"
-                     @blur="blurInput"
-                     @input="onInput"
-                     @focus="addLabelText"
-                     v-model="registerForm.name"
-                     required
-                     maxlength="20"
-              >
-              <span class="auth__error fields_error label__error position-absolute"
-                    id="name-error"
-                    data-js-form-field-errors
-                    @click.stop>
+              <Btn class="auth__btn button-big-radius" :is-submit="true" :is-disabled="isLoading">
+                <Loading v-if="isLoading"/>
+                <span v-else>Войти</span>
+              </Btn>
+            </form>
+          </SwiperSlide>
+          <SwiperSlide class="auth__slide">
+            <form class="auth__form flex flex-column"
+                  novalidate
+                  method="post"
+                  @submit.prevent="handleRegister"
+                  data-js-form
+            >
+              <label class="auth__label label position-relative" @click="addLabelText">
+                <span class="label__text position-absolute cursor-text user-select-none" @click.stop>Имя</span>
+                <input class="auth__input input"
+                       aria-describedby="name-error"
+                       @blur="blurInput"
+                       @input="onInput"
+                       @focus="addLabelText"
+                       v-model="registerForm.name"
+                       required
+                       maxlength="20"
+                >
+                <span class="auth__error fields_error label__error position-absolute"
+                      id="name-error"
+                      data-js-form-field-errors
+                      @click.stop>
               </span>
-              <span class="label__counter position-absolute">{{registerForm.name.length}}/20</span>
-            </label>
-            <label class="auth__label label position-relative" @click="addLabelText">
-              <span class="label__text position-absolute cursor-text user-select-none" @click.stop>Email</span>
-              <input class="auth__input input"
-                     type="email"
-                     aria-describedby="email-error"
-                     pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
-                     @blur="blurInput"
-                     @input="onInput"
-                     @focus="addLabelText"
-                     v-model="registerForm.email"
-                     required
-              >
-              <span class="auth__error fields_error label__error position-absolute"
-                    id="email-error"
-                    data-js-form-field-errors
-                    @click.stop></span>
-            </label>
-            <label class="auth__label label position-relative" @click="addLabelText">
-              <span class="label__text position-absolute cursor-text user-select-none" @click.stop>Пароль</span>
-              <input class="auth__input input"
-                     type="password"
-                     aria-describedby="password-error"
-                     minlength="4"
-                     maxlength="11"
-                     @blur="blurInput"
-                     @input="onInput"
-                     @focus="addLabelText"
-                     v-model="registerForm.password"
-                     required
-              >
-              <span class="auth__error fields_error label__error position-absolute" id="password-error" data-js-form-field-errors @click.stop></span>
-            </label>
+                <span class="label__counter position-absolute">{{registerForm.name.length}}/20</span>
+              </label>
+              <label class="auth__label label position-relative" @click="addLabelText">
+                <span class="label__text position-absolute cursor-text user-select-none" @click.stop>Email</span>
+                <input class="auth__input input"
+                       type="email"
+                       aria-describedby="email-error"
+                       pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
+                       @blur="blurInput"
+                       @input="onInput"
+                       @focus="addLabelText"
+                       v-model="registerForm.email"
+                       required
+                >
+                <span class="auth__error fields_error label__error position-absolute"
+                      id="email-error"
+                      data-js-form-field-errors
+                      @click.stop></span>
+              </label>
+              <label class="auth__label label position-relative" @click="addLabelText">
+                <span class="label__text position-absolute cursor-text user-select-none" @click.stop>Пароль</span>
+                <input class="auth__input input"
+                       type="password"
+                       aria-describedby="password-error"
+                       minlength="4"
+                       maxlength="11"
+                       @blur="blurInput"
+                       @input="onInput"
+                       @focus="addLabelText"
+                       v-model="registerForm.password"
+                       required
+                >
+                <span class="auth__error fields_error label__error position-absolute" id="password-error" data-js-form-field-errors @click.stop></span>
+              </label>
 
-            <Btn class="auth__btn button-big-radius" :is-submit="true" :is-disabled="isLoading">
-              <Loading v-if="isLoading"/>
-              <span v-else>Зарегистрироваться</span>
-            </Btn>
-          </form>
-        </SwiperSlide>
-      </Swiper>
-    </div>
+              <Btn class="auth__btn button-big-radius" :is-submit="true" :is-disabled="isLoading">
+                <Loading v-if="isLoading"/>
+                <span v-else>Зарегистрироваться</span>
+              </Btn>
+            </form>
+          </SwiperSlide>
+        </Swiper>
+      </div>
 
-    <RouterLink to="/main" v-else>
-      <Btn style="color: var(--color-light)">Перейти в приложение</Btn>
-    </RouterLink>
-  </main>
+      <RouterLink to="/main" v-else>
+        <Btn style="color: var(--color-light)">Перейти в приложение</Btn>
+      </RouterLink>
+    </main>
+  </div>
+
+  <AppSkeleton v-else/>
 </template>

@@ -6,7 +6,8 @@ export interface LoginData {
 export interface RegisterData {
     email: string
     password: string
-    name: string
+    name: string,
+    ip: string[]
 }
 
 export interface AuthResponse {

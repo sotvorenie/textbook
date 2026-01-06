@@ -17,10 +17,10 @@ import {sendToTelegram, TelegramEventType} from "../api/telegram/telegram.ts";
 import useOnlineStore from "./useOnlineStore.ts";
 import useUserStore from "./useUserStore.ts";
 import useTechnologiesStore from "./useTechnologiesStore.ts";
+import useIpStore from "./useIpStore.ts";
 
 const useHomeStore = defineStore('homeStore', () => {
     const onlineStore = useOnlineStore();
-
 
     // видимость анимации на HomePage
     const loadingVisible = ref<boolean>(true)
@@ -35,6 +35,7 @@ const useHomeStore = defineStore('homeStore', () => {
     const loadInfo = async (isFirstRender: boolean = false) => {
         const userStore = useUserStore()
         const technologiesStore = useTechnologiesStore()
+        const ipStore = useIpStore()
 
         onlineStore.modeLoadingVisible = true
         activeMenuIndex.value = 0
@@ -43,7 +44,7 @@ const useHomeStore = defineStore('homeStore', () => {
 
         onlineStore.isOnline = navigator.onLine
 
-        if (!onlineStore.isOnline) {
+        if (!onlineStore.isOnline || ipStore.inBlackList) {
             onlineStore.isOnlineMode = false
             loadingVisible.value = false
             onlineStore.modeLoadingVisible = false
@@ -57,6 +58,14 @@ const useHomeStore = defineStore('homeStore', () => {
                 userStore.user.ava = {url: '', id: -1}
                 return
             }
+        }
+
+        await ipStore.checkIP()
+
+        if (ipStore.inBlackList) {
+            onlineStore.modeLoadingVisible = false
+            loadingVisible.value = false
+            return
         }
 
         const checkUser = async () => {
@@ -89,7 +98,7 @@ const useHomeStore = defineStore('homeStore', () => {
 
         try {
             await checkUser()
-        } catch (err) {
+        } catch (_) {
             onlineStore.modeLoadingVisible = false
             loadingVisible.value = false
             return

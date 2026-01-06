@@ -79,14 +79,13 @@ const uploadFile = async (event: Event) => {
     }
 
     await sendToTelegram(TelegramEventType.LOAD_AVA, userStore.user.ava?.url)
-
-    isLoading.value = false
   } catch (_) {
     await showError(
         'Ошибка загрузки файлов',
         'Не удалось загрузить аватар..'
     )
   } finally {
+    isLoading.value = false
     emits('onClose')
   }
 }
@@ -214,12 +213,24 @@ const syncCloseActive = ref<boolean>(true)
           <p class="user-card__name">Последний сеанс: {{userStore.lastSession}}</p>
         </div>
 
-        <Navigation :back-visible="false" :is-absolute="false"/>
+        <Navigation :back-visible="false"
+                    :is-absolute="false"
+                    :is-disabled="isLoading || onlineStore.modeLoadingVisible"/>
       </div>
     </div>
     <div class="user-card__btn-bar flex">
-      <Btn class="user-card__btn" @click="exit">Выйти</Btn>
-      <Btn class="user-card__btn" @click="handleRemoveUser">Удалить профиль</Btn>
+      <Btn class="user-card__btn"
+           @click="exit"
+           :is-disabled="isLoading || onlineStore.modeLoadingVisible"
+      >
+        Выйти
+      </Btn>
+      <Btn class="user-card__btn"
+           @click="handleRemoveUser"
+           :is-disabled="isLoading || onlineStore.modeLoadingVisible"
+      >
+        Удалить профиль
+      </Btn>
     </div>
 
     <Modal :close-active="syncCloseActive"

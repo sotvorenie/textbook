@@ -24,7 +24,11 @@ defineProps({
   isAbsolute: {
     type: Boolean,
     default: true
-  }
+  },
+  isDisabled: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const locationReload = () => {
@@ -38,7 +42,11 @@ const locationReload = () => {
           'flex-wrap': !backVisible,
           'position-absolute': isAbsolute,
         }">
-    <button class="navigation__btn back recolor-svg flex flex-align-center" type="button" v-if="backVisible">
+    <button class="navigation__btn back recolor-svg flex flex-align-center"
+            type="button"
+            v-if="backVisible"
+            :disabled="isDisabled"
+    >
       <Arrow/>
       назад
     </button>
@@ -46,10 +54,12 @@ const locationReload = () => {
             type="button"
             title="Перезагрузить страницу"
             @click="locationReload"
+            :disabled="isDisabled"
     ><Reload/></button>
     <button class="navigation__btn theme recolor-svg flex flex-align-center"
             title="Изменить цветовую схему"
             type="button"
+            :disabled="isDisabled"
     >
       <Moon/>
       <ToggleButton :active="theme === 'light'" @click="changeTheme"/>
@@ -60,6 +70,7 @@ const locationReload = () => {
             title="Оффлайн/Онлайн режим"
             type="button"
             v-if="onlineStore.isOnline"
+            :disabled="isDisabled"
     >
       <span class="online flex flex-align-center" :style="{opacity: onlineStore.modeLoadingVisible ? '0' : '1'}">
         <Offline/>

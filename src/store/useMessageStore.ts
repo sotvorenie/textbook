@@ -17,6 +17,10 @@ const useMessageStore = defineStore("messageStore", () => {
         text.value = message
         isError.value = isErr
         isVisible.value = true
+
+        setTimeout(() => {
+            isVisible.value = false
+        })
     }
 
     return {
