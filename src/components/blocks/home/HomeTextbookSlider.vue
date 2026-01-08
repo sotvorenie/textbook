@@ -92,7 +92,7 @@ watch(activeIndex, async (newIndex, oldIndex) => {
 
 <template>
 
-  <div class="textbook__tabs flex flex-align-center">
+  <div class="textbook__tabs flex flex-align-center mb-10">
     <button class="textbook__btn textbook__prev button-width-svg hover-color-accent recolor-svg"
             type="button"
             @click="slidePrev"

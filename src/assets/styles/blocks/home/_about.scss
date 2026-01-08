@@ -4,16 +4,8 @@
 .about {
   @include fluid-text(24, 20);
 
-  &__title {
-    margin-bottom: rem(10);
-  }
-
   &__list {
     gap: rem(10);
-
-    &:not(:last-child) {
-      margin-bottom: rem(20);
-    }
 
     &:not(.is-links) {
       .about__item {

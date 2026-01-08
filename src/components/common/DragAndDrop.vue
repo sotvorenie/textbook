@@ -18,7 +18,7 @@ const props = defineProps({
 const items = defineModel({
   type:Array as PropType<
       {
-        id: number,
+        id: string,
         text: string,
         attributes: {
           name: string;

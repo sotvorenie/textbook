@@ -16,7 +16,7 @@ const handleSort = () => {
 
   <div class="sort position-relative">
 
-    <select class="sort overflow-hidden cursor-pointer"
+    <select class="sort overflow-hidden cursor-pointer h-100 w-100"
             @change="handleSort"
             v-model="selectedValue"
     >

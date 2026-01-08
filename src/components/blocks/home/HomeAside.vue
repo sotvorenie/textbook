@@ -31,9 +31,9 @@ const changeActiveIndex = (number: number): void => {
           }"
   >
 
-    <div class="menu__top home__header flex-center">
+    <div class="menu__top home__header flex-center mb-40-20">
       <Transition name="menu-top" appear>
-        <button class="menu__btn menu__logo flex flex-align-center recolor-svg"
+        <button class="menu__btn menu__logo flex flex-align-center recolor-svg w-100"
                 :title="isClosed ? 'Открыть' : 'Закрыть'"
                 type="button"
         >
@@ -53,14 +53,14 @@ const changeActiveIndex = (number: number): void => {
                        :delay="1000"
       >
         <li :class="{
-            'menu__item': true,
+            'menu__item mb-not-last-10': true,
             'is-active': homeStore.activeMenuIndex === index + 1,
           }"
             v-for="(item, index) in menuItems"
             :key="item.id"
             :style="{'--index': index}"
         >
-          <button class="menu__btn hover-color-accent recolor-svg flex flex-align-center"
+          <button class="menu__btn hover-color-accent recolor-svg flex flex-align-center w-100"
                   :title="isClosed ? item.name : ''"
                   type="button"
                   @click="changeActiveIndex(index + 1)"

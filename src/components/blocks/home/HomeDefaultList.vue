@@ -219,7 +219,7 @@ await getPosts()
 <template>
 
   <div class="list-wrapper">
-    <ul class="list flex row" v-if="itemsStore.items[name]?.length">
+    <ul class="list flex row mb-30" v-if="itemsStore.items[name]?.length">
       <li class="list__item cursor-pointer ks-col-2 ds-col-3 col-4 position-relative"
           v-for="(item, index) in itemsStore.items[name]"
           :key="item.id"
@@ -235,15 +235,15 @@ await getPosts()
           />
         </button>
 
-        <p class="list__title h5" v-html="highlightText(item.title)"></p>
+        <p class="list__title h5 mb-10" v-html="highlightText(item.title)"></p>
 
         <div class="list__info">
-          <p class="list__date">Дата: {{item?.date}}</p>
+          <p class="list__date mb-10">Дата: {{item?.date}}</p>
 
           <Absolute :is-visible="item?.languages_and_technologies?.length > 3">
             <template #activator>
               <div class="list__tech">
-                <div class="list__tech-title flex flex-align-center">
+                <div class="list__tech-title flex flex-align-center mb-10">
                   <p>Технологии:</p>
                   <button class="hover-color-accent"
                           type="button"

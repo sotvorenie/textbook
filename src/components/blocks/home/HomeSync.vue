@@ -102,14 +102,14 @@ const syncAll = async () => {
 <template>
 
   <div class="sync">
-    <Btn class="sync__btn all"
+    <Btn class="sync__btn all w-100"
          @click="syncAll"
          :is-loading="isLoading"
     >
       Синхронизировать все
     </Btn>
 
-    <p class="sync__title h4">Список созданных элементов:</p>
+    <p class="sync__title h4 mb-10">Список созданных элементов:</p>
 
     <ul class="ul">
       <TransitionGroup tag="div"
@@ -117,14 +117,14 @@ const syncAll = async () => {
                        name="item-list"
                        appear
       >
-        <li class="sync__item"
+        <li class="sync__item mb-not-last-10"
             v-for="item in onlineStore.offlinePosts"
             :title="item.title"
         >
           <p class="sync__name h5">{{sliceString(item.title, 25)}}</p>
-          <p class="sync__date">{{item.date}}</p>
+          <p class="sync__date mb-10">{{item.date}}</p>
 
-          <Btn class="sync__btn"
+          <Btn class="sync__btn w-100"
                @click="syncItem(item)"
                :is-loading="isLoading"
           >

@@ -43,8 +43,8 @@ const statistics = computed((): StatisticsList[] => {
 
 <template>
 
-  <div class="statistics">
-    <p class="statistics__title h4">Статистика поста:</p>
+  <div class="statistics mb-30">
+    <p class="statistics__title h4 mb-10">Статистика поста:</p>
 
     <ul class="statistics__list">
       <li class="statistics__item flex" v-for="item in statistics">

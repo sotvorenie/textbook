@@ -119,7 +119,7 @@ onMounted(async () => {
           @submit.prevent="save($event, newItem)"
           data-js-form
     >
-      <label class="create__label label position-relative" @click.stop>
+      <label class="create__label label position-relative w-100" @click.stop>
         <span class="label__text position-absolute cursor-text user-select-none"
               @click.stop
         >
@@ -145,7 +145,7 @@ onMounted(async () => {
       </label>
 
       <div class="create__block position-relative">
-        <div class="create__btn-bar position-sticky z-1000 flex" v-if="isVisibleCreateBtnBar()">
+        <div class="create__btn-bar position-sticky z-1000 flex mb-40" v-if="isVisibleCreateBtnBar()">
           <Btn @click="createTextarea('code')">Код <></Btn>
           <Btn @click="createTextarea('text')">Текст</Btn>
           <Btn @click="createTextarea('title')"
@@ -158,7 +158,7 @@ onMounted(async () => {
         <DragAndDrop v-model="newItems"
                      transition-name="textarea"
                      handler="create__handler"
-                     css-class="create__label-container"
+                     css-class="create__label-container mb-not-last-40"
         >
           <template #item="{item, index}">
             <HomeCreateTextarea
@@ -172,7 +172,7 @@ onMounted(async () => {
         </DragAndDrop>
       </div>
 
-      <div class="create__technologies" v-if="onlineStore.isOnlineMode">
+      <div class="create__technologies mb-20" v-if="onlineStore.isOnlineMode">
         <Modal>
           <template #activator="{open}">
             <Btn class="m-auto" @click="open">Выбрать языки и технологии</Btn>
@@ -189,7 +189,7 @@ onMounted(async () => {
       <div class="create__local flex flex-column flex-align-center"
            v-if="isVisibleLocalHandler"
       >
-        <p class="create__local-title h5">
+        <p class="create__local-title h5 mb-10">
           {{createStore.isRedact[name] ? 'Редактировать' : 'Создать'}} локальную копию?
         </p>
 
@@ -202,7 +202,7 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div class="create__btn-bar flex flex-justify-center">
+      <div class="create__btn-bar flex flex-justify-center mb-20">
         <Btn :is-submit="true">Сохранить</Btn>
         <Btn @click="handleBack">Отмена</Btn>
       </div>

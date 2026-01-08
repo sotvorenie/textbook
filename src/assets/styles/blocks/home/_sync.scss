@@ -4,15 +4,10 @@
 .sync {
 
   &__btn {
-    width: 100%;
 
     &.all {
       margin-bottom: rem(15);
     }
-  }
-
-  &__title {
-    margin-bottom: rem(10);
   }
 
   &__list {
@@ -25,13 +20,5 @@
     border: $border-light-alt;
     padding: rem(10);
     border-radius: $radius-medium;
-
-    &:not(:last-child) {
-      margin-bottom: rem(10);
-    }
-  }
-
-  &__date {
-    margin-bottom: rem(10);
   }
 }

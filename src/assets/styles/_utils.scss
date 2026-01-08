@@ -91,3 +91,37 @@
     height: auto;
   }
 }
+
+
+// частые классы элементов
+.mb-not-last-10 {
+  &:not(:last-child) {
+    margin-bottom: rem(10);
+  }
+}
+.mb-not-last-20 {
+  &:not(:last-child) {
+    margin-bottom: rem(20);
+  }
+}
+.mb-not-last-40 {
+  &:not(:last-child) {
+    margin-bottom: rem(20);
+  }
+}
+
+.mb-10 {
+  margin-bottom: rem(10) !important;
+}
+.mb-20 {
+  margin-bottom: rem(20) !important;
+}
+.mb-30 {
+  margin-bottom: rem(30) !important;
+}
+.mb-40 {
+  margin-bottom: rem(40) !important;
+}
+.mb-40-20 {
+  margin-bottom: fluid(40, 20) !important;
+}

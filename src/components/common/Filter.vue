@@ -47,7 +47,7 @@ onMounted(() => {
 
     <template #default>
       <div class="filter">
-        <p class="filter__title">Выберите языки/технологии</p>
+        <p class="filter__title mb-10">Выберите языки/технологии</p>
 
         <ul class="filter__list">
           <li class="filter__item absolute__content-item"

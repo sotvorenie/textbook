@@ -72,7 +72,7 @@ const {
     <DefaultItemSkeleton v-if="isLoading"/>
 
     <div class="item" v-else>
-      <Btn class="item__download button-small"
+      <Btn class="item__download button-small mb-10"
            v-if="downloadVisible"
            @click="handleDownload"
            :is-loading="isDownload"
@@ -81,16 +81,16 @@ const {
       </Btn>
 
       <Transition name="item-title" appear>
-        <p class="item__title h2">{{item?.title}}</p>
+        <p class="item__title h2 mb-20">{{item?.title}}</p>
       </Transition>
 
       <TransitionGroup name="item-list" appear>
         <template v-for="part in text">
-          <h3 class="item__pod-title text-w500" v-if="part.type === 'title'">
+          <h3 class="item__pod-title text-w500 mb-10" v-if="part.type === 'title'">
             {{ part.content }}
           </h3>
 
-          <p class="item__text" v-else-if="part.type === 'text'">
+          <p class="item__text mb-not-last-20 w-100" v-else-if="part.type === 'text'">
             {{ part.content }}
           </p>
 
@@ -100,7 +100,7 @@ const {
         </template>
       </TransitionGroup>
 
-      <ul class="item__date flex flex-align-center">
+      <ul class="item__date flex flex-align-center mb-10">
         <li class="item__date-item flex flex-align-center">
           <p class="h5">Дата создания:</p>
           <p class="h6">{{item.date}}</p>

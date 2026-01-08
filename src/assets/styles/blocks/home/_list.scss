@@ -4,8 +4,6 @@
 .list {
   --gap: 30px;
 
-  margin-bottom: rem(30);
-
   &-wrapper {
     width: 100%;
   }
@@ -34,16 +32,11 @@
 
   &__title {
     padding-bottom: rem(5);
-    margin-bottom: rem(10);
     border-bottom: $border-light-alt;
 
     .is-active {
       color: $color-accent;
     }
-  }
-
-  &__date {
-    margin-bottom: rem(10);
   }
 
   &__name.is-active {
@@ -57,7 +50,6 @@
   &__tech {
 
     &-title {
-      margin-bottom: rem(10);
       column-gap: rem(5);
 
       button {

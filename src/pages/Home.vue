@@ -24,8 +24,8 @@ onMounted(async () => {
       {{messageStore.text}}
     </Message>
 
-    <main class="home">
-      <div class="home__inner flex">
+    <main class="home w-100">
+      <div class="home__inner flex w-100">
         <HomeAside/>
 
         <HomeContent/>

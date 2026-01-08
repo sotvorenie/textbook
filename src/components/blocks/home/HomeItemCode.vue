@@ -12,7 +12,7 @@ const emits = defineEmits(['copy'])
 
 <template>
 
-  <div class="item__code position-relative">
+  <div class="item__code position-relative mb-not-last-20">
     <pre v-html="text" />
 
     <Btn class="position-absolute button-small"

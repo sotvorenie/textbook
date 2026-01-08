@@ -191,18 +191,18 @@ onMounted(() => {
 
     <ul class="ul" v-if="comments.length">
       <TransitionGroup tag="div"
-                       class="comments__list"
+                       class="comments__list mb-20"
                        name="item-list"
       >
         <li :class="{
-            'comments__item flex position-relative': true,
+            'comments__item flex position-relative mb-not-last-10': true,
             'is-active': comment.user_id === userStore.user.id && redactedComment
           }"
             v-for="comment in comments"
         >
           <div class="comments__avatar flex-center">{{comment.user_name?.[0].toUpperCase()}}</div>
 
-          <div class="comments__content">
+          <div class="comments__content w-100">
             <div class="comments__top flex flex-justify-between">
               <div class="comments__info">
                 <p class="comments__name">{{comment.user_name}}</p>
@@ -224,7 +224,7 @@ onMounted(() => {
 
                 <template #default>
                   <div class="comments__actions flex flex-column">
-                    <Btn class="comments__actions-btn button-small" @click="handleRedact(comment)">Редактировать</Btn>
+                    <Btn class="comments__actions-btn button-small mb-10" @click="handleRedact(comment)">Редактировать</Btn>
                     <Btn class="comments__actions-btn button-small" @click="handleRemoveComment(comment.id!)">Удалить</Btn>
                   </div>
                 </template>
@@ -237,7 +237,7 @@ onMounted(() => {
       </TransitionGroup>
     </ul>
 
-    <p class="comments__empty h5" v-else>Комментариев пока нет..</p>
+    <p class="comments__empty h5 mb-20" v-else>Комментариев пока нет..</p>
 
     <CommentsSkeleton v-if="skeletonVisible"/>
 

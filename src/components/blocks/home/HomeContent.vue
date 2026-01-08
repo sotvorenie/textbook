@@ -190,7 +190,7 @@ watch(
 
 <template>
 
-  <div class="home__content flex flex-column">
+  <div class="home__content flex flex-column w-100">
     <header class="home__content-header home__header flex flex-align-center flex-between">
 
       <div v-if="homeStore.activeMenuIndex === 0"></div>
@@ -236,7 +236,7 @@ watch(
       </Modal>
     </header>
 
-    <div class="home__main">
+    <div class="home__main w-100 h-100">
       <KeepAlive>
         <Component :is="contentComponents[homeStore.activeMenuIndex].component"
                    :key="`content-${homeStore.activeMenuIndex}`"

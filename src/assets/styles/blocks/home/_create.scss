@@ -6,12 +6,10 @@
 
   &__btn-bar {
     column-gap: rem(20);
-    margin-bottom: rem(20);
     margin-top: rem(50);
 
     &.position-sticky {
       top: 0;
-      margin-bottom: rem(40);
       background: $color-dark-alt;
     }
   }
@@ -55,7 +53,6 @@
   }
 
   &__technologies {
-    margin-bottom: rem(20);
 
     &-list {
       height: rem(400);
@@ -65,24 +62,13 @@
 
   &__local {
 
-    &-title {
-      margin-bottom: rem(10);
-    }
-
     &-btn {
       column-gap: rem(10);
       text-transform: uppercase;
     }
   }
 
-  &__label-container {
-    &:not(:last-child) {
-      margin-bottom: rem(40);
-    }
-  }
-
   &__label {
-    width: 100%;
 
     &.textarea {
       padding-left: rem(20);

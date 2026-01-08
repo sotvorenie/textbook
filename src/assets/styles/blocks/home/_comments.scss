@@ -7,7 +7,6 @@
     overflow-y: auto;
     margin-right: rem(-10);
     padding-right: rem(10);
-    margin-bottom: rem(20);
   }
 
   &__item {
@@ -15,10 +14,6 @@
     padding: rem(10);
     border-radius: $radius-medium;
     column-gap: rem(10);
-
-    &:not(:last-child) {
-      margin-bottom: rem(10);
-    }
 
     &.is-active {
       border: $border-accent;
@@ -31,10 +26,6 @@
     background: $color-accent;
     border-radius: 50%;
     user-select: none;
-  }
-
-  &__content {
-    width: 100%;
   }
 
   &__name {
@@ -51,22 +42,8 @@
     column-gap: rem(10);
   }
 
-  &__empty {
-    margin-bottom: rem(20);
-  }
-
   &__dots {
     @include square(40);
-  }
-
-  &__actions {
-
-    &-btn {
-
-      &:not(:last-child) {
-        margin-bottom: rem(10);
-      }
-    }
   }
 
   &__form {

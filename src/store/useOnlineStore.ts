@@ -50,7 +50,7 @@ const useOnlineStore = defineStore("onlineStore", () => {
 
     // получаем все несинхронизированные записи
     const getOfflinePosts = async () => {
-        const tablesNames = ['advices', 'projects', 'posts', 'textbooks']
+        const tablesNames = ['advices', 'projects', 'hints', 'textbooks']
         const userStore = useUserStore()
 
         offlinePosts.value = []

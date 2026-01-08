@@ -25,7 +25,13 @@ const handleChange = () => {
 <template>
 
   <div class="checkbox recolor-svg position-relative">
-    <input type="checkbox" :id="id" :checked="checked" @change="handleChange" :disabled="disabled">
+    <input class="w-100 h-100"
+           type="checkbox"
+           :id="id"
+           :checked="checked"
+           @change="handleChange"
+           :disabled="disabled"
+    >
     <Check class="position-absolute"/>
   </div>
 

@@ -18,13 +18,13 @@ onMounted(() =>{
         v-for="_ in colElements"
         :key="_"
     >
-      <div class="skeleton-default-list__title">
+      <div class="skeleton-default-list__title mb-10">
         <div class="line line__background h-30"></div>
       </div>
 
       <div class="skeleton-default-list__info">
-        <div class="skeleton-default-list__date h-20 line line__background"></div>
-        <div class="skeleton-default-list__tech-title h-20 line line__background"></div>
+        <div class="skeleton-default-list__date h-20 line line__background mb-10 w-100"></div>
+        <div class="skeleton-default-list__tech-title h-20 line line__background mb-10"></div>
         <ul class="skeleton-default-list__technologies flex row">
           <li class="col-4 h-30 line" v-for="_ in 3" :key="_"></li>
         </ul>

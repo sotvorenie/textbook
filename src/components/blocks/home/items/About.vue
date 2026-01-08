@@ -61,9 +61,9 @@ const links = [
 <template>
 
   <div class="about">
-    <h2 class="about__title">Приложение создано с помощью технологий:</h2>
+    <h2 class="about__title mb-10">Приложение создано с помощью технологий:</h2>
 
-    <ul class="about__list flex flex-wrap">
+    <ul class="about__list flex flex-wrap mb-20">
       <li v-for="lang in languages"
           class="about__item cursor-pointer hover-color-accent"
       >

@@ -17,7 +17,7 @@ export const getListFromDB = async ({
     name,
     page,
     value = "",
-    filterLanguages = [],
+    languages = [],
     user_id ,
     sortBy = "-sort_date",
     id = []
@@ -31,10 +31,10 @@ export const getListFromDB = async ({
     const whereParts: string[] = []
     const params: any[] = []
 
-    if (filterLanguages.length > 0) {
-        const languageConditions = filterLanguages.map(() => `languages_and_technologies LIKE ?`)
+    if (languages.length > 0) {
+        const languageConditions = languages.map(() => `languages_and_technologies LIKE ?`)
         whereParts.push(`(${languageConditions.join(' OR ')})`)
-        params.push(...filterLanguages.map(lang => `%"${lang}"%`))
+        params.push(...languages.map(lang => `%"${lang}"%`))
     }
 
     if (user_id !== null && user_id !== undefined) {

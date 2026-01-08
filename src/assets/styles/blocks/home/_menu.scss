@@ -25,7 +25,6 @@
 
   &__btn {
     column-gap: rem(10);
-    width: 100%;
     padding: rem(15);
     transition-duration: $transition-duration;
 
@@ -36,7 +35,6 @@
     }
 
     &.menu__logo {
-      width: 100%;
       padding-inline: var(--padding);
 
       svg {
@@ -64,10 +62,6 @@
   &__item {
     border-radius: $radius-regular;
     transition-duration: $transition-duration;
-
-    &:not(:last-child) {
-      margin-bottom: rem(10);
-    }
 
     &.is-active {
       pointer-events: none;

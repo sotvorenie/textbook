@@ -112,7 +112,7 @@ const {
     <TextbookSkeleton v-if="isLoading"/>
 
     <div class="textbook" v-else>
-      <Btn class="item__download button-small"
+      <Btn class="item__download button-small mb-10"
            v-if="downloadVisible"
            @click="handleDownload"
            :is-loading="isDownload"
@@ -120,11 +120,11 @@ const {
         Скачать
       </Btn>
 
-      <p class="textbook__title h2">{{item.title}}</p>
+      <p class="textbook__title h2 mb-40-20">{{item.title}}</p>
 
       <Modal :size="500">
         <template #activator="{open}">
-          <Btn class="textbook__search-btn button-small recolor-svg m-auto flex"
+          <Btn class="textbook__search-btn button-small recolor-svg m-auto flex mb-20"
                @click="open"
           >
             <span>Найти тему</span>
@@ -133,7 +133,7 @@ const {
         </template>
 
         <template #default="{close}">
-          <input class="textbook__search-input input"
+          <input class="textbook__search-input input mb-20"
                  placeholder="Найти тему.."
                  v-model="searchNameInModal"
           >
@@ -142,7 +142,7 @@ const {
             <li v-for="tab in filteredTabsForModal"
                 :key="tab"
                 :class="{
-                  'textbook__search-item cursor-pointer': true,
+                  'textbook__search-item cursor-pointer mb-not-last-10': true,
                   'is-active': tab === activeTabName
                 }"
                 @click="() => {
@@ -160,13 +160,13 @@ const {
                           v-model:active-index="activeIndex"
       />
 
-      <div class="textbook__content">
+      <div class="textbook__content mb-30">
         <template v-for="part in text">
-          <h4 class="item__pod-title text-w500" v-if="part.type === 'title'">
+          <h4 class="item__pod-title text-w500 mb-10" v-if="part.type === 'title'">
             {{ part.content }}
           </h4>
 
-          <p class="item__text" v-else-if="part.type === 'text'">
+          <p class="item__text mb-not-last-20 w-100" v-else-if="part.type === 'text'">
             {{ part.content }}
           </p>
 
@@ -176,7 +176,7 @@ const {
         </template>
       </div>
 
-      <ul class="item__date flex flex-align-center">
+      <ul class="item__date flex flex-align-center mb-10">
         <li class="item__date-item flex flex-align-center">
           <p class="h5">Дата создания:</p>
           <p class="h6">{{item.date}}</p>

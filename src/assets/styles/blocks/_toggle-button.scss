@@ -17,7 +17,7 @@
     transition-duration: $transition-duration;
 
     &.is-active {
-      transform: translateX(calc(100% - 4px));;
+      transform: translateX(calc(100% - 4px));
     }
   }
 }

@@ -184,7 +184,7 @@ const syncCloseActive = ref<boolean>(true)
 <template>
   <div class="user-card">
     <div class="user-card__top flex row user-select-none">
-      <div class="user-card__img-container img-container position-relative col-6">
+      <div class="user-card__img-container img-container position-relative col-6 w-100 h-100">
         <Loading class="user-card__loading" :size="50" v-if="isLoading"/>
 
         <img v-if="userStore.user?.ava?.url"
@@ -212,8 +212,8 @@ const syncCloseActive = ref<boolean>(true)
 
       <div class="user-card__info flex flex-column flex-between col-6">
         <div>
-          <p class="user-card__name">Имя: {{userStore.user?.name}}</p>
-          <p class="user-card__name">Статус: {{role}}</p>
+          <p class="user-card__name mb-20">Имя: {{userStore.user?.name}}</p>
+          <p class="user-card__name mb-20">Статус: {{role}}</p>
           <p class="user-card__name">Последний сеанс: {{userStore.lastSession}}</p>
         </div>
 

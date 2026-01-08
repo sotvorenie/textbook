@@ -6,23 +6,15 @@ import useOnlineStore from "../store/useOnlineStore.ts";
 export const tablesConfig: Record<string, Record<string, string>> = {
     advices: {
         table: "advices",
-        techTable: "advice_technologies",
-        idField: "advice_id",
     },
     projects: {
         table: "projects",
-        techTable: "project_technologies",
-        idField: "project_id",
     },
     hints: {
         table: "hints",
-        techTable: "post_technologies",
-        idField: "post_id",
     },
     textbooks: {
         table: "textbooks",
-        techTable: "textbook_technologies",
-        idField: "textbook_id",
     },
 }
 
