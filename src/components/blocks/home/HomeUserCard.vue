@@ -147,7 +147,7 @@ const exit = async () => {
     resetAllStores()
 
     try {
-      await router.push('/')
+      await router.push('/auth')
 
       globalThis.location.reload()
     } catch (err) {

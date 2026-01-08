@@ -5,7 +5,7 @@ import Fox from "../../../assets/icons/Fox.vue";
 
 <template>
 
-  <div class="skeleton skeleton-app">
+  <div class="skeleton skeleton-app position-fixed">
     <Fox/>
 
     <span class="h2">Загрузка..</span>

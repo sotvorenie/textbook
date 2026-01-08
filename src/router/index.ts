@@ -14,19 +14,26 @@ const router = createRouter({
     }
 })
 
-router.beforeEach((to, _from, next) => {
-    const isAuthenticated = authToken.hasToken();
+router.beforeEach((to, from, next) => {
+    const isAuthenticated = authToken.hasToken()  // проверка авторизации
+
+    if (to.meta.requiresAuth && !isAuthenticated) {
+        next({ name: 'Auth' })
+        return
+    }
+
+    if (to.name === 'User' && !from.name) {
+        next({ name: 'Main' })
+        return
+    }
 
     if (to.name === 'Auth' && isAuthenticated) {
-        //если уже авторизован и пытается перейти на страницу авторизации
         next({ name: 'Main' })
-    } else if (to.meta.requiresAuth && !isAuthenticated) {
-        //если требуется авторизация, но пользователь не авторизован
-        next({ name: 'Auth' })
-    } else {
-        //во всех остальных случаях разрешаем навигацию
-        next()
+        return
     }
+
+    next()
 })
+
 
 export default router

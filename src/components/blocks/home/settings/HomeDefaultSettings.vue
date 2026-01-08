@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import {computed, ref, watch} from "vue";
+import {useRoute} from "vue-router";
+import router from "../../../../router";
 
 import {FilterList} from "../../../../types/filter.ts";
 
@@ -35,6 +37,8 @@ import useItemsStore from "../../../../store/useItemsStore.ts";
 const itemsStore = useItemsStore();
 import useOnlineStore from "../../../../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();
+
+const route = useRoute();
 
 const props = defineProps({
   name: {
@@ -86,6 +90,11 @@ const goToList = () => {
 
 // клик по кнопке "Назад"
 const handleBack = () => {
+  if (route.path === '/user') {
+    router.go(-1)
+    return
+  }
+
   if (userStore.isUserPost[props.name]
       && blocksStore.activeBlock[props.name] === 'create'
       && createStore.isRedact[props.name]

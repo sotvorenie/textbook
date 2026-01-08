@@ -1042,6 +1042,8 @@ button:disabled {
   align-items: center;
   flex-direction: column;
   row-gap: 1.25rem;
+  inset: 0;
+  z-index: 9999;
 }
 .skeleton-app svg {
   width: 12%;

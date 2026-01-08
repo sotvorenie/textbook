@@ -2,13 +2,30 @@ import { RouteRecordRaw } from 'vue-router'
 
 export const routes: RouteRecordRaw[] = [
     {
-        path: '/',
+        path: '/auth',
         name: 'Auth',
         component: () => import('../pages/Auth.vue')
     },
     {
-        path: '/main',
-        name: 'Main',
-        component: () => import('../pages/Home.vue')
-    }
+        path: '/',
+        component: () => import('../layouts/MainLayout.vue'),
+        children: [
+            {
+                path: '',
+                redirect: 'main',
+            },
+            {
+                path: 'main',
+                name: 'Main',
+                component: () => import('../pages/Home.vue'),
+                meta: { requiresAuth: true },
+            },
+            {
+                path: 'user',
+                name: 'User',
+                component: () => import('../pages/User.vue'),
+                meta: { requiresAuth: true },
+            },
+        ]
+    },
 ]

@@ -55,6 +55,8 @@
 
   flex-direction: column;
   row-gap: rem(20);
+  inset: 0;
+  z-index: 9999;
 
   svg {
     width: 12%;

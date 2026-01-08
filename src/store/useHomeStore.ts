@@ -22,6 +22,9 @@ import useIpStore from "./useIpStore.ts";
 const useHomeStore = defineStore('homeStore', () => {
     const onlineStore = useOnlineStore();
 
+    // загрузился ли Home впервые (чтобы при возврате со страницы User не было обновления данных)
+    const firstLoading = ref(true)
+
     // видимость анимации на HomePage
     const loadingVisible = ref<boolean>(true)
 
@@ -78,7 +81,7 @@ const useHomeStore = defineStore('homeStore', () => {
             } catch (err: any) {
                 if (err.message === 'NO_TOKEN') {
                     loadingVisible.value = false
-                    await router.push('/')
+                    await router.push('/auth')
                     return false
                 }
 
@@ -94,7 +97,7 @@ const useHomeStore = defineStore('homeStore', () => {
                 }
 
                 loadingVisible.value = false
-                await router.push('/')
+                await router.push('/auth')
                 return false
             }
         }
@@ -243,6 +246,8 @@ const useHomeStore = defineStore('homeStore', () => {
     )
 
     return {
+        firstLoading,
+
         loadingVisible,
         activeMenuIndex,
         pageNumberForAPI,

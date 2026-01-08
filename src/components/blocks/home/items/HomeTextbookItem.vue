@@ -98,6 +98,7 @@ const {
   upBtnVisible,
   clickToUp,
   commentsVisible,
+  author
 } = useItem(
     props.name,
     item,
@@ -174,6 +175,16 @@ const {
                         @copy="handleCopy"
                         v-else/>
         </template>
+      </div>
+
+      <div class="item__author mb-15 flex flex-align-center" v-if="author.name">
+        <span>Автор:</span>
+        <RouterLink to="/user" class="item__author-info flex flex-align-center">
+          <div class="item__avatar img-container" v-if="author.ava">
+            <img :src="author?.ava?.url" :alt="author?.name">
+          </div>
+          <span>{{author?.name}}</span>
+        </RouterLink>
       </div>
 
       <ul class="item__date flex flex-align-center mb-10">
