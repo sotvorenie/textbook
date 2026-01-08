@@ -327,6 +327,10 @@ svg * {
   margin-bottom: 0.625rem !important;
 }
 
+.mb-15 {
+  margin-bottom: 0.9375rem !important;
+}
+
 .mb-20 {
   margin-bottom: 1.25rem !important;
 }
@@ -1968,6 +1972,21 @@ button:disabled {
   right: 0.625rem;
   top: -1.25rem;
   background: var(--color-dark-alt);
+}
+.item__author {
+  font-size: 1rem;
+  column-gap: 0.3125rem;
+}
+.item__author-info {
+  column-gap: 0.3125rem;
+}
+.item__avatar {
+  width: 1.875rem !important;
+  min-width: 1.875rem !important;
+  height: 1.875rem !important;
+  min-height: 1.875rem !important;
+  background: var(--color-dark);
+  border-radius: 50%;
 }
 .item__date {
   column-gap: 3.75rem;

@@ -5,7 +5,7 @@ import {Item} from "../../types/item.ts";
 import {showConfirm, showError} from "../../utils/modals.ts";
 import decodeHtmlEntities from "../useDecodeHtmlEntities.ts";
 
-import {getItem, updateStatistics} from "../../api/posts/posts.ts";
+import {getAuthor, getItem, updateStatistics} from "../../api/posts/posts.ts";
 import {checkPost, createItemInDB} from "../../api/posts/postsDB.ts";
 
 import useIdStore from "../../store/useIdStore.ts";
@@ -222,6 +222,28 @@ export const useItem = (
 
 
     //=========================================================//
+    //-- автор поста --//
+    type Author = {
+        name: string;
+        ava?: {url: string}
+    }
+    const author = ref<Author>({name: ''})
+
+
+    // получение данных об авторе
+    const getAuthorInfo = async (id: number) => {
+        const data: {ava?: {url: string}, name: string} = await getAuthor(id)
+
+        if (data) {
+            author.value.name = data.name
+
+            if (data.ava) author.value.ava = data.ava
+        }
+    }
+    //=========================================================//
+
+
+    //=========================================================//
     //-- статистика и комментарии --//
     // видимость блока комментариев
     const commentsVisible = ref<boolean>(false)
@@ -292,6 +314,8 @@ export const useItem = (
 
         if (item.value.user_id === userStore.user.id) {
             userStore.isUserPost[name] = true
+        } else {
+            await getAuthorInfo(item.value.user_id)
         }
 
         isLoading.value = false
@@ -314,6 +338,8 @@ export const useItem = (
                 updateBlocksVisible()
             })
         }
+
+        author.value = {name: ''}
     })
 
     onMounted(() => {
@@ -345,5 +371,7 @@ export const useItem = (
 
         commentsVisible,
         updateBlocksVisible,
+
+        author,
     }
 }

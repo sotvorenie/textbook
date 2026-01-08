@@ -40,6 +40,20 @@
     }
   }
 
+  &__author {
+    font-size: rem(16);
+    column-gap: rem(5);
+  }
+  &__author-info {
+    column-gap: rem(5);
+  }
+  &__avatar {
+    @include square(30);
+
+    background: $color-dark;
+    border-radius: 50%;
+  }
+
   &__date {
     column-gap: rem(60);
 
