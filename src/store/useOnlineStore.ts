@@ -55,10 +55,9 @@ const useOnlineStore = defineStore("onlineStore", () => {
 
         offlinePosts.value = []
 
-        try {
-            for (const tableName of tablesNames) {
-                const items = await selectSQL<UnAuthorizedList>(
-                    `SELECT 
+        for (const tableName of tablesNames) {
+            const items = await selectSQL<UnAuthorizedList>(
+                `SELECT 
                             id,
                             title,
                             date,
@@ -67,35 +66,32 @@ const useOnlineStore = defineStore("onlineStore", () => {
                             block_name,
                             user_id
                           FROM ${tableName} WHERE offline != ''`
-                );
+            )
 
-                for (const item of items) {
-                    if (hasAccessToOfflinePost(userStore, item)) {
-                        offlinePosts.value.push(item);
-                    }
+            for (const item of items) {
+                if (hasAccessToOfflinePost(userStore, item)) {
+                    offlinePosts.value.push(item)
                 }
             }
-        } catch (err) {
-            return
         }
     }
 
     // проверка: вносить ли несинхронизированный элемент в список для синхронизации
     const hasAccessToOfflinePost = (userStore: any, item: any): boolean => {
-        const isTextbook = item.block_name === 'textbooks';
-        const isRedact = item.offline === 'redact';
+        const isTextbook = item.block_name === 'textbooks'
+        const isRedact = item.offline === 'redact'
 
         if (isTextbook) {
             if (isRedact) {
-                return userStore.isFullAdmin && item.user_id === userStore.user.id;
+                return userStore.isFullAdmin && item.user_id === userStore.user.id
             }
-            return userStore.isFullAdmin;
+            return userStore.isFullAdmin
         }
 
         if (isRedact) {
-            return userStore.isAdmin && item.user_id === userStore.user.id;
+            return userStore.isAdmin && item.user_id === userStore.user.id
         }
-        return userStore.isAdmin;
+        return userStore.isAdmin
     }
 
     return {

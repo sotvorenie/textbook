@@ -8,6 +8,7 @@
     <div class="skeleton-comments__title line line__background loading-line h-30"></div>
     <ul class="skeleton-comments__list">
       <li v-for="_ in [1,2]"
+          :key="_"
           class="skeleton-comments__item line line__background loading-line"
       ></li>
     </ul>

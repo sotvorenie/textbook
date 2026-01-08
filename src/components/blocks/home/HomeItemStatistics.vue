@@ -15,9 +15,9 @@ const props = defineProps({
 })
 
 interface StatisticsList {
-  name: String
+  name: string
   icon: any
-  number: Number | String
+  number: number | string
 }
 
 const statistics = computed((): StatisticsList[] => {

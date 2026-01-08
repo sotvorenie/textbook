@@ -29,10 +29,10 @@ const handleTab = (index: number) => {
 const swiperElement = ref<SwiperType | null>(null)
 
 // видимость кнопки "Назад"
-const isBeginning = ref(true);
+const isBeginning = ref(true)
 
 // видимость кнопки "Вперед"
-const isEnd = ref(false);
+const isEnd = ref(false)
 
 
 // инициализация слайдера
@@ -44,23 +44,23 @@ const onSwiper = (swiper: any) => {
 const checkSlides = () => {
   if (!swiperElement.value) return
 
-  isBeginning.value = swiperElement.value.isBeginning;
-  isEnd.value = swiperElement.value.isEnd;
+  isBeginning.value = swiperElement.value.isBeginning
+  isEnd.value = swiperElement.value.isEnd
 }
 
 // предыдущий слайд
 const slidePrev = () => {
   if (swiperElement.value && !isBeginning.value) {
-    swiperElement.value.slidePrev();
+    swiperElement.value.slidePrev()
   }
-};
+}
 
 // следующий слайд
 const slideNext = () => {
   if (swiperElement.value && !isEnd.value) {
-    swiperElement.value.slideNext();
+    swiperElement.value.slideNext()
   }
-};
+}
 
 // функция для прокрутки к активному слайду
 const scrollToActiveSlide = () => {

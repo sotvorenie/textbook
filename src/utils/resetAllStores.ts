@@ -8,6 +8,7 @@ import useUserStore from "../store/useUserStore.ts";
 import useScrollStore from "../store/useScrollStore.ts";
 import useCreateStore from "../store/useCreateStore.ts";
 import useItemsStore from "../store/useItemsStore.ts";
+import useIpStore from "../store/useIpStore.ts";
 
 export const resetAllStores = (): void => {
     const userStore = useUserStore();
@@ -20,15 +21,19 @@ export const resetAllStores = (): void => {
     const scrollStore = useScrollStore();
     const createStore = useCreateStore();
     const createdDeletedItemStore = useItemsStore();
+    const ipStore = useIpStore();
+    const itemsStore = useItemsStore();
 
-    userStore.resetStore();
-    blocksStore.resetStore();
-    idStore.resetStore();
-    itemMemoStore.resetStore();
-    searchStore.resetStore();
-    settingsStore.resetStore();
-    technologiesStore.resetStore();
-    scrollStore.resetStore();
-    createStore.resetStore();
-    createdDeletedItemStore.resetStore();
-};
+    userStore.resetStore()
+    blocksStore.resetStore()
+    idStore.resetStore()
+    itemMemoStore.resetStore()
+    searchStore.resetStore()
+    settingsStore.resetStore()
+    technologiesStore.resetStore()
+    scrollStore.resetStore()
+    createStore.resetStore()
+    createdDeletedItemStore.resetStore()
+    ipStore.resetStore()
+    itemsStore.resetStore()
+}

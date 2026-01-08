@@ -26,8 +26,8 @@ const text = defineModel({type: String, required: true});
 const activeTab = defineModel('activeIndex')
 
 const blurInput = (event: Event) => {
-  onBlur(event);
-  removeLabelText(event);
+  onBlur(event)
+  removeLabelText(event)
 }
 
 // текст в поле ввода textarea
@@ -63,87 +63,86 @@ const handleInput = (event: Event) => {
 
 // для автоматической табуляции
 const handleKeyDown = (event: KeyboardEvent) => {
-  if (props.code !== textareaAttributesList.code.code) return; // только для code-полей
-  const textarea = textareaRef.value;
-  if (!textarea) return;
+  if (props.code !== textareaAttributesList.code.code) return // только для code-полей
+  const textarea = textareaRef.value
+  if (!textarea) return
 
-  const key = event.key;
-  const indentSize = 3; // пробелов на уровень отступа
+  const key = event.key
+  const indentSize = 3 // пробелов на уровень отступа
 
-  const selectionStart = textarea.selectionStart ?? 0;
-  const selectionEnd = textarea.selectionEnd ?? 0;
-  const value = textarea.value;
+  const selectionStart = textarea.selectionStart ?? 0
+  const selectionEnd = textarea.selectionEnd ?? 0
+  const value = textarea.value
 
   const getCurrentLineIndent = () => {
-    const lineStart = value.lastIndexOf('\n', selectionStart - 1) + 1;
-    const line = value.slice(lineStart, selectionStart);
-    const match = line.match(/^\s*/);
-    return match ? match[0] : '';
+    const lineStart = value.lastIndexOf('\n', selectionStart - 1) + 1
+    const line = value.slice(lineStart, selectionStart)
+    const match = line.match(/^\s*/)
+    return match ? match[0] : ''
   };
 
   const apply = (newValue: string, newCursorPos: number) => {
-    textarea.value = newValue;
-    textarea.focus();
-    textarea.setSelectionRange(newCursorPos, newCursorPos);
-    text.value = newValue;
+    textarea.value = newValue
+    textarea.focus()
+    textarea.setSelectionRange(newCursorPos, newCursorPos)
+    text.value = newValue
     nextTick(() => {
       autoResize()
       updateCloseBtnVisible()
-    });
-  };
+    })
+  }
 
-  const pairs: Record<string, string> = { '{': '}', '(': ')', '[': ']', '"': '"', "'": "'" };
+  const pairs: Record<string, string> = { '{': '}', '(': ')', '[': ']', '"': '"', "'": "'" }
 
-  if (Object.prototype.hasOwnProperty.call(pairs, key) && !event.ctrlKey && !event.metaKey) {
-    const closing = pairs[key];
-    const nextChar = value[selectionStart] ?? '';
+  if (Object.hasOwn(pairs, key) && !event.ctrlKey && !event.metaKey) {
+    const closing = pairs[key]
+    const nextChar = value[selectionStart] ?? ''
 
-    event.preventDefault();
+    event.preventDefault()
 
     if (nextChar === closing) {
-      const newValue = value.slice(0, selectionStart) + key + value.slice(selectionEnd);
-      apply(newValue, selectionStart + 1);
+      const newValue = value.slice(0, selectionStart) + key + value.slice(selectionEnd)
+      apply(newValue, selectionStart + 1)
     } else {
-      const newValue = value.slice(0, selectionStart) + key + closing + value.slice(selectionEnd);
-      apply(newValue, selectionStart + 1);
+      const newValue = value.slice(0, selectionStart) + key + closing + value.slice(selectionEnd)
+      apply(newValue, selectionStart + 1)
     }
-    return;
+    return
   }
 
   if (key === 'Enter') {
-    const prevChar = value[selectionStart - 1] ?? '';
-    const nextChar = value[selectionStart] ?? '';
-    const currentIndent = getCurrentLineIndent();
+    const prevChar = value[selectionStart - 1] ?? ''
+    const nextChar = value[selectionStart] ?? ''
+    const currentIndent = getCurrentLineIndent()
 
     if (['{', '(', '['].includes(prevChar) && nextChar === pairs[prevChar]) {
-      event.preventDefault();
+      event.preventDefault()
 
       const innerIndent = ' '.repeat(indentSize);
-      const insertText = `\n${currentIndent}${innerIndent}\n${currentIndent}`;
-      const newValue = value.slice(0, selectionStart) + insertText + value.slice(selectionEnd);
+      const insertText = `\n${currentIndent}${innerIndent}\n${currentIndent}`
+      const newValue = value.slice(0, selectionStart) + insertText + value.slice(selectionEnd)
 
-      const newCursorPos = selectionStart + 1 + currentIndent.length + innerIndent.length;
-      apply(newValue, newCursorPos);
-      return;
+      const newCursorPos = selectionStart + 1 + currentIndent.length + innerIndent.length
+      apply(newValue, newCursorPos)
+      return
     }
 
-    event.preventDefault();
-    const insertText = `\n${currentIndent}`;
-    const newValue = value.slice(0, selectionStart) + insertText + value.slice(selectionEnd);
-    const newCursorPos = selectionStart + 1 + currentIndent.length;
-    apply(newValue, newCursorPos);
-    return;
+    event.preventDefault()
+    const insertText = `\n${currentIndent}`
+    const newValue = value.slice(0, selectionStart) + insertText + value.slice(selectionEnd)
+    const newCursorPos = selectionStart + 1 + currentIndent.length
+    apply(newValue, newCursorPos)
+    return
   }
 
   if (key === 'Tab') {
-    event.preventDefault();
-    const spaces = ' '.repeat(indentSize);
-    const newValue = value.slice(0, selectionStart) + spaces + value.slice(selectionEnd);
-    const newCursorPos = selectionStart + spaces.length;
-    apply(newValue, newCursorPos);
-    return;
+    event.preventDefault()
+    const spaces = ' '.repeat(indentSize)
+    const newValue = value.slice(0, selectionStart) + spaces + value.slice(selectionEnd)
+    const newCursorPos = selectionStart + spaces.length
+    apply(newValue, newCursorPos)
   }
-};
+}
 
 // свернут ли textarea
 const isClosed = ref<boolean>(false)
@@ -163,13 +162,13 @@ const handleCloseTextarea = () => {
 }
 
 // видимость кнопки "развернуть/свернуть"
-const closeBtnVisible = ref<boolean>(false);
+const closeBtnVisible = ref<boolean>(false)
 
 // изменить видимость кнопки "развернуть/свернуть"
 const updateCloseBtnVisible = () => {
   if (!textareaRef.value) return false
 
-  closeBtnVisible.value = textareaRef.value.offsetHeight > 100;
+  closeBtnVisible.value = textareaRef.value.offsetHeight > 100
 }
 
 

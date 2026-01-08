@@ -8,6 +8,7 @@ defineProps({
     default: false,
     required: true,
   },
+  id: String,
   disabled: {
     type: Boolean,
     default: false
@@ -24,7 +25,7 @@ const handleChange = () => {
 <template>
 
   <div class="checkbox recolor-svg position-relative">
-    <input type="checkbox" :checked="checked" @change="handleChange" :disabled="disabled">
+    <input type="checkbox" :id="id" :checked="checked" @change="handleChange" :disabled="disabled">
     <Check class="position-absolute"/>
   </div>
 

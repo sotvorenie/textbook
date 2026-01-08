@@ -145,7 +145,7 @@ const contentComponents = ref<ContentComponent[]>([
 //-- аватарка пользователя --//
 // имя пользователя
 const userName = computed((): string => {
-  return userIconVisible ? userStore.user?.name : 'Пользователь';
+  return userIconVisible ? userStore.user?.name : 'Пользователь'
 })
 
 // проверка: есть ли у пользователя аватарка или нет (если нет, то показывать svg-человечка)
@@ -160,7 +160,7 @@ const userIconVisible = computed(() => {
 //=========================================================//
 //-- модальное окно --//
 // видимость модального окна
-const modalVisible = ref<boolean>(false);
+const modalVisible = ref<boolean>(false)
 
 // можно ли закрыть модальное окно (чтобы при загрузке аватарки нельзя было закрыть модальное окно)
 const isAvatarLoaded = ref<boolean>(true)

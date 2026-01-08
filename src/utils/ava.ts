@@ -8,12 +8,8 @@ export const userAva = {
     },
     get() {
         try {
-            const item = localStorage.getItem('ava');
-            if (!item || item === 'null' || item === 'undefined') {
-                return {};
-            }
-            return JSON.parse(item);
-        } catch (error) {
+            return JSON.parse(localStorage.getItem('ava') ?? '{}');
+        } catch {
             return {};
         }
     },

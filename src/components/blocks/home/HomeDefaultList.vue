@@ -44,13 +44,13 @@ const emits = defineEmits(['changeItem']);
 //=========================================================//
 //-- асинхронные функции --//
 // для получения данных с апи при изменениях фильтров
-const debouncedGetPosts = debounce(() => getPosts(false), 500);
+const debouncedGetPosts = debounce(() => getPosts(false), 500)
 
 // данные о номере страницы апи
 const page = ref<number>(1)
 
 // данные обо всех/оставшихся элементов в апи
-const meta = ref<Meta>();
+const meta = ref<Meta>()
 
 
 // получение данных списка с апи
@@ -72,15 +72,15 @@ const getPosts = async(push: boolean = true) => {
       likes = likedItems.value?.length ? likedItems.value : [-1]
      }
 
-    const response: {meta: any, items: List[]} = await getList(
-        props.name,
-        page.value,
-        searchStore.searchNames[props?.name],
-        searchStore.filterTechnologies[props?.name],
-        user_id,
-        searchStore.sortBy[props?.name],
-        likes
-    );
+    const response: {meta: any, items: List[]} = await getList({
+      name: props.name,
+      page: page.value,
+      value: searchStore.searchNames[props?.name],
+      languages: searchStore.filterTechnologies[props?.name],
+      user_id,
+      sortBy: searchStore.sortBy[props?.name],
+      id: likes
+    })
 
     if (response) {
       if (push) {
@@ -102,14 +102,16 @@ const getPosts = async(push: boolean = true) => {
         )
       }
 
-      await nextTick();
+      await nextTick()
     }
 
     settingsStore.settingsVisible[props.name] = 'list'
-  } catch (_) {
+  } catch (err) {
+    console.error('Не удалось загрузить данные с сервера', err)
+
     await showError(
-        'Ошибка загрузки контента',
-        'Не удалось загрузить список элементов'
+        'Ошибка загрузки контента с сервера',
+        'Не удалось загрузить список элементов с сервера приложения'
     )
   } finally {
     loadingVisible.value = false
@@ -175,7 +177,7 @@ const likedItems = computed(() => {
 
 // добавление/удаление элемента из избранного
 const like = async (id: number, statistics: Item['statistics']) => {
-  await handleLike(props.name, id, props.name, statistics)
+  await handleLike(props.name, id, statistics)
 }
 //=========================================================//
 

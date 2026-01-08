@@ -45,32 +45,34 @@ const changeActiveIndex = (number: number): void => {
       </Transition>
     </div>
 
-    <TransitionGroup class="menu__list"
-                     name="menu"
-                     tag="ul"
-                     appear
-                     :delay="1000"
-    >
-      <li :class="{
+    <ul class="ul">
+      <TransitionGroup class="menu__list"
+                       name="menu"
+                       tag="div"
+                       appear
+                       :delay="1000"
+      >
+        <li :class="{
             'menu__item': true,
             'is-active': homeStore.activeMenuIndex === index + 1,
           }"
-          v-for="(item, index) in menuItems"
-          :key="item.id"
-          :style="{'--index': index}"
-      >
-        <button class="menu__btn hover-color-accent recolor-svg flex flex-align-center"
-                :title="isClosed ? item.name : ''"
-                type="button"
-                @click="changeActiveIndex(index + 1)"
+            v-for="(item, index) in menuItems"
+            :key="item.id"
+            :style="{'--index': index}"
         >
-          <Component :is="item.icon"/>
-          <Transition name="scale-left">
-            <span class="menu__name" v-show="!isClosed">{{item.name}}</span>
-          </Transition>
-        </button>
-      </li>
-    </TransitionGroup>
+          <button class="menu__btn hover-color-accent recolor-svg flex flex-align-center"
+                  :title="isClosed ? item.name : ''"
+                  type="button"
+                  @click="changeActiveIndex(index + 1)"
+          >
+            <Component :is="item.icon"/>
+            <Transition name="scale-left">
+              <span class="menu__name" v-show="!isClosed">{{item.name}}</span>
+            </Transition>
+          </button>
+        </li>
+      </TransitionGroup>
+    </ul>
 
     <button class="menu__bottom button button-small m-auto"
             type="button"

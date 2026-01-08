@@ -4,115 +4,116 @@ import {executeSQL, selectSQL, tablesConfig} from "../database.ts";
 import {showError} from "../../utils/modals.ts";
 import useIdStore from "../../store/useIdStore.ts";
 
-export const getListFromDB = async (
-    name: string,
-    page: number,
-    value: string = "",
-    filterLanguages: string[] = [],
-    user_id: number | null,
-    sortBy: string = "-sort_date",
-    id: number[] = []
-): Promise<{ meta: any; items: List[] }> => {
-    const config = tablesConfig[name];
-    if (!config) throw new Error(`Неизвестная таблица: ${name}`);
+type GetListParams = {
+    name: string
+    page: number
+    languages: string[]
+    user_id: number | null
+    value?: string
+    sortBy?: string
+    id?: number[]
+}
+export const getListFromDB = async ({
+    name,
+    page,
+    value = "",
+    filterLanguages = [],
+    user_id ,
+    sortBy = "-sort_date",
+    id = []
+}: GetListParams): Promise<{ meta: any; items: List[] }> => {
+    const config = tablesConfig[name]
+    if (!config) throw new Error(`Неизвестная таблица: ${name}`)
 
-    const limit = 9;
-    const offset = (page - 1) * limit;
+    const limit = 9
+    const offset = (page - 1) * limit
 
-    const whereParts: string[] = [];
-    const params: any[] = [];
+    const whereParts: string[] = []
+    const params: any[] = []
 
     if (filterLanguages.length > 0) {
-        const languageConditions = filterLanguages.map(() => `languages_and_technologies LIKE ?`);
-        whereParts.push(`(${languageConditions.join(' OR ')})`);
-        params.push(...filterLanguages.map(lang => `%"${lang}"%`));
+        const languageConditions = filterLanguages.map(() => `languages_and_technologies LIKE ?`)
+        whereParts.push(`(${languageConditions.join(' OR ')})`)
+        params.push(...filterLanguages.map(lang => `%"${lang}"%`))
     }
 
     if (user_id !== null && user_id !== undefined) {
-        whereParts.push(`user_id = ?`);
-        params.push(user_id);
+        whereParts.push(`user_id = ?`)
+        params.push(user_id)
     }
 
     if (value) {
-        whereParts.push(`title LIKE ?`);
-        params.push(`%${value}%`);
+        whereParts.push(`title LIKE ?`)
+        params.push(`%${value}%`)
     }
 
     if (id && id.length > 0) {
-        whereParts.push(`id IN (${id.map(() => "?").join(",")})`);
-        params.push(...id);
+        whereParts.push(`id IN (${id.map(() => "?").join(",")})`)
+        params.push(...id)
     }
 
-    const where = whereParts.length ? `WHERE ${whereParts.join(" AND ")}` : "";
-    const sortName = sortBy.replace("-", "");
-    const sortOrder = sortBy.startsWith("-") ? "DESC" : "ASC";
+    const where = whereParts.length ? `WHERE ${whereParts.join(" AND ")}` : ""
+    const sortName = sortBy.replace("-", "")
+    const sortOrder = sortBy.startsWith("-") ? "DESC" : "ASC"
 
-    try {
-        const items = await selectSQL<any>(
-            `SELECT 
+    const items = await selectSQL<any>(
+        `SELECT 
                 id,
                 title,
                 date,
                 languages_and_technologies
               FROM ${config.table} ${where} ORDER BY ${sortName} ${sortOrder} LIMIT ? OFFSET ?`,
-            [...params, limit, offset]
-        );
+        [...params, limit, offset]
+    )
 
-        const processedItems = items.map(item => ({
-            ...item,
-            languages_and_technologies: item.languages_and_technologies ? JSON.parse(item.languages_and_technologies) : []
-        }));
+    const processedItems = items.map(item => ({
+        ...item,
+        languages_and_technologies: item.languages_and_technologies ? JSON.parse(item.languages_and_technologies) : []
+    }))
 
-        const countRows = await selectSQL<{ total: number }>(
-            `SELECT COUNT(*) AS total FROM ${config.table} ${where}`,
-            params
-        );
+    const countRows = await selectSQL<{ total: number }>(
+        `SELECT COUNT(*) AS total FROM ${config.table} ${where}`,
+        params
+    )
 
-        const total = countRows[0]?.total ?? 0;
+    const total = countRows[0]?.total ?? 0;
 
-        const meta = {
-            current_page: page,
-            from: total === 0 ? 0 : offset + 1,
-            to: Math.min(offset + limit, total),
-            total,
-            per_page: limit,
-            last_page: Math.ceil(total / limit),
-        };
-
-        return { meta, items: processedItems };
-    } catch (err) {
-        throw err
+    const meta = {
+        current_page: page,
+        from: total === 0 ? 0 : offset + 1,
+        to: Math.min(offset + limit, total),
+        total,
+        per_page: limit,
+        last_page: Math.ceil(total / limit),
     }
+
+    return { meta, items: processedItems }
 };
 
 export const getItemFromDB = async (
     name: string,
     id: number
 ): Promise<Item> => {
-    try {
-        const config = tablesConfig[name];
+    const config = tablesConfig[name]
 
-        const items = await selectSQL<any>(`SELECT * FROM ${config.table} WHERE id = ?`, [id]);
+    const items = await selectSQL<any>(`SELECT * FROM ${config.table} WHERE id = ?`, [id])
 
-        const item = items[0];
+    const item = items[0]
 
-        let content = item.content;
-        if (typeof content === 'string') {
-            try {
-                content = JSON.parse(content);
-            } catch (e) {
-                console.error('Error parsing content:', e);
-                content = {};
-            }
+    let content = item.content;
+    if (typeof content === 'string') {
+        try {
+            content = JSON.parse(content)
+        } catch (e) {
+            console.error('Error parsing content:', e)
+            content = {}
         }
+    }
 
-        return {
-            ...item,
-            content: content,
-            languages_and_technologies: item.languages_and_technologies ? JSON.parse(item.languages_and_technologies) : []
-        };
-    } catch (err) {
-        throw err
+    return {
+        ...item,
+        content: content,
+        languages_and_technologies: item.languages_and_technologies ? JSON.parse(item.languages_and_technologies) : []
     }
 };
 
@@ -193,14 +194,13 @@ export const redactItemInDB = async (
     id: number,
     offline: string = ""
 ) => {
-    try {
-        const config = tablesConfig[name];
+    const config = tablesConfig[name]
 
-        const contentName = config.table === tablesConfig.textbooks.table ? "content" : "text";
-        const languagesJson = JSON.stringify(item.languages_and_technologies || []);
+    const contentName = config.table === tablesConfig.textbooks.table ? "content" : "text"
+    const languagesJson = JSON.stringify(item.languages_and_technologies || [])
 
-        await executeSQL(
-            `UPDATE ${config.table} SET
+    await executeSQL(
+        `UPDATE ${config.table} SET
                 title = ?, 
                 ${contentName} = ?, 
                 date = ?, 
@@ -209,27 +209,20 @@ export const redactItemInDB = async (
                 offline = ?, 
                 languages_and_technologies = ? 
               WHERE id = ?`,
-            [item.title, (item as any)[contentName], item.date, item.sort_date, item.time, offline, languagesJson, id]
-        );
+        [item.title, (item as any)[contentName], item.date, item.sort_date, item.time, offline, languagesJson, id]
+    )
 
-        return {...item, id};
-    } catch (err) {
-        throw err
-    }
+    return {...item, id}
 };
 
 export const removeFromDB = async (
     name: string,
     id: number
 ) => {
-    try {
-        const config = tablesConfig[name];
+    const config = tablesConfig[name]
 
-        return await executeSQL(`DELETE FROM ${config.table} WHERE id = ?`, [id]);
-    } catch (err) {
-
-    }
-};
+    return executeSQL(`DELETE FROM ${config.table} WHERE id = ?`, [id])
+}
 
 
 export const checkPost = async (
@@ -237,17 +230,12 @@ export const checkPost = async (
 ): Promise<boolean> => {
     const idStore = useIdStore()
 
-    const config = tablesConfig[name];
+    const config = tablesConfig[name]
     if (!config) return false
 
     const id = idStore.idValues[name]
 
-    try {
-        const item = await selectSQL<any>(`SELECT * FROM ${config.table} WHERE id = ?`, [id])
+    const item = await selectSQL<any>(`SELECT * FROM ${config.table} WHERE id = ?`, [id])
 
-        return item && item.length > 0;
-    } catch (_) {
-        return false
-    }
-
+    return item.length > 0
 }

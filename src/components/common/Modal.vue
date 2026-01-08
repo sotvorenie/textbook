@@ -21,17 +21,17 @@ const props = defineProps({
   },
 })
 
-const emits = defineEmits(['close']);
+const emits = defineEmits(['close'])
 
 const open = () => {
-  visible.value = true;
+  visible.value = true
 }
 
 const close = () => {
   if (!props.closeActive) return
 
-  emits('close');
-  visible.value = false;
+  emits('close')
+  visible.value = false
 }
 
 </script>

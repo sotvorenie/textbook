@@ -2,17 +2,17 @@ function throttle<T extends (...args: any[]) => void>(
     fn: T,
     limit: number
 ): (...args: Parameters<T>) => void {
-    let inThrottle = false;
+    let inThrottle = false
 
     return function (...args: Parameters<T>) {
         if (!inThrottle) {
-            fn(...args);
-            inThrottle = true;
+            fn(...args)
+            inThrottle = true
             setTimeout(() => {
-                inThrottle = false;
-            }, limit);
+                inThrottle = false
+            }, limit)
         }
-    };
+    }
 }
 
-export {throttle};
+export {throttle}

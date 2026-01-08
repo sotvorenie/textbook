@@ -14,7 +14,7 @@ defineProps({
 })
 
 const handleIndex = (value: string) => {
-  index.value = value;
+  index.value = value
 }
 </script>
 

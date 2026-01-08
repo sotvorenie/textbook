@@ -70,7 +70,7 @@ const handleFilterChange = (list: FilterList): void => {
 
 // выбор: сначала старые/новые
 const handleSort = (value: string): void => {
-  searchStore.sortBy[props?.name] = value;
+  searchStore.sortBy[props?.name] = value
 }
 //=========================================================//
 
@@ -184,10 +184,12 @@ const handleRemove = async () => {
 
       await handleLike(props.name, idStore.idValues[props.name])
 
-      const arr = itemsStore.items[props.name];
-      const index = arr.findIndex(el => el.id === idStore.idValues[props.name]);
-      if (index !== -1) arr.splice(index, 1);
-    } catch (_) {
+      const arr = itemsStore.items[props.name]
+      const index = arr.findIndex(el => el.id === idStore.idValues[props.name])
+      if (index !== -1) arr.splice(index, 1)
+    } catch (err) {
+      console.error('Ошибка удаления записи', err)
+
       await showError(
           'Ошибка удаления записи',
           'Не удалось удалить запись..'

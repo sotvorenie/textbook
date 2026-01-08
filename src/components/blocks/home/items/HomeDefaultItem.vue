@@ -8,10 +8,11 @@ import {useItem} from "../../../../composables/item/useItem.ts";
 import DefaultItemSkeleton from "../loading/DefaultItemSkeleton.vue";
 import HomeItemCode from "../HomeItemCode.vue";
 import Btn from "../../../ui/Btn.vue";
-import Arrow from "../../../../assets/icons/Arrow.vue";
 import StatisticsSkeleton from "../loading/StatisticsSkeleton.vue";
 import HomeItemComments from "../HomeItemComments.vue";
 import HomeItemStatistics from "../HomeItemStatistics.vue";
+
+import Arrow from "../../../../assets/icons/Arrow.vue";
 
 import useOnlineStore from "../../../../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();

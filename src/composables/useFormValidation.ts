@@ -17,12 +17,12 @@ const errorsList: ErrorMessages = {
     valueMissing: (): string => 'пожалуйста, заполните это поле',
     patternMismatch: (field: FormField) => field.title || 'неверный формат',
     tooShort: (field: FormField): string => {
-        const minLength = 'minLength' in field ? field.minLength : -1;
-        return `минимум символов — ${minLength}`;
+        const minLength = 'minLength' in field ? field.minLength : -1
+        return `минимум символов — ${minLength}`
     },
     tooLong: (field: FormField) => {
-        const maxLength = 'maxLength' in field ? field.maxLength : -1;
-        return `максимум символов — ${maxLength}`;
+        const maxLength = 'maxLength' in field ? field.maxLength : -1
+        return `максимум символов — ${maxLength}`
     },
 }
 
@@ -37,29 +37,29 @@ function manageErrors(fieldControlElement: FormField, errorMessages: string[]): 
 }
 
 function validateField(fieldControlElement: FormField): boolean {
-    const errors = fieldControlElement.validity;
-    const errorMessages: string[] = [];
+    const errors = fieldControlElement.validity
+    const errorMessages: string[] = []
 
     // Проверяем только известные свойства
     if (errors.valueMissing) {
-        errorMessages.push(errorsList.valueMissing());
+        errorMessages.push(errorsList.valueMissing())
     }
     if (errors.patternMismatch) {
-        errorMessages.push(errorsList.patternMismatch(fieldControlElement));
+        errorMessages.push(errorsList.patternMismatch(fieldControlElement))
     }
     if (errors.tooShort) {
-        errorMessages.push(errorsList.tooShort(fieldControlElement));
+        errorMessages.push(errorsList.tooShort(fieldControlElement))
     }
     if (errors.tooLong) {
-        errorMessages.push(errorsList.tooLong(fieldControlElement));
+        errorMessages.push(errorsList.tooLong(fieldControlElement))
     }
 
-    manageErrors(fieldControlElement, errorMessages);
+    manageErrors(fieldControlElement, errorMessages)
 
-    const isValid = errorMessages.length === 0;
-    fieldControlElement.ariaInvalid = (!isValid).toString();
+    const isValid = errorMessages.length === 0
+    fieldControlElement.ariaInvalid = (!isValid).toString()
 
-    return isValid;
+    return isValid
 }
 
 function onBlur(event: Event): void {
@@ -76,14 +76,14 @@ function onBlur(event: Event): void {
 }
 
 function onInput(event: Event): void {
-    const target = event.target as FormField | null;
+    const target = event.target as FormField | null
 
-    if (!target) return;
+    if (!target) return
 
-    const errorSpan = target.closest('label')?.querySelector('.fields_error');
+    const errorSpan = target.closest('label')?.querySelector('.fields_error')
 
     if (errorSpan) {
-        errorSpan.textContent = '';
+        errorSpan.textContent = ''
     }
 }
 
@@ -103,11 +103,11 @@ function onChange(event: Event): void {
 function onSubmit(event: Event): boolean {
     const target = event.target as HTMLFormElement | null
 
-    if (!target) return false;
+    if (!target) return false
 
     const isFormElement = target.matches(selectors.form)
     if (!isFormElement) {
-        return false;
+        return false
     }
 
     const formElements = Array.from(target.elements) as FormField[]
@@ -121,9 +121,7 @@ function onSubmit(event: Event): boolean {
 
         if (!isFieldValid) {
             isFormValid = false
-            if (!firstInvalidFieldControl) {
-                firstInvalidFieldControl = element
-            }
+            firstInvalidFieldControl ??= element
         }
     })
 
@@ -131,11 +129,11 @@ function onSubmit(event: Event): boolean {
         event.preventDefault()
 
         if ('focus' in firstInvalidFieldControl) {
-            (firstInvalidFieldControl as HTMLElement).focus();
+            (firstInvalidFieldControl as HTMLElement).focus()
         }
     }
 
-    return isFormValid;
+    return isFormValid
 }
 
 export { onBlur, onInput, onSubmit, onChange }

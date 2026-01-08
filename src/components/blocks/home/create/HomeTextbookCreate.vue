@@ -4,11 +4,10 @@ import {computed, onMounted, reactive, ref} from "vue";
 import {Item} from "../../../../types/item.ts";
 
 import {showConfirm} from "../../../../utils/modals.ts";
-import {textareaAttributesList} from "../../../../composables/create/useCreate.ts";
+import {textareaAttributesList, useCreate} from "../../../../composables/create/useCreate.ts";
 
 import {addLabelText} from "../../../../composables/useLabelText.ts";
 import {onInput} from "../../../../composables/useFormValidation.ts";
-import {useCreate} from "../../../../composables/create/useCreate.ts";
 
 import Btn from "../../../ui/Btn.vue";
 
@@ -68,7 +67,7 @@ const tabs = ref<{id: number, name: string}[]>([{
   name: ''
 }])
 
-const tabId = computed(() => tabs.value[activeTab.value]?.id);
+const tabId = computed(() => tabs.value[activeTab.value]?.id)
 
 // возможность создания нового tab-а (чтобы был лимит tab-ов)
 const isVisibleCreateTab = computed(() => {
@@ -90,12 +89,12 @@ const removeTab = async () => {
   if (confirm) {
     const idToRemove = tabId.value;
 
-    tabs.value.splice(activeTab.value, 1);
+    tabs.value.splice(activeTab.value, 1)
 
-    delete newItems.value[idToRemove];
+    delete newItems.value[idToRemove]
 
     if (activeTab.value >= tabs.value.length) {
-      activeTab.value = tabs.value.length - 1;
+      activeTab.value = tabs.value.length - 1
     }
   }
 };
@@ -127,31 +126,31 @@ const newItem = reactive<Item>({
 //-- конвертация --//
 // для создания разметки при редактировании записи
 const initializeFromStore = () => {
-  const storedContent = createStore.createData[props.name].content;
-  if (!storedContent || !Object.keys(storedContent).length) return;
+  const storedContent = createStore.createData[props.name].content
+  if (!storedContent || !Object.keys(storedContent).length) return
 
-  let tabCounter = 0;
+  let tabCounter = 0
 
   tabs.value = []
 
   newItem.title = createStore.createData[props.name].title
 
   for (const tabName in storedContent) {
-    const id = tabCounter++;
-    tabs.value.push({ id, name: tabName });
+    const id = tabCounter++
+    tabs.value.push({ id, name: tabName })
 
     const blocks = convertTextToBlocks(storedContent[tabName]);
-    newItems.value[id] = [];
+    newItems.value[id] = []
 
     blocks.forEach(block => {
       newItems.value[id].push({
         id: crypto.randomUUID(),
         ...block,
         attributes: textareaAttributesList[block.type]
-      });
-    });
+      })
+    })
   }
-};
+}
 //=========================================================//
 
 
@@ -221,7 +220,7 @@ onMounted(() => {
                v-model="tabs[activeTab]!.name"
         >
         <span class="create__error fields_error label__error position-absolute"
-              id="title-error"
+              id="description-error"
               data-js-form-field-errors
               @click.stop>
         </span>

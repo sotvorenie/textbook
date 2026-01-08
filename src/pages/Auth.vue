@@ -5,17 +5,17 @@ import {Swiper, SwiperSlide} from "swiper/vue";
 import type {Swiper as ISwiper} from 'swiper/types'
 import 'swiper/css';
 
+import {classes} from "../data/classes.ts";
+
+import {showConfirm, showError, showWarning} from "../utils/modals.ts";
+import {resetAllStores} from "../utils/resetAllStores.ts";
+
 import {onBlur, onInput, onSubmit} from "../composables/useFormValidation.ts";
 import {addLabelText, removeLabelText} from "../composables/useLabelText.ts";
 
 import {login, register} from "../api/auth/auth.ts";
 import {AuthResponse, LoginData, RegisterData} from "../api/auth/types.ts";
 import {sendToTelegram, TelegramEventType} from "../api/telegram/telegram.ts";
-
-import {showConfirm, showError, showWarning} from "../utils/modals.ts";
-import {resetAllStores} from "../utils/resetAllStores.ts";
-
-import {classes} from "../data/classes.ts";
 
 import Btn from "../components/ui/Btn.vue";
 import Navigation from "../components/common/Navigation.vue";
@@ -33,39 +33,41 @@ const ipStore = useIpStore();
 
 //=========================================================//
 //-- асинхронные функции --//
-const isLoading = ref<boolean>(false);
+const isLoading = ref<boolean>(false)
 
 
 const loginUser = async () => {
   try {
     if (ipStore.inBlackList) return
 
-    isLoading.value = true;
+    isLoading.value = true
 
     let data: LoginData = {
       email: loginForm.email,
       password: loginForm.password,
     }
 
-    let response: AuthResponse = await login(data);
+    let response: AuthResponse = await login(data)
 
     if (response.token) {
       await ipStore.checkUserIp(response.data.id)
 
       await sendToTelegram(TelegramEventType.LOGIN, response.data.name)
 
-      await router.push('/main').catch(() => {});
+      await router.push('/main').catch(() => {})
     } else {
       await showWarning('Ошибка входа','Пользователя с таким логином/паролем не существует!!')
       wrongCounter.value = wrongCounter.value + 1
     }
-  } catch (_) {
+  } catch (err) {
+    console.error('ошибка авторизации', err)
+
     await showError(
         'Ошибка авторизации',
         'Не удалось авторизоваться..'
     )
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
 }
 
@@ -73,7 +75,7 @@ const registerUser = async () => {
   try {
     if (ipStore.inBlackList) return
 
-    isLoading.value = true;
+    isLoading.value = true
 
     let data: RegisterData = {
       email: registerForm.email,
@@ -82,16 +84,18 @@ const registerUser = async () => {
       ip: [ipStore.userIp]
     }
 
-    let response: AuthResponse = await register(data);
+    let response: AuthResponse = await register(data)
 
     if (response.token) {
       await sendToTelegram(TelegramEventType.REGISTER, response.data.name)
 
-      successRegister();
+      successRegister()
     } else {
-      await showWarning('Ошибка регистрации','Пользователь с таким email уже существует!!');
+      await showWarning('Ошибка регистрации','Пользователь с таким email уже существует!!')
     }
-  } catch (_) {
+  } catch (err) {
+    console.error('ошибка ругистрации', err)
+
     await showError(
         'Ошибка регистрации',
         'Не удалось зарегистрироваться..'
@@ -105,10 +109,10 @@ const successRegister = () => {
   messageStore.show('Регистрация прошла успешно!!')
 
   const timer = setTimeout(() => {
-    router.push('/main');
-  }, 2000);
+    router.push('/main')
+  }, 2000)
 
-  onUnmounted(() => clearTimeout(timer));
+  onUnmounted(() => clearTimeout(timer))
 }
 
 // проверка ip-адреса
@@ -127,31 +131,35 @@ const skeletonVisible = ref<boolean>(true)
 
 //=========================================================//
 //-- auth-блок --//
-const authElement = ref<HTMLDivElement | null>(null);
+const authElement = ref<HTMLDivElement | null>(null)
 //=========================================================//
 
 //=========================================================//
 //-- header --//
-const titleElements: HTMLButtonElement[] = [];
+const titleElements: HTMLButtonElement[] = []
 
 
 const setActiveTitle = (value: number) => {
-  titleElements.forEach(el => el.classList.remove(classes.isActive));
-  titleElements[value].classList.add(classes.isActive);
+  if (!titleElements || titleElements.length === 0) return
+
+  titleElements.forEach(el => el.classList.remove(classes.isActive))
+
+  const el = titleElements[value]
+  if (el) el.classList.add(classes.isActive)
 }
 //=========================================================//
 
 //=========================================================//
 //-- swiper --//
-const swiperElement = ref<ISwiper | null>(null);
+const swiperElement = ref<ISwiper | null>(null)
 
 
 const changeSwiper = (value: number) => {
-  swiperElement.value?.slideTo(value);
+  swiperElement.value?.slideTo(value)
 
-  setActiveTitle(value);
+  setActiveTitle(value)
 
-  clearForms();
+  clearForms()
 }
 //=========================================================//
 
@@ -178,41 +186,42 @@ const registerForm = reactive({
 
 
 const blurInput = (event: Event) => {
-  onBlur(event);
-  removeLabelText(event);
+  onBlur(event)
+  removeLabelText(event)
 }
 
 const removeAllErrors = () => {
   if (authElement.value) {
-    let errors: NodeListOf<HTMLSpanElement> = authElement.value!.querySelectorAll('.fields_error');
-    errors.forEach(el => el.textContent = '');
+    let errors: NodeListOf<HTMLSpanElement> = authElement.value!.querySelectorAll('.fields_error')
+    errors.forEach(el => el.textContent = '')
   }
 }
 
 const removeAllLabelText = () => {
   if (authElement.value) {
-    let labelTexts: NodeListOf<HTMLSpanElement> = authElement.value!.querySelectorAll('.label__text');
-    labelTexts.forEach(el => el.classList.remove(classes.isActive));
+    let labelTexts: NodeListOf<HTMLSpanElement> = authElement.value!.querySelectorAll('.label__text')
+    labelTexts.forEach(el => el.classList.remove(classes.isActive))
   }
 }
 
 const clearForms = () => {
-  loginForm.email = "";
-  loginForm.password = "";
+  loginForm.email = ""
+  loginForm.password = ""
 
-  registerForm.name = "";
-  registerForm.email = "";
-  registerForm.password = "";
+  registerForm.name = ""
+  registerForm.email = ""
+  registerForm.password = ""
 
-  removeAllErrors();
-  removeAllLabelText();
+  removeAllErrors()
+  removeAllLabelText()
 }
 
 const handleLogin = (event: Event) => {
-  onSubmit(event) ? loginUser() : -1;
+  if (onSubmit(event)) loginUser()
 }
+
 const handleRegister = (event: Event) => {
-  onSubmit(event) ? registerUser() : null;
+  if (onSubmit(event)) registerUser()
 }
 //=========================================================//
 
@@ -318,7 +327,7 @@ watch(
                        required
                 >
                 <span class="auth__error fields_error label__error position-absolute"
-                      id="email-error"
+                      id="login-email-error"
                       data-js-form-field-errors
                       @click.stop></span>
               </label>
@@ -335,7 +344,9 @@ watch(
                        v-model="loginForm.password"
                        required
                 >
-                <span class="auth__error fields_error label__error position-absolute" id="password-error" data-js-form-field-errors @click.stop></span>
+                <span class="auth__error fields_error label__error position-absolute"
+                      id="login-password-error"
+                      data-js-form-field-errors @click.stop></span>
               </label>
 
               <Btn class="auth__btn button-big-radius" :is-submit="true" :is-disabled="isLoading">
@@ -382,7 +393,7 @@ watch(
                        required
                 >
                 <span class="auth__error fields_error label__error position-absolute"
-                      id="email-error"
+                      id="registration-email-error"
                       data-js-form-field-errors
                       @click.stop></span>
               </label>
@@ -399,7 +410,9 @@ watch(
                        v-model="registerForm.password"
                        required
                 >
-                <span class="auth__error fields_error label__error position-absolute" id="password-error" data-js-form-field-errors @click.stop></span>
+                <span class="auth__error fields_error label__error position-absolute"
+                      id="registration-password-error"
+                      data-js-form-field-errors @click.stop></span>
               </label>
 
               <Btn class="auth__btn button-big-radius" :is-submit="true" :is-disabled="isLoading">

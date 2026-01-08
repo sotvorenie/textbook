@@ -61,8 +61,8 @@ const componentProps = { name: props.name }
 //-- компонент списка --//
 // выбор элемента списка
 const changeItem = (id: number): void => {
-  blocksStore.activeBlock[props.name] = 'item';
-  idStore.idValues[props.name] = id;
+  blocksStore.activeBlock[props.name] = 'item'
+  idStore.idValues[props.name] = id
 }
 //=========================================================//
 
@@ -73,11 +73,11 @@ const scrollManager = useSaveScroll(props.name)
 
 onActivated(() => {
   scrollManager.setup()
-  scrollManager.restoreScroll();
+  scrollManager.restoreScroll()
 });
 
 onDeactivated(() => {
-  scrollManager.destroy();
+  scrollManager.destroy()
 });
 //=========================================================//
 </script>

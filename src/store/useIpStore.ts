@@ -28,7 +28,9 @@ const useIpStore = defineStore("ipStore", () => {
                 onlineStore.isOnline = false
                 onlineStore.isOnlineMode = false
             }
-        } catch (_) {
+        } catch (err) {
+            console.error('ошибка проверки черного списка', err)
+
             inBlackList.value = true
         } finally {
             if (isLoading) isLoading.value = false
@@ -47,12 +49,19 @@ const useIpStore = defineStore("ipStore", () => {
         }
     }
 
+    const resetStore = () => {
+        userIp.value = ''
+        inBlackList.value = false
+    }
+
     return {
         userIp,
         inBlackList,
 
         checkIP,
         checkUserIp,
+
+        resetStore,
     }
 })
 

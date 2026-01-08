@@ -5,14 +5,12 @@ import {authToken} from "../utils/auth.ts";
 import {showError} from "../utils/modals.ts";
 
 import useOnlineStore from "../store/useOnlineStore.ts";
-import router from "../router";
 
 const client = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
     timeout: 10000,
 })
 
-// Интерцепторы
 client.interceptors.request.use((config) => {
     const token = authToken.get()
     if (token) config.headers.Authorization = `Bearer ${token}`
@@ -31,17 +29,6 @@ client.interceptors.response.use(
     async (error) => {
         const onlineStore = useOnlineStore()
 
-        // if (error.response?.status === 401) {
-        //     authToken.remove()
-        //     await showError(
-        //         'Ошибка авторизации',
-        //         'Вы будете перенаправлены на страницу авторизации'
-        //     )
-        //     await router.push('/')
-        //
-        //     throw error;
-        // }
-
         const isNetworkError =
             error.code === 'ECONNABORTED' ||
             error.message === 'Network Error' ||
@@ -55,14 +42,13 @@ client.interceptors.response.use(
 
             await showError('Нет подключения', 'Проверьте интернет-соединение')
 
-            return Promise.reject(error)
+            throw error;
         }
 
-        return Promise.reject(error)
+        throw error;
     }
 )
 
-// Базовые методы
 export const get = async <T>(url: string, params?: any): Promise<T> => {
     const res = await client.get(url, { params })
     return res.data as T
@@ -86,4 +72,27 @@ export const del = async <T>(url: string): Promise<T> => {
 export const patch = async <T>(url: string, data?: any): Promise<T> => {
     const res = await client.patch(url, data)
     return res.data as T
+}
+
+export const isNetworkError = (err: any): boolean => {
+    return (
+        err?.code === 'ECONNABORTED' ||
+        err?.message === 'Network Error' ||
+        (err?.request && !err?.response)
+    )
+}
+export class OfflineError extends Error {
+    constructor() {
+        super('OFFLINE')
+    }
+}
+export class NoTokenError extends Error {
+    constructor() {
+        super('NO_TOKEN')
+    }
+}
+export class UnauthorizedError extends Error {
+    constructor() {
+        super('UNAUTHORIZED')
+    }
 }

@@ -58,6 +58,8 @@ const syncItem = async (item: UnAuthorizedList, isAll: boolean = false) => {
     }
 
   } catch (err) {
+    console.error('Ошибка синхронизации', err)
+
     await showError(
         'Ошибка синхронизации',
         'Не удалось синхронизировать данные..'
@@ -73,26 +75,26 @@ const isLoading = ref< boolean>(false)
 // синхронизировать все
 const syncAll = async () => {
   isLoading.value = true
-  emits('offClose');
+  emits('offClose')
 
   try {
     const itemsToSync = [...onlineStore.offlinePosts]
 
     await Promise.all(
         itemsToSync.map(el => syncItem(el, true))
-    );
+    )
 
     onlineStore.offlinePosts = []
 
     emits('message', 'Все записи синхронизированы!!')
-    emits('onClose');
+    emits('onClose')
     emits('close')
 
-  } catch (_) {
-
+  } catch (err) {
+    console.error('Ошибка синхронизации', err)
   } finally {
-    isLoading.value = false;
-    emits('onClose');
+    isLoading.value = false
+    emits('onClose')
   }
 }
 </script>
@@ -109,26 +111,28 @@ const syncAll = async () => {
 
     <p class="sync__title h4">Список созданных элементов:</p>
 
-    <TransitionGroup tag="ul"
-                     class="sync__list"
-                     name="item-list"
-                     appear
-    >
-      <li class="sync__item"
-          v-for="item in onlineStore.offlinePosts"
-          :title="item.title"
+    <ul class="ul">
+      <TransitionGroup tag="div"
+                       class="sync__list"
+                       name="item-list"
+                       appear
       >
-        <p class="sync__name h5">{{sliceString(item.title, 25)}}</p>
-        <p class="sync__date">{{item.date}}</p>
-
-        <Btn class="sync__btn"
-             @click="syncItem(item)"
-             :is-loading="isLoading"
+        <li class="sync__item"
+            v-for="item in onlineStore.offlinePosts"
+            :title="item.title"
         >
-          Синхронизировать
-        </Btn>
-      </li>
-    </TransitionGroup>
+          <p class="sync__name h5">{{sliceString(item.title, 25)}}</p>
+          <p class="sync__date">{{item.date}}</p>
+
+          <Btn class="sync__btn"
+               @click="syncItem(item)"
+               :is-loading="isLoading"
+          >
+            Синхронизировать
+          </Btn>
+        </li>
+      </TransitionGroup>
+    </ul>
   </div>
 
 </template>

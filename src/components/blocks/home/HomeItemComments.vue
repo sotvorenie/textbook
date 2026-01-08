@@ -77,7 +77,6 @@ const getData = async (getVisible: boolean = false) => {
         await getComments(props.name, page.value)
 
     if (getVisible) {
-      console.log(props.name)
       const visibleData: boolean | undefined =
           await checkComment(props.name)
 
@@ -90,6 +89,8 @@ const getData = async (getVisible: boolean = false) => {
       totalPages.value = data.meta.total_pages
     }
   } catch (err) {
+    console.error('Ошибка загрузки комментариев', err)
+
     await showError(
         'Ошибка загрузки комментариев',
         'Не удалось загрузить комментарии..'
@@ -128,6 +129,8 @@ const createComment = async () => {
       }
     }
   } catch (err) {
+    console.error('Ошибка редактирования комментария', err)
+
     await showError(
         'Ошибка отправки комментария',
         'Не удалось отправить комментарий..'
@@ -162,6 +165,8 @@ const handleRemoveComment = async (id: number) => {
 
       comments.value = comments.value.filter(comment => comment.id !== id)
     } catch (err) {
+      console.error('Ошибка удаления комментария', err)
+
       await showError(
           'Ошибка удаления комментария',
           'Не удалось удалить комментарий..'
@@ -184,52 +189,53 @@ onMounted(() => {
   <div class="comments position-relative">
     <p class="statistics__title h4">Комментарии:</p>
 
-    <TransitionGroup tag="ul"
-                     class="comments__list"
-                     v-if="comments.length"
-                     name="item-list"
-    >
-      <li :class="{
+    <ul class="ul" v-if="comments.length">
+      <TransitionGroup tag="div"
+                       class="comments__list"
+                       name="item-list"
+      >
+        <li :class="{
             'comments__item flex position-relative': true,
             'is-active': comment.user_id === userStore.user.id && redactedComment
           }"
-          v-for="comment in comments"
-      >
-        <div class="comments__avatar flex-center">{{comment.user_name?.[0].toUpperCase()}}</div>
+            v-for="comment in comments"
+        >
+          <div class="comments__avatar flex-center">{{comment.user_name?.[0].toUpperCase()}}</div>
 
-        <div class="comments__content">
-          <div class="comments__top flex flex-justify-between">
-            <div class="comments__info">
-              <p class="comments__name">{{comment.user_name}}</p>
-              <p class="comments__date flex">
-                <span>{{comment.date}}</span>
-                <span v-if="comment.is_redact">Редактировано</span>
-              </p>
+          <div class="comments__content">
+            <div class="comments__top flex flex-justify-between">
+              <div class="comments__info">
+                <p class="comments__name">{{comment.user_name}}</p>
+                <p class="comments__date flex">
+                  <span>{{comment.date}}</span>
+                  <span v-if="comment.is_redact">Редактировано</span>
+                </p>
+              </div>
+
+              <Absolute class="is-left-center"
+                        position="left"
+                        v-if="comment.user_id === userStore.user.id"
+              >
+                <template #activator>
+                  <button class="comments__dots recolor-svg button-width-svg flex-center" type="button">
+                    <Dots/>
+                  </button>
+                </template>
+
+                <template #default>
+                  <div class="comments__actions flex flex-column">
+                    <Btn class="comments__actions-btn button-small" @click="handleRedact(comment)">Редактировать</Btn>
+                    <Btn class="comments__actions-btn button-small" @click="handleRemoveComment(comment.id!)">Удалить</Btn>
+                  </div>
+                </template>
+              </Absolute>
             </div>
 
-            <Absolute class="is-left-center"
-                      position="left"
-                      v-if="comment.user_id === userStore.user.id"
-            >
-              <template #activator>
-                <button class="comments__dots recolor-svg button-width-svg flex-center" type="button">
-                  <Dots/>
-                </button>
-              </template>
-
-              <template #default>
-                <div class="comments__actions flex flex-column">
-                  <Btn class="comments__actions-btn button-small" @click="handleRedact(comment)">Редактировать</Btn>
-                  <Btn class="comments__actions-btn button-small" @click="handleRemoveComment(comment.id!)">Удалить</Btn>
-                </div>
-              </template>
-            </Absolute>
+            <p class="comments__text">{{comment.text}}</p>
           </div>
-
-          <p class="comments__text">{{comment.text}}</p>
-        </div>
-      </li>
-    </TransitionGroup>
+        </li>
+      </TransitionGroup>
+    </ul>
 
     <p class="comments__empty h5" v-else>Комментариев пока нет..</p>
 

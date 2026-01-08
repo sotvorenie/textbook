@@ -24,7 +24,7 @@ const useUserStore = defineStore('userStore', () => {
             textbooks: [],
         },
         user_id: "-1"
-    });
+    })
 
     const isAdmin = ref<boolean>(false)
     const isFullAdmin = ref<boolean>(false)

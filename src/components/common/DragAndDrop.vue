@@ -30,9 +30,9 @@ const draggableIndex = ref<number | null>(null)
 const newDraggableIndex = ref<number | null>(null)
 
 // стартовая позиция мыши
-const startY = ref(0);
+const startY = ref(0)
 // значение для translate
-const offsetY = ref(0);
+const offsetY = ref(0)
 
 // перетаскиваем ли мы сейчас элемент или нет
 const isDragging = ref<boolean>(false)
@@ -50,25 +50,17 @@ const mouseDown = (event: MouseEvent, index: number) => {
 
   isDragging.value = true
 
-  window.addEventListener('mousemove', updateMouse)
-  window.addEventListener('mouseup', mouseEnd)
+  globalThis.addEventListener('mousemove', updateMouse)
+  globalThis.addEventListener('mouseup', mouseEnd)
 }
 
 // движение мышью
 const updateMouse = (event: MouseEvent) => {
   if (draggableIndex.value === null) return
 
-  offsetY.value = event.clientY - startY.value;
+  offsetY.value = event.clientY - startY.value
 
-  newDraggableIndex.value = calculateNewIndex(draggableIndex.value);
-
-  // if (newIndex !== draggableIndex.value) {
-  //   const draggedItem = items.value.splice(draggableIndex.value, 1)[0];
-  //   items.value.splice(newIndex, 0, draggedItem);
-  //   draggableIndex.value = newIndex;
-  //   startY.value = event.clientY;
-  //   offsetY.value = 0;
-  // }
+  newDraggableIndex.value = calculateNewIndex(draggableIndex.value)
 }
 
 // отпускаем мышь - конец перетаскивания
@@ -87,8 +79,8 @@ const mouseEnd = () => {
 
   isDragging.value = false
 
-  window.removeEventListener('mousemove', updateMouse)
-  window.removeEventListener('mouseup', mouseEnd)
+  globalThis.removeEventListener('mousemove', updateMouse)
+  globalThis.removeEventListener('mouseup', mouseEnd)
 }
 
 // если передвинули на половину props.height вверх/вниз - задаем новый индекс
@@ -104,10 +96,10 @@ function calculateNewIndex(currentIndex: number) {
 // стили элемента списка
 const getItemStyle = (index: number) => {
   if (draggableIndex.value === index) {
-    return { transform: `translateY(${offsetY.value}px)` };
+    return { transform: `translateY(${offsetY.value}px)` }
   }
-  return {};
-};
+  return {}
+}
 </script>
 
 <template>

@@ -13,12 +13,12 @@ import HomeTextbookSlider from "../HomeTextbookSlider.vue";
 import HomeItemCode from "../HomeItemCode.vue";
 import Modal from "../../../common/Modal.vue";
 import Btn from "../../../ui/Btn.vue";
+import HomeItemComments from "../HomeItemComments.vue";
 
 import SearchIcon from "../../../../assets/icons/SearchIcon.vue";
+import Arrow from "../../../../assets/icons/Arrow.vue";
 
 import useOnlineStore from "../../../../store/useOnlineStore.ts";
-import Arrow from "../../../../assets/icons/Arrow.vue";
-import HomeItemComments from "../HomeItemComments.vue";
 const onlineStore = useOnlineStore();
 
 const props = defineProps({

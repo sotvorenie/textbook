@@ -1,26 +1,26 @@
 function getParent(event: Event) {
-    let target: HTMLElement = event.target as HTMLElement;
+    let target: HTMLElement = event.target as HTMLElement
 
-    let parent: HTMLLabelElement | null = target.closest('label');
+    let parent: HTMLLabelElement | null = target.closest('label')
 
-    if (!parent) return;
+    if (!parent) return
 
-    return parent;
+    return parent
 }
 
 function addLabelText(event: Event) {
-    getParent(event)?.querySelector('.label__text')?.classList.add('is-active');
+    getParent(event)?.querySelector('.label__text')?.classList.add('is-active')
 }
 
 function removeLabelText(event: Event) {
 
-    let parent: HTMLLabelElement | null = getParent(event) as HTMLLabelElement;
+    let parent: HTMLLabelElement | null = getParent(event) as HTMLLabelElement
 
     let input: HTMLInputElement | HTMLTextAreaElement | null =
-        parent?.querySelector('input, textarea');
+        parent?.querySelector('input, textarea')
 
-    if (!input?.value) parent?.querySelector('.label__text')?.classList.remove('is-active');
+    if (!input?.value) parent?.querySelector('.label__text')?.classList.remove('is-active')
 }
 
 
-export { addLabelText, removeLabelText };
+export { addLabelText, removeLabelText }

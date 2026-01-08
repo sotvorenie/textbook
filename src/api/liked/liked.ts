@@ -1,13 +1,14 @@
-import {patch, post} from "../base.ts";
+import {Item} from "../../types/item.ts";
 
+import {showError} from "../../utils/modals.ts";
+import {updateStatistics} from "../posts/posts.ts";
+
+import {patch, post} from "../base.ts";
 import {sendToTelegram, TelegramEventType} from "../telegram/telegram.ts";
 
 import useUserStore from "../../store/useUserStore.ts";
-import useOnlineStore from "../../store/useOnlineStore.ts";
 import useItemsStore from "../../store/useItemsStore.ts";
-import {showError} from "../../utils/modals.ts";
-import {updateStatistics} from "../posts/posts.ts";
-import {Item} from "../../types/item.ts";
+
 
 export const handleLike = async (
     name: string,
@@ -26,7 +27,7 @@ export const handleLike = async (
 
         const userLikes = userStore.userLiked.items[name]
 
-        if (userLikes && userLikes?.includes(id)) {
+        if (userLikes?.includes(id)) {
             userStore.userLiked.items[name] =
                 userLikes?.filter((item: number) => item !== id)
 
@@ -52,45 +53,38 @@ export const handleLike = async (
             }
         }
     } catch (err) {
+        console.error('handleLike failed', err)
+
         await showError(
             'Ошибка добавления в избранное',
             'Не удалось добавить элемент в избранное'
         )
 
-        if (!isRemoveLike) {
-            userStore.userLiked?.items[name].pop()
-        } else {
+        if (isRemoveLike) {
             userStore.userLiked?.items[name].push(id)
+        } else {
+            userStore.userLiked?.items[name].pop()
         }
     }
 }
 
 const like = async (name: string): Promise<any> => {
     const userStore = useUserStore();
-    const onlineStore = useOnlineStore();
 
-    try {
-        if (userStore.userLiked.id >= 0) {
-            return await patch(`/user_liked/${userStore.userLiked.id}`, {
-                items: {
-                    ...userStore.userLiked.items
-                }
-            })
-        } else {
-            const response = await post(`/user_liked`, {
-                user_id: userStore.user.id,
-                items: {
-                    [name]: userStore.userLiked.items[name]
-                }
-            })
+    if (userStore.userLiked.id >= 0) {
+        return await patch(`/user_liked/${userStore.userLiked.id}`, {
+            items: {
+                ...userStore.userLiked.items
+            }
+        })
+    } else {
+        const response = await post(`/user_liked`, {
+            user_id: userStore.user.id,
+            items: {
+                [name]: userStore.userLiked.items[name]
+            }
+        })
 
-            if (response) return response
-        }
-    } catch (err: any) {
-        if (err.message === "Network Error" || err.code === "ECONNABORTED") {
-            onlineStore.isOnline = false;
-            onlineStore.isOnlineMode = false;
-        }
-        throw err;
+        if (response) return response
     }
 }

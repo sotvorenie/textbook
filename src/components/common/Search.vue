@@ -8,45 +8,45 @@ const isVisible = ref<boolean>(false);
 const inputElement = ref<HTMLInputElement | null>(null);
 const searchWrapper = ref<HTMLElement | null>(null);
 
-const name = defineModel();
+const name = defineModel()
 const buttonsVisible = defineModel('buttons-visible')
 
 const handleVisible = (): void => {
-  isVisible.value = !isVisible.value;
+  isVisible.value = !isVisible.value
 
-  if (isVisible.value) setFocus();
+  if (isVisible.value) setFocus()
 }
 
 const handleClickOutside = (event: MouseEvent) => {
-  if (!searchWrapper.value) return;
+  if (!searchWrapper.value) return
   if (!searchWrapper.value.contains(event.target as Node)) {
-    isVisible.value = false;
+    isVisible.value = false
   }
 }
 
 const setFocus = () => {
   nextTick(() => {
-    inputElement.value?.focus();
+    inputElement.value?.focus()
   })
 }
 
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside);
-});
+  document.addEventListener('click', handleClickOutside)
+})
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside);
-});
+  document.removeEventListener('click', handleClickOutside)
+})
 
 watch(isVisible, () => {
   if (isVisible.value) {
-    buttonsVisible.value = false;
+    buttonsVisible.value = false
   } else {
     setTimeout(() => {
-      buttonsVisible.value = true;
-    }, 200);
+      buttonsVisible.value = true
+    }, 200)
   }
-});
+})
 </script>
 
 <template>

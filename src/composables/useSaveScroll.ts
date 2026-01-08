@@ -9,23 +9,23 @@ export const useSaveScroll = (pageName: string) => {
     const blocksStore = useBlocksStore();
 
     const getMainElement = () =>
-        document.querySelector('.home__main') as HTMLDivElement;
+        document.querySelector('.home__main') as HTMLDivElement
 
     const saveScroll = () => {
-        const mainElement = getMainElement();
-        if (!mainElement) return;
+        const mainElement = getMainElement()
+        if (!mainElement) return
 
-        scrollStore.scrolls[pageName][blocksStore.activeBlock[pageName]] = mainElement.scrollTop;
-    };
+        scrollStore.scrolls[pageName][blocksStore.activeBlock[pageName]] = mainElement.scrollTop
+    }
 
-    const debouncedSaveScroll = debounce(saveScroll, 200);
+    const debouncedSaveScroll = debounce(saveScroll, 200)
 
     const setup = () => {
-        const mainElement = getMainElement();
-        if (!mainElement) return;
+        const mainElement = getMainElement()
+        if (!mainElement) return
 
-        mainElement.addEventListener('scroll', debouncedSaveScroll);
-    };
+        mainElement.addEventListener('scroll', debouncedSaveScroll)
+    }
 
     const clearItem = () => {
         scrollStore.scrolls[pageName].item = 0
@@ -36,19 +36,19 @@ export const useSaveScroll = (pageName: string) => {
     }
 
     const destroy = () => {
-        const mainElement = getMainElement();
-        if (!mainElement) return;
+        const mainElement = getMainElement()
+        if (!mainElement) return
 
-        mainElement.removeEventListener('scroll', debouncedSaveScroll);
-    };
+        mainElement.removeEventListener('scroll', debouncedSaveScroll)
+    }
 
     const restoreScroll = async () => {
         await nextTick()
 
-        const mainElement = getMainElement();
-        if (!mainElement) return;
+        const mainElement = getMainElement()
+        if (!mainElement) return
 
-        mainElement.scrollTop = scrollStore.scrolls[pageName][blocksStore.activeBlock[pageName]];
+        mainElement.scrollTop = scrollStore.scrolls[pageName][blocksStore.activeBlock[pageName]]
     }
 
     watch(
@@ -68,12 +68,12 @@ export const useSaveScroll = (pageName: string) => {
                 await restoreScroll()
             }
         }
-    );
+    )
 
     return {
         setup,
         destroy,
         saveScroll,
         restoreScroll,
-    };
-};
+    }
+}

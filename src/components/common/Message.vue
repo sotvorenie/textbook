@@ -13,7 +13,7 @@ defineProps({
 watch(visible, () => {
   if (visible.value === true) {
     setTimeout(() => {
-      visible.value = false;
+      visible.value = false
     }, 3000)
   }
 })

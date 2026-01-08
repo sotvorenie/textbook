@@ -39,9 +39,9 @@ export const useItem = (
         try {
             if (!idStore.idValues[name]) return
 
-            const response = await getItem(name, idStore.idValues[name]);
+            const response = await getItem(name, idStore.idValues[name])
             if (response) {
-                item.value = response;
+                item.value = response
             }
         } catch (err){
             await showError(
@@ -66,77 +66,77 @@ export const useItem = (
     //-- работа с текстом --//
     const escapeHtml = (str: string) => {
         return str
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#39;");
-    };
+            .replaceAll('&', "&amp;")
+            .replaceAll('<', "&lt;")
+            .replaceAll('>', "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll('\'', "&#39;")
+    }
 
     const highlightCodeComments = (code: string): string => {
-        const escaped = escapeHtml(code);
+        const escaped = escapeHtml(code)
 
-        return escaped.replace(/(\/\/.*$)/gm, '<span class="item__comment">$1</span>');
-    };
+        return escaped.replaceAll(/(\/\/.*$)/gm, '<span class="item__comment">$1</span>')
+    }
 
     const parsedText = computed(() => {
-        let text: string;
+        let text: string
         if (index) {
-            text = Object.values(item.value.content!)[index.value];
+            text = Object.values(item.value.content!)[index.value]
         } else {
-            text = item.value.text!;
+            text = item.value.text!
         }
 
-        if (!text) return [];
+        if (!text) return []
 
-        const result: Array<{ type: "title" | "text" | "code"; content: string }> = [];
+        const result: Array<{ type: "title" | "text" | "code"; content: string }> = []
 
         const decodeHtmlEntities = (str: string): string => {
-            const textarea = document.createElement('textarea');
-            textarea.innerHTML = str;
-            return textarea.value;
-        };
+            const textarea = document.createElement('textarea')
+            textarea.innerHTML = str
+            return textarea.value
+        }
 
         const preserveLineBreaks = (str: string): string => {
             return str
-                .replace(/<br\s*\/?>/gi, "\n")
-                .replace(/&nbsp;/g, " ");
-        };
+                .replaceAll(/<br\s*\/?>/gi, "\n")
+                .replaceAll('&nbsp;', " ")
+        }
 
-        const regex = /<pre><code>[\s\S]*?<\/code><\/pre>|<h3>[\s\S]*?<\/h3>|<p>[\s\S]*?<\/p>/gi;
-        const blocks = text.match(regex);
+        const regex = /<pre><code>[\s\S]*?<\/code><\/pre>|<h3>[\s\S]*?<\/h3>|<p>[\s\S]*?<\/p>/gi
+        const blocks = text.match(regex)
 
-        if (!blocks) return [];
+        if (!blocks) return []
 
         for (const block of blocks) {
-            let type: "title" | "text" | "code";
-            let rawContent: string;
+            let type: "title" | "text" | "code"
+            let rawContent: string
 
-            if (block.match(/^<pre><code(?:\s[^>]*)?>/)) {
-                type = "code";
-                rawContent = block.replace(/^<pre><code(?:\s[^>]*)?>|<\/code><\/pre>$/g, "");
+            if (/^<pre><code(?:\s[^>]*)?>/.exec(block)) {
+                type = "code"
+                rawContent = block.replaceAll(/(<pre><code(?:\s[^>]*)?>)|(<\/code><\/pre>)/g, "")
             } else if (block.startsWith("<h3>")) {
-                type = "title";
-                rawContent = block.replace(/<\/?h3>/g, "");
+                type = "title"
+                rawContent = block.replaceAll(/<\/?h3>/g, "")
             } else {
-                type = "text";
-                rawContent = block.replace(/<\/?p>/g, "");
+                type = "text"
+                rawContent = block.replaceAll(/<\/?p>/g, "")
             }
 
             // Сохраняем только явные переносы строк
-            const formattedContent = preserveLineBreaks(rawContent);
+            const formattedContent = preserveLineBreaks(rawContent)
 
             // Декодируем HTML-сущности
-            const decodedContent = decodeHtmlEntities(formattedContent);
+            const decodedContent = decodeHtmlEntities(formattedContent)
 
             result.push({
                 type,
                 content: type === "code" ? highlightCodeComments(decodedContent) : decodedContent
-            });
+            })
         }
 
-        return result;
-    });
+        return result
+    })
     //=========================================================//
 
 
@@ -145,10 +145,12 @@ export const useItem = (
     // копирование кода
     const handleCopy = async (code: string): Promise<void> => {
         try {
-            await navigator.clipboard.writeText(decodeHtmlEntities(code));
+            await navigator.clipboard.writeText(decodeHtmlEntities(code))
 
             messageStore.show('Скопировано')
-        } catch (_) {
+        } catch (err) {
+            console.error('ошибка копирования', err)
+
             await showError(
                 'Ошибка копирования',
                 'Не удалось скопировать данные..'
@@ -188,7 +190,9 @@ export const useItem = (
                 )
 
                 isDownload.value = false
-            } catch (_) {
+            } catch (err) {
+                console.error('ошибка скачивания', err)
+
                 messageStore.show('Не удалось скачать..', true)
             } finally {
                 downloadVisible.value = false
@@ -252,15 +256,15 @@ export const useItem = (
         const data = itemMemoStore.getItem(
             name,
             idStore.idValues[name]
-        );
+        )
 
-        settingsStore.settingsVisible[name] = 'item';
+        settingsStore.settingsVisible[name] = 'item'
 
         if (data) {
             item.value = data
         } else {
             try {
-                await getListItem();
+                await getListItem()
 
                 itemMemoStore.setItem(
                     name,
@@ -274,7 +278,9 @@ export const useItem = (
                     'views',
                     item.value.statistics
                 )
-            } catch (_) {
+            } catch (err) {
+                console.error('ошибка обновления статистики', err)
+
                 blocksStore.activeBlock[name] = 'list'
                 settingsStore.settingsVisible[name] = 'list'
 

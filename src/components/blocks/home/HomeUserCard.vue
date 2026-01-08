@@ -3,12 +3,12 @@ import {computed, ref} from "vue";
 import router from "../../../router";
 
 const myEmail = import.meta.env.VITE_MY_EMAIL;
+import {roundedButtonStyle} from "../../../data/styles.ts";
 
 import {authToken} from "../../../utils/auth.ts";
 import {showConfirm, showError, showWarning} from "../../../utils/modals.ts";
 import {userAva} from "../../../utils/ava.ts";
 import { resetAllStores } from "../../../utils/resetAllStores";
-import {roundedButtonStyle} from "../../../data/styles.ts";
 
 import {deletePredLastFile, postAva, postFile} from "../../../api/users/users.ts";
 import {sendToTelegram, TelegramEventType} from "../../../api/telegram/telegram.ts";
@@ -17,11 +17,11 @@ import Navigation from "../../common/Navigation.vue";
 import Btn from "../../ui/Btn.vue";
 import Loading from "../../ui/loading/Loading.vue";
 import Modal from "../../common/Modal.vue";
+import HomeSync from "./HomeSync.vue";
 
 import Edit from "../../../assets/icons/Edit.vue";
 import UserIcon from "../../../assets/icons/UserIcon.vue";
 
-import HomeSync from "./HomeSync.vue";
 
 import useUserStore from "../../../store/useUserStore.ts";
 const userStore = useUserStore();
@@ -79,7 +79,9 @@ const uploadFile = async (event: Event) => {
     }
 
     await sendToTelegram(TelegramEventType.LOAD_AVA, userStore.user.ava?.url)
-  } catch (_) {
+  } catch (err) {
+    console.error('Ошибка загрузки файлов', err)
+
     await showError(
         'Ошибка загрузки файлов',
         'Не удалось загрузить аватар..'
@@ -147,8 +149,10 @@ const exit = async () => {
     try {
       await router.push('/')
 
-      window.location.reload()
-    } catch (_) {
+      globalThis.location.reload()
+    } catch (err) {
+      console.error('Ошибка выхода из профиля', err)
+
       await showError(
           'Ошибка роутера',
           'Не удалось перейти на страницу авторизации..'

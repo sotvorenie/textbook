@@ -4,35 +4,35 @@ import {LRUCache} from "lru-cache";
 
 import {Item} from "../types/item.ts";
 
-const MAX_ITEMS = 10;
+const MAX_ITEMS = 10
 const MAX_BYTES = 1024 * 1024 // ~ 1 Мб
 
 function roughSizeOfObject(object: any): number {
-    const objectList = new WeakSet();
-    const stack = [object];
-    let bytes = 0;
+    const objectList = new WeakSet()
+    const stack = [object]
+    let bytes = 0
 
     while (stack.length) {
-        const value = stack.pop();
+        const value = stack.pop()
 
-        if (value === null || value === undefined) continue;
+        if (value === null || value === undefined) continue
 
-        const type = typeof value;
+        const type = typeof value
 
-        if (type === 'boolean') bytes += 4;
-        else if (type === 'number') bytes += 8;
-        else if (type === 'string') bytes += value.length * 2;
+        if (type === 'boolean') bytes += 4
+        else if (type === 'number') bytes += 8
+        else if (type === 'string') bytes += value.length * 2
         else if (type === 'object') {
-            if (objectList.has(value)) continue;
-            objectList.add(value);
+            if (objectList.has(value)) continue
+            objectList.add(value)
 
             for (const i in value) {
-                stack.push(value[i]);
+                stack.push(value[i])
             }
         }
     }
 
-    return bytes;
+    return bytes
 }
 
 const useItemMemoStore = defineStore('itemMemoStore', () => {
@@ -58,68 +58,68 @@ const useItemMemoStore = defineStore('itemMemoStore', () => {
             maxSize: MAX_BYTES,
             sizeCalculation: roughSizeOfObject
         }),
-    };
+    }
 
     const getItem = (name: string, id: number): Item | undefined => {
-        const cache = caches[name];
-        if (!cache) return undefined;
+        const cache = caches[name]
+        if (!cache) return undefined
 
-        const item = cache.get(id);
+        const item = cache.get(id)
         if (item) {
-            cache.set(id, item);
+            cache.set(id, item)
         }
 
-        return item;
+        return item
     }
 
     const setItem = (name: string, id: number, value: Item): void => {
-        caches[name]?.set(id, value);
+        caches[name]?.set(id, value)
     }
 
     const resetStore = () => {
         for (const key of Object.keys(caches)) {
-            caches[key].clear();
+            caches[key].clear()
         }
     }
 
     const getLastFromCache = (cacheName: string): { key: number; value: Item } | null => {
-        const cache = caches[cacheName];
-        if (!cache) return null;
+        const cache = caches[cacheName]
+        if (!cache) return null
 
-        const entries = Array.from(cache.entries());
-        if (entries.length === 0) return null;
+        const entries = Array.from(cache.entries())
+        if (entries.length === 0) return null
 
-        const [key, value] = entries[0];
-        return { key, value };
-    };
+        const [key, value] = entries[0]
+        return { key, value }
+    }
 
     const updateLastItemInCache = (cacheName: string, newValue: Partial<Item>) => {
-        const last = getLastFromCache(cacheName);
-        if (!last) return;
+        const last = getLastFromCache(cacheName)
+        if (!last) return
 
-        const updated = { ...last.value, ...newValue };
-        caches[cacheName].set(last.key, updated);
-    };
+        const updated = { ...last.value, ...newValue }
+        caches[cacheName].set(last.key, updated)
+    }
 
     const findItemById = (id: number): { cacheName: string, item: Item } | null => {
         for (const [cacheName, cache] of Object.entries(caches)) {
-            const item = cache.get(id);
-            if (item) return { cacheName, item };
+            const item = cache.get(id)
+            if (item) return { cacheName, item }
         }
-        return null;
-    };
+        return null
+    }
 
     const updateItemInCacheById = (cacheName: string, id: number, newValue: Partial<Item>) => {
-        const cache = caches[cacheName];
-        if (!cache) return;
+        const cache = caches[cacheName]
+        if (!cache) return
 
-        const existing = cache.get(id);
-        if (!existing) return;
+        const existing = cache.get(id)
+        if (!existing) return
 
-        const updated = { ...existing, ...newValue };
+        const updated = { ...existing, ...newValue }
 
-        cache.set(id, updated);
-    };
+        cache.set(id, updated)
+    }
 
     return {
         caches,

@@ -32,7 +32,7 @@ defineProps({
 })
 
 const locationReload = () => {
-  window.location.reload();
+  globalThis.location.reload()
 }
 </script>
 

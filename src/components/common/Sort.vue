@@ -2,12 +2,12 @@
 import {ref} from "vue";
 import SortIcon from "../../assets/icons/SortIcon.vue";
 
-const emits = defineEmits(['search']);
+const emits = defineEmits(['search'])
 
-const selectedValue = ref<string>('-sort_date');
+const selectedValue = ref<string>('-sort_date')
 
 const handleSort = () => {
-  emits('search', selectedValue.value);
+  emits('search', selectedValue.value)
 }
 
 </script>

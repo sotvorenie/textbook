@@ -37,6 +37,11 @@ const useHomeStore = defineStore('homeStore', () => {
         const technologiesStore = useTechnologiesStore()
         const ipStore = useIpStore()
 
+        const hideLoading = () => {
+            onlineStore.modeLoadingVisible = false
+            loadingVisible.value = false
+        }
+
         onlineStore.modeLoadingVisible = true
         activeMenuIndex.value = 0
 
@@ -46,37 +51,35 @@ const useHomeStore = defineStore('homeStore', () => {
 
         if (!onlineStore.isOnline || ipStore.inBlackList) {
             onlineStore.isOnlineMode = false
-            loadingVisible.value = false
-            onlineStore.modeLoadingVisible = false
+            hideLoading()
             return
-        } else {
-            if (isFirstRender) onlineStore.getFromLocalStorage()
+        }
 
-            if (!onlineStore.isOnlineMode) {
-                loadingVisible.value = false
-                onlineStore.modeLoadingVisible = false
-                userStore.user.ava = {url: '', id: -1}
-                return
-            }
+        if (isFirstRender) onlineStore.getFromLocalStorage()
+
+        if (!onlineStore.isOnlineMode) {
+            userStore.user.ava = { url: '', id: -1 }
+            hideLoading()
+            return
         }
 
         await ipStore.checkIP()
 
         if (ipStore.inBlackList) {
-            onlineStore.modeLoadingVisible = false
-            loadingVisible.value = false
+            hideLoading()
             return
         }
 
         const checkUser = async () => {
             try {
-                const user = await check();
-                userStore.setUser(user as User);
+                const user = await check()
+                userStore.setUser(user as User)
+                return true
             } catch (err: any) {
                 if (err.message === 'NO_TOKEN') {
                     loadingVisible.value = false
                     await router.push('/')
-                    throw new Error('STOP')
+                    return false
                 }
 
                 if (err.message === 'OFFLINE') {
@@ -87,43 +90,41 @@ const useHomeStore = defineStore('homeStore', () => {
                     onlineStore.isOnline = false
                     onlineStore.isOnlineMode = false
                     loadingVisible.value = false
-                    throw new Error('STOP')
+                    return false
                 }
 
                 loadingVisible.value = false
                 await router.push('/')
-                throw new Error('STOP')
+                return false
             }
         }
 
-        try {
-            await checkUser()
-        } catch (_) {
-            onlineStore.modeLoadingVisible = false
-            loadingVisible.value = false
+        if (!(await checkUser())) {
+            hideLoading()
             return
         }
 
         if (!onlineStore.isOnline || !onlineStore.isOnlineMode) {
-            onlineStore.modeLoadingVisible = false
-            loadingVisible.value = false
+            hideLoading()
             return
         }
 
         const getAdmins = async () => {
             try {
                 const response: {id:number, full: boolean, viewer: boolean}[] =
-                    await get(`/admins?id=${userStore.user.id}`);
+                    await get(`/admins?id=${userStore.user.id}`)
 
                 let user
                 if (response?.length) {
                     user = response[0]
                 }
 
-                userStore.isAdmin = !!user;
+                userStore.isAdmin = !!user
                 userStore.isFullAdmin = user?.full ?? false
                 userStore.isViewer = user?.viewer ?? false
-            } catch (_) {
+            } catch (err) {
+                console.error('Ошибка получения администраторов', err)
+
                 await showError(
                     'Ошибка получения статуса',
                     'Не удалось получить статус пользователя'
@@ -134,12 +135,14 @@ const useHomeStore = defineStore('homeStore', () => {
 
         const getTechnologies = async () => {
             try {
-                const response: string[] = await get('/technologies');
+                const response: string[] = await get('/technologies')
 
                 if (response) {
                     technologiesStore.technologies = response
                 }
-            } catch (_) {
+            } catch (err) {
+                console.error('Ошибка получения технологий', err)
+
                 await showError(
                     'Ошибка получения языков и технологий',
                     'Не удалось получить список языков и технологий'
@@ -150,12 +153,14 @@ const useHomeStore = defineStore('homeStore', () => {
 
         const getLiked = async () => {
             try {
-                const response: any = await get(`/user_liked?user_id=${userStore.user.id}`);
+                const response: any = await get(`/user_liked?user_id=${userStore.user.id}`)
 
                 if (response?.length) {
-                    userStore.userLiked = response[0];
+                    userStore.userLiked = response[0]
                 }
-            } catch (_) {
+            } catch (err) {
+                console.error('Ошибка получения избранного', err)
+
                 await showError(
                     'Ошибка получения избранных постов',
                     'Не удалось получить список избранных постов'
@@ -166,14 +171,15 @@ const useHomeStore = defineStore('homeStore', () => {
 
         const getUserAvatar = (response: string): string => {
             const ava = userAva.get()
-            if (!ava?.url) {
-                response += ',ava'
-            } else {
+            if (ava?.url) {
                 userStore.user.ava = ava
+            } else {
+                response += ',ava'
             }
 
             return response
         }
+
         const getUserInfo = async () => {
             try {
                 let responseData: string = '_select=last_session'
@@ -191,7 +197,9 @@ const useHomeStore = defineStore('homeStore', () => {
 
                     userAva.set()
                 }
-            } catch (_) {
+            } catch (err) {
+                console.error('Ошибка получения данных пользователя', err)
+
                 await showError(
                     'Ошибка загрузки данных пользователя',
                     'Не удалось загрузить данные пользователя'
@@ -202,16 +210,18 @@ const useHomeStore = defineStore('homeStore', () => {
 
         await setLastSession()
 
-        const date = getCurrentDateTime()
-        if (date.date !== userStore.lastSession) {
-            await sendToTelegram(TelegramEventType.NEW_SESSION)
-        }
-
         // получаем несинхронизированные данные с бд
         await onlineStore.getOfflinePosts()
 
-        onlineStore.modeLoadingVisible = false
-        loadingVisible.value = false
+        const sendSessionMessage = async () => {
+            const date = getCurrentDateTime()
+            if (date.date !== userStore.lastSession) {
+                await sendToTelegram(TelegramEventType.NEW_SESSION)
+            }
+        }
+        await sendSessionMessage()
+
+        hideLoading()
     }
 
     // изменяем page-number для api в зависимости от разрешения экрана

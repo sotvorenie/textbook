@@ -80,12 +80,12 @@ const {
 //-- конвертация --//
 // для создания разметки при редактировании записи
 const initializeFromStore = () => {
-  const storedText = createStore.createData[props.name].text;
+  const storedText = createStore.createData[props.name].text
 
   newItem.title = createStore.createData[props.name].title
 
   if (storedText) {
-    const blocks = convertTextToBlocks(storedText);
+    const blocks = convertTextToBlocks(storedText)
 
     blocks.forEach(block => {
       newItems.value.push({

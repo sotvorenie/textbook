@@ -72,7 +72,7 @@ export const useCreate = (name: string) => {
         name: string,
         type: string = 'no_textbooks'
     ) => {
-        blocksStore.activeBlock[name] = 'list';
+        blocksStore.activeBlock[name] = 'list'
         settingsStore.settingsVisible[name] = 'list'
 
         createStore.createData[name] = {
@@ -89,8 +89,8 @@ export const useCreate = (name: string) => {
 
     // потеря фокуса поля ввода заголовка
     const blurInput = (event: Event) => {
-        onBlur(event);
-        removeLabelText(event);
+        onBlur(event)
+        removeLabelText(event)
     }
 
     // сохранение
@@ -167,7 +167,7 @@ export const useCreate = (name: string) => {
 
         setLanguages(newItem)
 
-        const isCreating = !createStore.createData[name].title.length;
+        const isCreating = !createStore.createData[name].title.length
 
         try {
             if (isCreating) {
@@ -190,40 +190,42 @@ export const useCreate = (name: string) => {
                 await redact(newItem)
             }
         } catch (err) {
+            console.error('Ошибка создания записи', err)
+
             await showError(
                 isCreating ? 'Ошибка создания записи' : 'Ошибка редактирования записи',
                 isCreating ? 'Не удалось создать запись..' : 'Не удалось редактировать запись..'
-            );
+            )
         }
 
         await sendToTg(newItem)
 
-        newItems.value = [];
+        newItems.value = []
 
-        back(name, tabs ? 'textbooks' : undefined);
-    };
+        back(name, tabs ? 'textbooks' : undefined)
+    }
 
     // проверка наличия tab-ов
     const checkTabsLength = (newItem: Item, tabs: any) => {
         if (tabs && tabs?.length > 0) {
-            const content: Record<string, string> = {};
+            const content: Record<string, string> = {}
             for (const tab of tabs) {
-                const key = tab.name || `tab${tab.id}`;
-                content[key] = convertBlocksToText(newItemsTextbook.value[String(tab.id)] || []);
+                const key = tab.name || `tab${tab.id}`
+                content[key] = convertBlocksToText(newItemsTextbook.value[String(tab.id)] || [])
             }
-            newItem.content = content;
+            newItem.content = content
         } else {
-            newItem.text = convertBlocksToText(newItems.value);
+            newItem.text = convertBlocksToText(newItems.value)
         }
     }
 
     // получаем данные о дате
     const getDateData = (newItem: Item) => {
-        const dateTime = getCurrentDateTime();
+        const dateTime = getCurrentDateTime()
 
-        newItem.time = dateTime.time;
-        newItem.date = dateTime.date;
-        newItem.sort_date = dateTime.sort_date;
+        newItem.time = dateTime.time
+        newItem.date = dateTime.date
+        newItem.sort_date = dateTime.sort_date
     }
 
     // задаем языки и технологии
@@ -231,22 +233,22 @@ export const useCreate = (name: string) => {
          if (onlineStore.isOnlineMode) {
              newItem.languages_and_technologies = technologies.value
                  ?.filter(item => item.checked)
-                 ?.map(item => item.title);
+                 ?.map(item => item.title)
          } else {
              newItem.languages_and_technologies =
-                 createStore.createData[name].languages_and_technologies;
+                 createStore.createData[name].languages_and_technologies
          }
     }
 
     // создание записи
     const create = async (newItem: Item) => {
-        const createInDB: boolean = onlineStore.isOnlineMode ? localCopyActive.value : true;
+        const createInDB: boolean = onlineStore.isOnlineMode ? localCopyActive.value : true
         const response: Item = await createItem(
             name,
             newItem,
             createInDB,
             createStore.isCanCreateInAPI[name]
-        );
+        )
 
         if (response?.id && (createStore.isCanCreateInAPI[name] || !onlineStore.isOnlineMode)) {
             itemsStore.items[name].unshift({
@@ -259,10 +261,10 @@ export const useCreate = (name: string) => {
                     downloads: 0,
                     likes: 0,
                 }
-            });
+            })
 
-            const cacheElement = itemMemoStore.findItemById(response.id);
-            if (cacheElement) itemMemoStore.updateItemInCacheById(name, response.id, newItem);
+            const cacheElement = itemMemoStore.findItemById(response.id)
+            if (cacheElement) itemMemoStore.updateItemInCacheById(name, response.id, newItem)
         }
     }
 
@@ -272,15 +274,15 @@ export const useCreate = (name: string) => {
             name,
             newItem,
             createStore.createData[name].id
-        );
+        )
 
         if (response?.id) {
-            setNewLanguages();
+            setNewLanguages()
             itemsStore.items[name] = itemsStore.items[name]?.map(el =>
                 el.id === response.id ? { ...el, title: response.title } : el
-            );
+            )
 
-            itemMemoStore.updateLastItemInCache(name, newItem);
+            itemMemoStore.updateLastItemInCache(name, newItem)
         }
     }
 
@@ -291,11 +293,9 @@ export const useCreate = (name: string) => {
             textbooks: TelegramEventType.CREATE_TEXTBOOKS,
             projects: TelegramEventType.CREATE_PROJECTS,
             advices: TelegramEventType.CREATE_ADVICES,
-        };
+        }
 
-        try {
-            await sendToTelegram(blockNameToEventType[name], newItem.title);
-        } catch {}
+        await sendToTelegram(blockNameToEventType[name], newItem.title)
     }
     //=========================================================//
 
@@ -322,14 +322,14 @@ export const useCreate = (name: string) => {
             name: string;
             code: string;
         }
-    }[]>>({});
+    }[]>>({})
 
     // видимость кнопок создания новых textarea (чтобы ограничить число textarea)
     const isVisibleCreateBtnBar = (id?: number) => {
         const mainLimit = newItems.value.length < 10
-        const tabLimit = id !== undefined
-            ? (newItemsTextbook.value[id]?.length ?? 0) < 10
-            : true
+        const tabLimit = id === undefined
+            ? true
+            : (newItemsTextbook.value[id]?.length ?? 0) < 10
 
         return mainLimit && tabLimit
     }
@@ -344,30 +344,30 @@ export const useCreate = (name: string) => {
             attributes: textareaAttributesList[type]
         }
 
-        if (tabId !== undefined) {
-            if (!newItemsTextbook.value[tabId]) newItemsTextbook.value[tabId] = [];
-
-            newItemsTextbook.value[tabId].push(item);
-        } else {
+        if (tabId === undefined) {
             newItems.value.push(item)
+        } else {
+            if (!newItemsTextbook.value[tabId]) newItemsTextbook.value[tabId] = []
+
+            newItemsTextbook.value[tabId].push(item)
         }
-    };
+    }
 
     // удаление поля ввода
     const removeTextarea = (index: number, tabId?: number) => {
         if (tabId) {
-            newItemsTextbook.value[tabId]?.splice(index, 1);
+            newItemsTextbook.value[tabId]?.splice(index, 1)
         } else {
             newItems.value.splice(index, 1)
         }
-    };
+    }
     //=========================================================//
 
 
     //=========================================================//
     //-- языки и технологии --//
     // список языков и технологий с полями checked для checkbox
-    const technologies = ref<{title: string, checked: boolean}[]>([]);
+    const technologies = ref<{title: string, checked: boolean}[]>([])
 
 
     // выбор технологий при редактировании поста
@@ -379,7 +379,7 @@ export const useCreate = (name: string) => {
         technologies.value = technologies.value.map(t => ({
             title: t.title,
             checked: languages.includes(t.title)
-        }));
+        }))
     }
 
     // если изменился список языков, то добавить в нужный элемент list
@@ -424,95 +424,95 @@ export const useCreate = (name: string) => {
     //-- конвертация --//
     // конвертация текста в блоки (при редактировании записи)
     const convertTextToBlocks = (str: string): { type: string, text: string }[] => {
-        if (!str) return [];
+        if (!str) return []
 
-        const blocks: { type: string, text: string }[] = [];
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = str;
+        const blocks: { type: string, text: string }[] = []
+        const tempDiv = document.createElement('div')
+        tempDiv.innerHTML = str
 
         const decodeHtmlEntities = (text: string): string => {
-            const textarea = document.createElement('textarea');
-            textarea.innerHTML = text;
-            return textarea.value;
-        };
+            const textarea = document.createElement('textarea')
+            textarea.innerHTML = text
+            return textarea.value
+        }
 
         const processElement = (element: Element): { type: string, text: string } | null => {
-            let text = element.innerHTML;
+            let text = element.innerHTML
 
             if (element.tagName === 'PRE' && element.querySelector('code')) {
-                const codeElement = element.querySelector('code');
+                const codeElement = element.querySelector('code')
                 if (codeElement) {
                     let codeText = codeElement.innerHTML
-                        .replace(/<br\s*\/?>/gi, '\n')
-                        .replace(/&nbsp;/g, ' ');
+                        .replaceAll(/<br\s*\/?>/gi, '\n')
+                        .replaceAll('&nbsp;', ' ')
 
-                    codeText = decodeHtmlEntities(codeText);
+                    codeText = decodeHtmlEntities(codeText)
 
                     return {
                         type: 'code',
                         text: codeText
-                    };
+                    }
                 }
             } else if (element.tagName === 'H3') {
-                text = element.textContent || '';
-                text = decodeHtmlEntities(text);
+                text = element.textContent || ''
+                text = decodeHtmlEntities(text)
 
                 return {
                     type: 'title',
                     text: text
-                };
+                }
             } else if (element.tagName === 'P') {
-                text = element.innerHTML;
+                text = element.innerHTML
                 text = text
-                    .replace(/<br\s*\/?>/gi, '\n')
-                    .replace(/&nbsp;/g, ' ');
+                    .replaceAll(/<br\s*\/?>/gi, '\n')
+                    .replaceAll('&nbsp;', ' ')
 
-                text = decodeHtmlEntities(text);
+                text = decodeHtmlEntities(text)
 
                 return {
                     type: 'text',
                     text: text
-                };
+                }
             }
 
-            return null;
-        };
+            return null
+        }
 
         for (const child of Array.from(tempDiv.children)) {
-            const block = processElement(child);
+            const block = processElement(child)
             if (block) {
-                blocks.push(block);
+                blocks.push(block)
             }
         }
 
-        return blocks;
-    };
+        return blocks
+    }
 
     // конвертирование блоков в текст для отправки в апи
     const convertBlocksToText = (blocks: { type: string, text: string }[]): string => {
         return blocks?.map(block => {
             const escapeHtml = (text: string): string => {
                 return text
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#39;');
-            };
+                    .replaceAll('&', '&amp;')
+                    .replaceAll('<', '&lt;')
+                    .replaceAll('>', '&gt;')
+                    .replaceAll('"', '&quot;')
+                    .replaceAll('\'', '&#39;');
+            }
 
             const formattedText = escapeHtml(block.text)
-                .replace(/\n/g, '<br>')
-                .replace(/ /g, '&nbsp;');
+                .replaceAll('\n', '<br>')
+                .replaceAll(' ', '&nbsp;')
 
             if (block.type === 'code') {
-                return `<pre><code>${formattedText}</code></pre>`;
+                return `<pre><code>${formattedText}</code></pre>`
             } else if (block.type === 'title') {
-                return `<h3>${formattedText}</h3>`;
+                return `<h3>${formattedText}</h3>`
             } else {
-                return `<p>${formattedText}</p>`;
+                return `<p>${formattedText}</p>`
             }
-        }).join('');
-    };
+        }).join('')
+    }
     //=========================================================//
 
 
@@ -527,7 +527,7 @@ export const useCreate = (name: string) => {
 
     // переключение значения локальной копии
     const handleLocalCopy = () => {
-        localCopyActive.value = !localCopyActive.value;
+        localCopyActive.value = !localCopyActive.value
     }
     //=========================================================//
 
@@ -537,10 +537,10 @@ export const useCreate = (name: string) => {
     onMounted(async () => {
         if (!onlineStore.isOnlineMode || !createStore.isCanCreateInAPI[name]) {
             isVisibleLocalHandler.value = false
-        } else if (!createStore.isRedact[name]) {
-            isVisibleLocalHandler.value = true
-        } else {
+        } else if (createStore.isRedact[name]) {
             isVisibleLocalHandler.value = await checkPost(name)
+        } else {
+            isVisibleLocalHandler.value = true
         }
     })
     //=========================================================//
