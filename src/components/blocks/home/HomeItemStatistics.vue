@@ -25,7 +25,7 @@ const statistics = computed((): StatisticsList[] => {
     {
       name: 'Кол-во просмотров: ',
       icon: EyeIcon,
-      number: props?.statistics?.views || 0,
+      number: props?.statistics?.views || 1,
     },
     {
       name: 'Кол-во скачиваний: ',

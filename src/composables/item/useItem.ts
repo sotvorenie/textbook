@@ -36,20 +36,11 @@ export const useItem = (
     //=========================================================//
     //-- запросы к апи --//
     const getListItem = async () => {
-        try {
-            if (!idStore.idValues[name]) return
+        if (!idStore.idValues[name]) return
 
-            const response = await getItem(name, idStore.idValues[name])
-            if (response) {
-                item.value = response
-            }
-        } catch (err){
-            await showError(
-                'Ошибка загрузки элемента',
-                'Не удалось загрузить элемент'
-            )
-
-            throw err
+        const response = await getItem(name, idStore.idValues[name])
+        if (response) {
+            item.value = response
         }
     }
     //=========================================================//
@@ -265,27 +256,38 @@ export const useItem = (
         } else {
             try {
                 await getListItem()
-
-                itemMemoStore.setItem(
-                    name,
-                    idStore.idValues[name],
-                    item.value
-                )
-
-                await updateStatistics(
-                    name,
-                    item.value.id!,
-                    'views',
-                    item.value.statistics
-                )
             } catch (err) {
-                console.error('ошибка обновления статистики', err)
+                console.error('ошибка загрузки данных', err)
+
+                await showError(
+                    'Ошибка загрузки элемента',
+                    'Не удалось загрузить элемент'
+                )
 
                 blocksStore.activeBlock[name] = 'list'
                 settingsStore.settingsVisible[name] = 'list'
 
                 return
             }
+
+            itemMemoStore.setItem(
+                name,
+                idStore.idValues[name],
+                item.value
+            )
+
+            const statistics = item.value.statistics ?? {
+                views: 0,
+                downloads: 0,
+                likes: 0,
+            }
+
+            await updateStatistics(
+                name,
+                item.value.id!,
+                'views',
+                statistics
+            )
         }
 
         if (item.value.user_id === userStore.user.id) {

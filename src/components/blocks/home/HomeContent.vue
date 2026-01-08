@@ -191,7 +191,7 @@ watch(
 <template>
 
   <div class="home__content flex flex-column w-100">
-    <header class="home__content-header home__header flex flex-align-center flex-between">
+    <header class="home__content-header home__header flex flex-align-center flex-between mb-20">
 
       <div v-if="homeStore.activeMenuIndex === 0"></div>
 

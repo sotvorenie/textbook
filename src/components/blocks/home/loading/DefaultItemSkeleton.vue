@@ -6,7 +6,7 @@
 
   <div class="skeleton skeleton-default-item">
     <div class="skeleton-default-item__title line line__background loading-line h-30 mb-20"></div>
-    <div class="skeleton-default-item__text line line__background loading-line h-20"
+    <div class="skeleton-default-item__text line line__background loading-line h-20 mb-not-last-10"
          v-for="_ in 5"
          :key="_"
     ></div>
