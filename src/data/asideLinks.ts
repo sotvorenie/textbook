@@ -9,21 +9,25 @@ const menuItems: Array<{id: number; [key: string]: any}> = [
     {
         id: 1,
         name: 'Полезное',
+        value: 'hints',
         icon: Info
     },
     {
         id: 2,
         name: 'Учебники',
+        value: 'textbooks',
         icon: Book
     },
     {
         id: 3,
         name: 'Проекты',
+        value: 'projects',
         icon: Project
     },
     {
         id: 4,
         name: 'Советы',
+        value: 'advices',
         icon: Help
     },
     {

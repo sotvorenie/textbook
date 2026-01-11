@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import {ref} from "vue";
 
+import router from "../../../router";
+
 import {menuItems} from "../../../data/asideLinks.ts";
 
 import Menu from "../../../assets/icons/Menu.vue";
 
 import useHomeStore from "../../../store/useHomeStore.ts";
 const homeStore = useHomeStore();
+import useRouterStore from "../../../store/useRouterStore.ts";
+const routerStore = useRouterStore();
 
 //=========================================================//
 // открыто/закрыто боковое меню
@@ -19,6 +23,8 @@ const changeClosed = () => {
 
 // выбор активного элемента меню
 const changeActiveIndex = (number: number): void => {
+  routerStore.isUser = false
+  router.push({name: 'Main'})
   homeStore.activeMenuIndex = number;
 }
 </script>

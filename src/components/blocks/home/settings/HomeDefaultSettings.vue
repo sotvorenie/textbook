@@ -37,6 +37,8 @@ import useItemsStore from "../../../../store/useItemsStore.ts";
 const itemsStore = useItemsStore();
 import useOnlineStore from "../../../../store/useOnlineStore.ts";
 const onlineStore = useOnlineStore();
+import useRouterStore from "../../../../store/useRouterStore.ts";
+const routerStore = useRouterStore();
 
 const route = useRoute();
 
@@ -90,12 +92,13 @@ const goToList = () => {
 
 // клик по кнопке "Назад"
 const handleBack = () => {
-  if (route.path === '/user') {
+  if (route.name === 'User') {
+    routerStore.isUser = false
     router.go(-1)
-    return
-  }
-
-  if (userStore.isUserPost[props.name]
+  } else if (routerStore.isUser) {
+    idStore.idValues[props.name] = idStore.oldIdValues[props.name]
+    router.go(-1)
+  } else if (userStore.isUserPost[props.name]
       && blocksStore.activeBlock[props.name] === 'create'
       && createStore.isRedact[props.name]
   ) {

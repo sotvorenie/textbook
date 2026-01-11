@@ -128,3 +128,11 @@
 .mb-40-20 {
   margin-bottom: fluid(40, 20) !important;
 }
+
+.cg-10 {
+  column-gap: rem(10) !important;
+}
+
+.accent-color {
+  color: $color-accent;
+}

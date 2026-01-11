@@ -1,12 +1,12 @@
 <script setup lang="ts">
 
-import {emptyList} from "../../../../data/base64/emptyListFox.ts";
+import {emptyList} from "../../data/base64/emptyListFox.ts";
 
 </script>
 
 <template>
 
-  <div class="flex-center flex-column">
+  <div class="flex-center flex-column position-relative">
     <img :src="emptyList" alt="Пусто..">
 
     <p>Список пуст..</p>
@@ -18,6 +18,7 @@ import {emptyList} from "../../../../data/base64/emptyListFox.ts";
 
 div {
   margin-top: -5vw;
+  z-index: -1;
 }
 
 img {

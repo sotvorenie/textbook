@@ -1,18 +1,28 @@
 <script setup lang="ts">
-import {onBeforeMount, onUnmounted, reactive, ref} from "vue";
-
+import {computed, onBeforeMount, onUnmounted, reactive, ref} from "vue";
+import {useRoute} from "vue-router";
 import router from "../router";
-const myEmail = import.meta.env.VITE_MY_EMAIL;
 
+const myEmail = import.meta.env.VITE_MY_EMAIL;
 import {menuItems} from "../data/asideLinks.ts";
 
+import {get} from "../api/base.ts";
 import {getAuthor} from "../api/posts/posts.ts";
 
-import UserIcon from "../assets/icons/UserIcon.vue";
-import AppSkeleton from "../components/ui/loading/AppSkeleton.vue";
 import {showError} from "../utils/modals.ts";
-import {get} from "../api/base.ts";
+
+import AppSkeleton from "../components/ui/loading/AppSkeleton.vue";
 import Btn from "../components/ui/Btn.vue";
+import List from "../components/blocks/user/List.vue";
+
+import UserIcon from "../assets/icons/UserIcon.vue";
+import Modal from "../components/common/Modal.vue";
+import Statistics from "../components/blocks/user/Statistics.vue";
+
+import useRouterStore from "../store/useRouterStore.ts";
+const routerStore = useRouterStore();
+import useIdStore from "../store/useIdStore.ts";
+const idStore = useIdStore();
 
 const props = defineProps({
   id: {
@@ -20,6 +30,8 @@ const props = defineProps({
     required: true,
   },
 })
+
+const route = useRoute()
 
 //=========================================================//
 
@@ -106,11 +118,26 @@ const status = ref<string>('')
 // активный таб
 const activeTab = ref<number>(0)
 
+// список tabs
+const tabs = computed(() => {
+  return menuItems.slice(0, 4)
+})
+
 
 // клик по табу
 const handleTab = (index: number) => {
   activeTab.value = index
 }
+//=========================================================//
+
+
+//=========================================================//
+//-- статистика --//
+const statistics = ref({
+  'Всего просмотров': 0,
+  'Добавлено в избранное': 0,
+  'Всего скачано': 0,
+})
 //=========================================================//
 
 
@@ -129,7 +156,15 @@ onBeforeMount(async () => {
   } finally {
     isLoading.value = false
   }
-})
+
+  routerStore.isUser = true
+
+  const name = Array.isArray(route.query.name) ? route.query.name[0] : route.query.name
+  const postId = Array.isArray(route.query.postId) ? route.query.postId[0] : route.query.postId
+  if (name && postId) {
+    idStore.oldIdValues[name] = +postId
+  }}
+)
 
 onUnmounted(() => {
   controller?.abort()
@@ -155,10 +190,10 @@ onUnmounted(() => {
       </div>
     </header>
 
-    <div class="user-page__content">
-      <ul class="user-page__tabs flex">
-        <li class="user-page__tab h5"
-            v-for="(tab, index) in menuItems.slice(0, 4)"
+    <div class="flex cg-10">
+      <ul class="user-page__tabs flex cg-10">
+        <li class="user-page__tab h5 mb-20"
+            v-for="(tab, index) in tabs"
             :key="tab.id"
         >
           <Btn :class="{
@@ -169,6 +204,20 @@ onUnmounted(() => {
           >{{tab?.name}}</Btn>
         </li>
       </ul>
+
+      <Modal :size="400">
+        <template #activator="{open}">
+          <Btn class="button-small" @click="open">Статистика</Btn>
+        </template>
+
+        <template #default>
+          <Statistics :user-id="+props.id" v-model:statistics="statistics"/>
+        </template>
+      </Modal>
+    </div>
+
+    <div class="user-page__content">
+      <List :user-id="+props.id" :name="tabs[activeTab].value"/>
     </div>
   </div>
 

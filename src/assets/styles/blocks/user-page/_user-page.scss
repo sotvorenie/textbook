@@ -3,6 +3,8 @@
 
 .user-page {
   padding-inline: rem(20);
+  overflow-y: auto;
+  padding-bottom: rem(20);
 
   &__header {
     column-gap: rem(20);
@@ -12,10 +14,6 @@
     @include fluid-square(160, 120);
 
     border-radius: 50%;
-  }
-
-  &__tabs {
-    column-gap: rem(10);
   }
 
   &__tab {
@@ -28,5 +26,13 @@
         pointer-events: none;
       }
     }
+  }
+
+  &__statistics {
+    min-height: rem(120);
+  }
+
+  &__loading {
+    @include abs-center;
   }
 }

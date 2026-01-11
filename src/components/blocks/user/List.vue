@@ -1,40 +1,39 @@
 <script setup lang="ts">
-import {computed, ref, watch, nextTick} from "vue";
+import {computed, onBeforeMount, ref, watch} from "vue";
+
+import router from "../../../router";
 
 import {Meta} from "../../../types/meta.ts";
+import {List} from "../../../types/list.ts";
+import {Item} from "../../../types/item.ts";
 
-import {debounce} from "../../../utils/debounce.ts";
-import {showError, showWarning} from "../../../utils/modals.ts";
+import {showError} from "../../../utils/modals.ts";
 
 import {getList} from "../../../api/posts/posts.ts";
 import {handleLike} from "../../../api/liked/liked.ts";
 
 import EmptyList from "../../common/EmptyList.vue";
 
-import {List} from "../../../types/list.ts";
 import Like from "../../ui/Like.vue";
 import Absolute from "../../common/Absolute.vue";
 import Btn from "../../ui/Btn.vue";
+import DefaulListSkeleton from "../home/loading/DefaulListSkeleton.vue";
 
-import useSearchStore from "../../../store/useSearchStore.ts";
-const searchStore = useSearchStore();
-import useSettingsStore from "../../../store/useSettingsStore.ts";
-const settingsStore = useSettingsStore();
+
 import useUserStore from "../../../store/useUserStore.ts";
 const userStore = useUserStore();
-import useItemsStore from "../../../store/useItemsStore.ts";
-const itemsStore = useItemsStore();
-import useOnlineStore from "../../../store/useOnlineStore.ts";
-const onlineStore = useOnlineStore();
-import useCreateStore from "../../../store/useCreateStore.ts";
-import {Item} from "../../../types/item.ts";
-const createStore = useCreateStore();
+import useIdStore from "../../../store/useIdStore.ts";
+const idStore = useIdStore();
 
 const props = defineProps({
   name: {
     type: String,
     required: true
-  }
+  },
+  userId: {
+    type: Number,
+    required: true,
+  },
 })
 
 const emits = defineEmits(['changeItem']);
@@ -43,9 +42,6 @@ const emits = defineEmits(['changeItem']);
 
 //=========================================================//
 //-- асинхронные функции --//
-// для получения данных с апи при изменениях фильтров
-const debouncedGetPosts = debounce(() => getPosts(false), 500)
-
 // данные о номере страницы апи
 const page = ref<number>(1)
 
@@ -56,7 +52,7 @@ const meta = ref<Meta>()
 // получение данных списка с апи
 const getPosts = async(push: boolean = true) => {
   try {
-    loadingVisible.value = true
+    isLoadMore.value = true
 
     if (!push || !meta.value?.current_page) {
       page.value = 1
@@ -64,48 +60,28 @@ const getPosts = async(push: boolean = true) => {
       page.value = meta.value?.current_page + 1
     }
 
-    let user_id: number | null = null
-    let likes: number[] = []
-    if (searchStore.myOtherFilter[props?.name] === 'my') {
-      user_id = userStore.user.id
-    } else if (searchStore.myOtherFilter[props?.name] === 'likes') {
-      likes = likedItems.value?.length ? likedItems.value : [-1]
-     }
+    let user_id: number | null = props.userId
 
     const response: {meta: any, items: List[]} = await getList({
       name: props.name,
       page: page.value,
-      value: searchStore.searchNames[props?.name],
-      languages: searchStore.filterTechnologies[props?.name],
+      value: '',
+      languages: [],
       user_id,
-      sortBy: searchStore.sortBy[props?.name],
-      id: likes
+      sortBy: '-sort_date',
     })
 
-    if (response) {
+    if (response.items?.length > 0) {
       if (push) {
-        itemsStore.items[props.name]?.push(...response.items)
+        items.value.push(...response.items)
       } else {
-        itemsStore.items[props.name] = response.items
+        items.value = response.items
       }
 
       meta.value = response.meta
-
-      const checkTotalItems: boolean = (meta.value?.total_items as number) < 500
-
-      createStore.isCanCreateInAPI[props.name] = checkTotalItems
-
-      if (!checkTotalItems && (userStore.isAdmin || userStore.isFullAdmin) && onlineStore.isOnlineMode) {
-        await showWarning(
-            'Недостаточно места!!',
-            'Внимание! На сервере недостаточно места для данной категории! Создание нового элемента будет происходить локально'
-        )
-      }
-
-      await nextTick()
+    } else {
+      items.value = []
     }
-
-    settingsStore.settingsVisible[props.name] = 'list'
   } catch (err) {
     console.error('Не удалось загрузить данные с сервера', err)
 
@@ -114,9 +90,15 @@ const getPosts = async(push: boolean = true) => {
         'Не удалось загрузить список элементов с сервера приложения'
     )
   } finally {
-    loadingVisible.value = false
+    isLoadMore.value = false
   }
 }
+//=========================================================//
+
+
+//=========================================================//
+//-- элементы списка --//
+const items = ref<List[]>([])
 //=========================================================//
 
 
@@ -124,17 +106,8 @@ const getPosts = async(push: boolean = true) => {
 //-- пустая страница --//
 // видимость пустой страницы
 const emptyVisible = computed(() => {
-  return !itemsStore.items[props.name]?.length && !loadingVisible.value
+  return items.value.length === 0 && !loadingVisible.value
 })
-//=========================================================//
-
-
-//=========================================================//
-//-- данные фильтров --//
-// выбранные языки и технологии
-const searchTechnologies = computed(() => {
-  return searchStore.filterTechnologies[props.name] ?? []
-});
 //=========================================================//
 
 
@@ -142,28 +115,9 @@ const searchTechnologies = computed(() => {
 //-- элемент списка --//
 // выбор элемента списка
 const handleItem = (id: number) => {
-  emits('changeItem', id);
+  idStore.idValues[props.name] = id
+  router.push({name: 'Main'})
 }
-//=========================================================//
-
-
-//=========================================================//
-//-- подсветка текста --//
-// метод для подсветки текста
-const highlightText = (text: string) => {
-  if (!text) return 'Без названия'
-  if (!searchStore.searchNames[props?.name]) return text;
-
-  const words = searchStore.searchNames[props?.name].split(/\s+/).filter(Boolean);
-  let result = text;
-
-  words.forEach(word => {
-    const regex = new RegExp(`(${word})`, "gi");
-    result = result.replace(regex, `<span class="is-active">$1</span>`);
-  });
-
-  return result;
-};
 //=========================================================//
 
 
@@ -186,56 +140,53 @@ const like = async (id: number, statistics: Item['statistics']) => {
 //-- кнопка "Загрузить ещё" --//
 // видимость кнопки "Загрузить ещё"
 const loadMoreVisible = computed(() => {
-  return itemsStore.items[props.name]?.length > 0
-      && (page.value >= 1 && meta.value?.remaining_count! > 0)
+  return items.value.length > 0 && (page.value >= 1 && meta.value?.remaining_count! > 0)
 })
 
 // видимость анимации загрузки
-const loadingVisible = ref(true);
+const loadingVisible = ref<boolean>(true);
+
+// видимость анимации загрузки при клике на "Загрузить еще"
+const isLoadMore = ref<boolean>(false)
 //=========================================================//
 
 
 //=========================================================//
-//-- наблюдатели --//
-// следим за изменение фильтров, чтобы обращаться к апи по заданным параметрам
+//-- хуки --//
+onBeforeMount(async () => {
+  loadingVisible.value = true
+  await getPosts()
+  loadingVisible.value = false
+})
+
 watch(
-    () => [
-      searchStore.searchNames[props?.name],
-      searchStore.filterTechnologies[props?.name],
-      searchStore.myOtherFilter[props?.name],
-      searchStore.sortBy[props?.name],
-    ],
-    () => debouncedGetPosts()
+    () => props.name,
+    async () => {
+      loadingVisible.value = true
+      await getPosts(false)
+      loadingVisible.value = false
+    }
 )
-//=========================================================//
-
-
-//=========================================================//
-//-- вызов асинхронных функций --//
-await getPosts(false)
 //=========================================================//
 </script>
 
 <template>
 
-  <div class="list-wrapper">
-    <ul class="list flex row mb-30" v-if="itemsStore.items[name]?.length">
+  <template v-if="!loadingVisible">
+    <ul class="list flex row mb-30" v-if="items?.length">
       <li class="list__item cursor-pointer ks-col-2 ds-col-3 col-4 position-relative"
-          v-for="(item, index) in itemsStore.items[name]"
+          v-for="(item, index) in items"
           :key="item.id"
-          @click="handleItem(item.id)"
+          @click="handleItem(item?.id)"
           :style="{'--index': index}"
       >
-        <button class="list__like recolor-svg button-width-svg position-absolute"
-                type="button"
-                v-if="onlineStore.isOnlineMode"
-        >
+        <button class="list__like recolor-svg button-width-svg position-absolute" type="button">
           <Like :liked="likedItems?.includes(item.id)"
                 @click.stop="like(item.id, item.statistics)"
           />
         </button>
 
-        <p class="list__title h5 mb-10" v-html="highlightText(item.title)"></p>
+        <p class="list__title h5 mb-10">{{item?.title}}</p>
 
         <div class="list__info">
           <p class="list__date mb-10">Дата: {{item?.date}}</p>
@@ -254,7 +205,7 @@ await getPosts(false)
                 </div>
 
                 <ul class="list__technologies flex flex-wrap">
-                  <li :class="['list__technologies-item list__name', {'is-active': searchTechnologies.includes(technology)}]"
+                  <li class="list__technologies-item list__name"
                       v-for="technology in item?.languages_and_technologies?.slice(0, 3)"
                   >
                     {{technology}}
@@ -266,7 +217,7 @@ await getPosts(false)
             <template #default>
               <div class="list__tech-content flex flex-wrap">
                 <p v-for="technology in item?.languages_and_technologies"
-                   :class="['list__name absolute__content-item', {'is-active': searchTechnologies.includes(technology)}]"
+                   class="list__name absolute__content-item"
                 >
                   {{technology}}
                 </p>
@@ -279,8 +230,8 @@ await getPosts(false)
     </ul>
 
     <Btn class="list__load-more m-auto"
-         :is-disabled="loadingVisible"
-         :is-loading="loadingVisible"
+         :is-disabled="loadingVisible || isLoadMore"
+         :is-loading="isLoadMore"
          @click="getPosts"
          v-if="loadMoreVisible"
     >
@@ -288,6 +239,8 @@ await getPosts(false)
     </Btn>
 
     <EmptyList v-if="emptyVisible"/>
-  </div>
+  </template>
+
+  <DefaulListSkeleton v-else/>
 
 </template>
