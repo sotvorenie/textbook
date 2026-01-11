@@ -103,7 +103,9 @@ const {
 
       <div class="item__author mb-15 flex flex-align-center" v-if="author.name">
         <span>Автор:</span>
-        <RouterLink to="/user" class="item__author-info flex flex-align-center">
+        <RouterLink :to="{name: 'User', params: {id: author.id}}"
+                    class="item__author-info flex flex-align-center"
+        >
           <div class="item__avatar img-container" v-if="author.ava">
             <img :src="author?.ava?.url" :alt="author?.name">
           </div>

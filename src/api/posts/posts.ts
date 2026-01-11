@@ -157,6 +157,11 @@ export const updateStatistics = async (
     await patch(`/${name}/${id}`, {statistics})
 }
 
-export const getAuthor = async (id: number): Promise<{ava?: {url: string}, name: string}> => {
-    return await get(`/users/${id}?_select=ava,name`)
+export const getAuthor = async (id: number, getSessionAndEmail: boolean = false, signal?: AbortSignal):
+    Promise<{ava?: {url: string}, name: string, last_session: string, email: string}> => {
+    return await get(
+        `/users/${id}?_select=name,ava${getSessionAndEmail ? ',last_session,email' : ''}`,
+        undefined,
+        signal
+    )
 }

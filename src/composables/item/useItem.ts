@@ -225,20 +225,20 @@ export const useItem = (
     //-- автор поста --//
     type Author = {
         name: string;
+        id: number;
         ava?: {url: string}
     }
-    const author = ref<Author>({name: ''})
+    const author = ref<Author>({name: '', id: -1})
 
 
     // получение данных об авторе
     const getAuthorInfo = async (id: number) => {
         const data: {ava?: {url: string}, name: string} = await getAuthor(id)
 
-        if (data) {
-            author.value.name = data.name
+        author.value.name = data.name
+        author.value.id = id
 
-            if (data.ava) author.value.ava = data.ava
-        }
+        if (data.ava) author.value.ava = data.ava
     }
     //=========================================================//
 
@@ -304,18 +304,26 @@ export const useItem = (
                 likes: 0,
             }
 
-            await updateStatistics(
-                name,
-                item.value.id!,
-                'views',
-                statistics
-            )
+            try {
+                await updateStatistics(
+                    name,
+                    item.value.id!,
+                    'views',
+                    statistics
+                )
+            } catch (err) {
+                console.error('не удалось обновить статистику', err)
+            }
         }
 
         if (item.value.user_id === userStore.user.id) {
             userStore.isUserPost[name] = true
         } else {
-            await getAuthorInfo(item.value.user_id)
+            try {
+                await getAuthorInfo(item.value.user_id)
+            } catch (err) {
+                console.error('не удалось получить автора', err)
+            }
         }
 
         isLoading.value = false
@@ -339,7 +347,7 @@ export const useItem = (
             })
         }
 
-        author.value = {name: ''}
+        author.value = {name: '', id: -1}
     })
 
     onMounted(() => {

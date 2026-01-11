@@ -21,10 +21,11 @@ export const routes: RouteRecordRaw[] = [
                 meta: { requiresAuth: true },
             },
             {
-                path: 'user',
+                path: 'user/:id',
                 name: 'User',
                 component: () => import('../pages/User.vue'),
                 meta: { requiresAuth: true },
+                props: true,
             },
         ]
     },

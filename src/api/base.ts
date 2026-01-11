@@ -49,8 +49,8 @@ client.interceptors.response.use(
     }
 )
 
-export const get = async <T>(url: string, params?: any): Promise<T> => {
-    const res = await client.get(url, { params })
+export const get = async <T>(url: string, params?: any, signal?: AbortSignal): Promise<T> => {
+    const res = await client.get(url, { params, signal })
     return res.data as T
 }
 

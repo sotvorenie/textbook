@@ -2265,4 +2265,27 @@ button:disabled {
   background: var(--color-dark-alt);
 }
 
+.user-page {
+  padding-inline: 1.25rem;
+}
+.user-page__header {
+  column-gap: 1.25rem;
+}
+.user-page__avatar {
+  aspect-ratio: 1/1;
+  width: clamp(7.5rem, 4.7826086957rem + 4.347826087vw, 10rem);
+  height: clamp(7.5rem, 4.7826086957rem + 4.347826087vw, 10rem);
+  min-width: clamp(7.5rem, 4.7826086957rem + 4.347826087vw, 10rem);
+  min-height: clamp(7.5rem, 4.7826086957rem + 4.347826087vw, 10rem);
+  border-radius: 50%;
+}
+.user-page__tabs {
+  column-gap: 0.625rem;
+}
+.user-page__tab button.is-active {
+  background: #fe7971;
+  border-color: #fe7971;
+  pointer-events: none;
+}
+
 /*# sourceMappingURL=main.css.map */

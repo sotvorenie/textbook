@@ -1,0 +1,32 @@
+@use '../../helpers/index' as *;
+@use '../../variables' as *;
+
+.user-page {
+  padding-inline: rem(20);
+
+  &__header {
+    column-gap: rem(20);
+  }
+
+  &__avatar {
+    @include fluid-square(160, 120);
+
+    border-radius: 50%;
+  }
+
+  &__tabs {
+    column-gap: rem(10);
+  }
+
+  &__tab {
+
+    button {
+
+      &.is-active {
+        background: $color-accent;
+        border-color: $color-accent;
+        pointer-events: none;
+      }
+    }
+  }
+}
