@@ -2,7 +2,10 @@
 
 import Modal from "../../common/Modal.vue";
 
-const visible = defineModel()
+const visible = defineModel({
+  type: Boolean,
+  default: false,
+})
 </script>
 
 <template>

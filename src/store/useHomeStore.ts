@@ -224,7 +224,7 @@ const useHomeStore = defineStore('homeStore', () => {
                     userStore.lastSession = response?.last_session
                 }
                 if (response?.ava) {
-                    userStore.user.ava = response?.ava
+                    userStore.user.ava = {...response.ava, url: response.ava.url.replace('http://', 'https://')}
 
                     userAva.set()
                 }
