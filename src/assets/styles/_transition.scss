@@ -55,17 +55,6 @@
   transform: scaleX(0);
 }
 
-.textarea-move, .textarea-enter-active, .textarea-leave-active {
-  transition: all 0.4s ease;
-}
-.textarea-enter-from, .textarea-leave-to {
-  opacity: 0;
-  transform: translateX(30px);
-}
-.textarea-active {
-  position: absolute;
-}
-
 .item-title-enter-active, .item-title-leave-active {
   transition: all 0.4s ease;
 }

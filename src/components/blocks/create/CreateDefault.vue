@@ -179,7 +179,6 @@ watch(
         </div>
 
         <DragAndDrop v-model="newItems"
-                     transition-name="textarea"
                      handler="create__handler"
                      css-class="create__label-container mb-not-last-40"
         >
