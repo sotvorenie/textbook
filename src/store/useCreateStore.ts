@@ -1,5 +1,5 @@
 import {defineStore} from "pinia";
-import {reactive} from "vue";
+import {reactive, ref} from "vue";
 
 const useCreateStore = defineStore('createStore', () => {
 
@@ -51,19 +51,13 @@ const useCreateStore = defineStore('createStore', () => {
         },
     })
 
+    const draft = ref<Record<string, any>>({})
+
     const isRedact = reactive<Record<string, boolean>>({
         hints: false,
         advices: false,
         projects: false,
         textbooks: false,
-    })
-
-    // возможно ли создать еще запись в апи (на случай если в апи уже 500 записей)
-    const isCanCreateInAPI = reactive<Record<string, boolean>>({
-        hints: true,
-        advices: true,
-        projects: true,
-        textbooks: true,
     })
 
     const resetStore = () => {
@@ -104,21 +98,18 @@ const useCreateStore = defineStore('createStore', () => {
             time: '',
         }
 
+        draft.value = {}
+
         isRedact.hints = false
         isRedact.advices = false
         isRedact.projects = false
         isRedact.textbooks = false
-
-        isCanCreateInAPI.hints = true
-        isCanCreateInAPI.advices = false
-        isCanCreateInAPI.projects = true
-        isCanCreateInAPI.textbooks = true
     }
 
     return {
         createData,
+        draft,
         isRedact,
-        isCanCreateInAPI,
 
         resetStore,
     }

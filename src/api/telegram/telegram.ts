@@ -17,7 +17,7 @@ export enum TelegramEventType {
     LOAD_AVA = 'LOAD_AVA',
 }
 
-export const sendToTelegram = async (eventType: TelegramEventType, title?: string): Promise<void> => {
+export const sendToTelegram = async (eventType: TelegramEventType, signal?: AbortSignal, title?: string): Promise<void> => {
     const userStore = useUserStore();
     const onlineStore = useOnlineStore();
 
@@ -47,6 +47,7 @@ export const sendToTelegram = async (eventType: TelegramEventType, title?: strin
             chat_id: chat_id,
             text: message,
             parse_mode: 'HTML'
-        })
+        }),
+        signal
     })
 }

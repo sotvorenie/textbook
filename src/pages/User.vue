@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import {computed, onBeforeMount, onUnmounted, reactive, ref} from "vue";
-import {useRoute} from "vue-router";
-import router from "../router";
+import {computed, onBeforeMount, reactive, ref} from "vue";
+import {useRouter} from "vue-router";
 
 const myEmail = import.meta.env.VITE_MY_EMAIL;
 import {menuItems} from "../data/asideLinks.ts";
@@ -10,38 +9,33 @@ import {get} from "../api/base.ts";
 import {getAuthor} from "../api/posts/posts.ts";
 
 import {showError} from "../utils/modals.ts";
+import {useSignal} from "../composables/useSignal.ts";
 
 import AppSkeleton from "../components/ui/loading/AppSkeleton.vue";
 import Btn from "../components/ui/Btn.vue";
-import List from "../components/blocks/user/List.vue";
+import UserList from "../components/blocks/user/UserList.vue";
 
 import UserIcon from "../assets/icons/UserIcon.vue";
 import Modal from "../components/common/Modal.vue";
-import Statistics from "../components/blocks/user/Statistics.vue";
-
-import useRouterStore from "../store/useRouterStore.ts";
-const routerStore = useRouterStore();
-import useIdStore from "../store/useIdStore.ts";
-const idStore = useIdStore();
+import Statistics from "../components/blocks/user/UserStatistics.vue";
 
 const props = defineProps({
   id: {
     type: String,
     required: true,
-  },
+  }
 })
 
-const route = useRoute()
+const router = useRouter();
 
 //=========================================================//
+
+const signal = useSignal()
 
 //=========================================================//
 //-- асинхронные функции --//
 // анимация загрузки
 const isLoading = ref<boolean>(true)
-
-// контроллер для аборта
-let controller: AbortController | null = null
 
 
 // получение данных пользователя: имя, аватар, последний сеанс, email
@@ -65,7 +59,7 @@ const getUserInfo = async (signal?: AbortSignal) => {
         'Не удалось загрузить данные пользователя'
     )
 
-    await router.replace('/main')
+    router.back()
   }
 }
 
@@ -146,28 +140,12 @@ const statistics = ref({
 onBeforeMount(async () => {
   isLoading.value = true
 
-  controller = new AbortController()
-
   try {
-    await Promise.all([
-        getUserInfo(controller.signal),
-        getUserStatus(controller.signal)
-    ])
+    await getUserInfo(signal)
+    await getUserStatus(signal)
   } finally {
     isLoading.value = false
   }
-
-  routerStore.isUser = true
-
-  const name = Array.isArray(route.query.name) ? route.query.name[0] : route.query.name
-  const postId = Array.isArray(route.query.postId) ? route.query.postId[0] : route.query.postId
-  if (name && postId) {
-    idStore.oldIdValues[name] = +postId
-  }}
-)
-
-onUnmounted(() => {
-  controller?.abort()
 })
 //=========================================================//
 </script>
@@ -217,7 +195,7 @@ onUnmounted(() => {
     </div>
 
     <div class="user-page__content">
-      <List :user-id="+props.id" :name="tabs[activeTab].value"/>
+      <UserList :user-id="+props.id" :name="tabs[activeTab].value"/>
     </div>
   </div>
 

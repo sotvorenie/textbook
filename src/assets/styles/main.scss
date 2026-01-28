@@ -22,6 +22,7 @@
 @use 'blocks/heart';
 @use 'blocks/checkbox-list';
 @use 'blocks/drag-and-drop';
+@use 'blocks/fox-modal';
 
 @use 'blocks/auth/auth';
 
@@ -42,3 +43,5 @@
 @use 'blocks/home/comments';
 
 @use 'blocks/user-page/user-page';
+
+@use 'blocks/winter/winter';

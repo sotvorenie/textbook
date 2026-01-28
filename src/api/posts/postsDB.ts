@@ -2,7 +2,6 @@ import {List} from "../../types/list.ts";
 import {Item} from "../../types/item.ts";
 import {executeSQL, selectSQL, tablesConfig} from "../database.ts";
 import {showError} from "../../utils/modals.ts";
-import useIdStore from "../../store/useIdStore.ts";
 
 type GetListParams = {
     name: string
@@ -224,16 +223,12 @@ export const removeFromDB = async (
     return executeSQL(`DELETE FROM ${config.table} WHERE id = ?`, [id])
 }
 
-
 export const checkPost = async (
+    id: number,
     name: string
 ): Promise<boolean> => {
-    const idStore = useIdStore()
-
     const config = tablesConfig[name]
     if (!config) return false
-
-    const id = idStore.idValues[name]
 
     const item = await selectSQL<any>(`SELECT * FROM ${config.table} WHERE id = ?`, [id])
 

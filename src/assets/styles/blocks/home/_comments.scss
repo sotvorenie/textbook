@@ -3,6 +3,10 @@
 
 .comments {
 
+  &__title {
+    margin-bottom: rem(10);
+  }
+
   &__list {
     overflow-y: auto;
     margin-right: rem(-10);
@@ -64,5 +68,9 @@
 
   &__button {
     background: $color-dark-alt;
+  }
+
+  &__actions {
+    gap: rem(10);
   }
 }

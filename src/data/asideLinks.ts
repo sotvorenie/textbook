@@ -33,11 +33,13 @@ const menuItems: Array<{id: number; [key: string]: any}> = [
     {
         id: 5,
         name: 'Мессенджер',
+        value: 'messenger',
         icon: Letter
     },
     {
         id: 6,
         name: 'Блог',
+        value: 'blog',
         icon: Blog
     },
 ]

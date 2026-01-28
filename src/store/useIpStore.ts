@@ -11,17 +11,17 @@ const useIpStore = defineStore("ipStore", () => {
     const inBlackList = ref<boolean>(false)
 
     // проверка: в черном списке ли мы или нет
-    const checkIP = async(isLoading?: Ref<boolean>): Promise<void> => {
+    const checkIP = async(isLoading?: Ref<boolean>, signal?: AbortSignal): Promise<void> => {
         const onlineStore = useOnlineStore();
 
         try {
             if (isLoading) isLoading.value = true
 
-            const ip: {ip: string} = await getIP()
+            const ip: {ip: string} = await getIP(signal)
 
             userIp.value = ip.ip
 
-            const check: boolean = await checkBlackList(userIp.value)
+            const check: boolean = await checkBlackList(userIp.value, signal)
 
             if (check) {
                 inBlackList.value = true
@@ -38,14 +38,14 @@ const useIpStore = defineStore("ipStore", () => {
     }
 
     // проверка: есть ли данный ip у пользователя (если нет - вносим)
-    const checkUserIp = async (id: number): Promise<void> => {
-        const ipList: string[] = await getUserIp(id)
+    const checkUserIp = async (id: number, signal?: AbortSignal): Promise<void> => {
+        const ipList: string[] = await getUserIp(id, signal)
 
         const check: boolean = ipList.includes(userIp.value)
 
         if (!check) {
             ipList.push(userIp.value)
-            await setUserIp(id, ipList)
+            await setUserIp(id, ipList, signal)
         }
     }
 

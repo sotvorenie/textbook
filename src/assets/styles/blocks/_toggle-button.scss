@@ -7,6 +7,11 @@
   border: $border-light-alt;
   border-radius: $radius;
   padding-inline: rem(2);
+  transition-duration: $transition-duration;
+
+  &.is-accent {
+    background: $color-light;
+  }
 
   &__btn {
     aspect-ratio: 1;
@@ -18,6 +23,10 @@
 
     &.is-active {
       transform: translateX(calc(100% - 4px));
+
+      &.is-accent {
+        background: $color-accent;
+      }
     }
   }
 }

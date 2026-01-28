@@ -3,16 +3,8 @@
 import {PropType, ref} from "vue";
 
 const props = defineProps({
-  transitionName: {
-    type: String,
-    default: 'textarea',
-  },
   handler: String,
   cssClass: String,
-  height: {
-    type: Number,
-    default: 100,
-  },
 })
 
 const items = defineModel({
@@ -25,6 +17,8 @@ const items = defineModel({
           code: string;
         }
       }[]>, required: true})
+
+const activeItemHeight = ref(0)
 
 const draggableIndex = ref<number | null>(null)
 const newDraggableIndex = ref<number | null>(null)
@@ -39,15 +33,18 @@ const isDragging = ref<boolean>(false)
 
 // клик мышью - начало перетаскивания
 const mouseDown = (event: MouseEvent, index: number) => {
+  const container = event.currentTarget as HTMLElement
   const target = event.target as HTMLElement
 
-  if (props.handler && !target.classList.contains(props.handler)) return
+  if (props.handler && !target.classList.contains(props.handler) && !target.closest(`.${props.handler}`)) {
+    return
+  }
+
+  activeItemHeight.value = container.offsetHeight
 
   draggableIndex.value = index
-
   startY.value = event.clientY
   offsetY.value = 0
-
   isDragging.value = true
 
   globalThis.addEventListener('mousemove', updateMouse)
@@ -83,9 +80,9 @@ const mouseEnd = () => {
   globalThis.removeEventListener('mouseup', mouseEnd)
 }
 
-// если передвинули на половину props.height вверх/вниз - задаем новый индекс
-function calculateNewIndex(currentIndex: number) {
-  const itemHeight = props.height
+// если передвинули на половину высоты перемещаемого элемента вверх/вниз - задаем новый индекс
+const calculateNewIndex = (currentIndex: number) => {
+  const itemHeight = activeItemHeight.value
 
   if (offsetY.value > itemHeight / 2 && currentIndex < items.value.length - 1) return currentIndex + 1
   if (offsetY.value < -itemHeight / 2 && currentIndex > 0) return currentIndex - 1
@@ -96,15 +93,39 @@ function calculateNewIndex(currentIndex: number) {
 // стили элемента списка
 const getItemStyle = (index: number) => {
   if (draggableIndex.value === index) {
-    return { transform: `translateY(${offsetY.value}px)` }
+    return {
+      transform: `translate3d(0, ${offsetY.value}px, 0) !important`,
+      zIndex: 9999,
+      position: 'relative' as const,
+      transition: 'none !important',
+      pointerEvents: 'none' as const,
+    }
   }
+
+  if (draggableIndex.value !== null && newDraggableIndex.value !== null) {
+    const shiftHeight = activeItemHeight.value + 40
+
+    if (index > draggableIndex.value && index <= newDraggableIndex.value) {
+      return {
+        transform: `translateY(-${shiftHeight}px)`,
+        transition: 'transform 0.2s'
+      }
+    }
+    if (index < draggableIndex.value && index >= newDraggableIndex.value) {
+      return {
+        transform: `translateY(${shiftHeight}px)`,
+        transition: 'transform 0.2s'
+      }
+    }
+  }
+
   return {}
 }
 </script>
 
 <template>
 
-  <TransitionGroup :name="transitionName" tag="div">
+  <div>
     <div v-for="(item, index) in items"
          :key="item.id"
          :class="[
@@ -119,6 +140,6 @@ const getItemStyle = (index: number) => {
     >
       <slot name="item" :item="item" :index="index"/>
     </div>
-  </TransitionGroup>
+  </div>
 
 </template>

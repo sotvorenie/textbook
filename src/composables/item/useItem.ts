@@ -1,139 +1,226 @@
-import {computed, nextTick, onActivated, onDeactivated, onMounted, ref, watchEffect} from "vue";
+import {
+    computed,
+    nextTick,
+    ref,
+    onMounted,
+    onBeforeUnmount
+} from "vue";
+import { useRoute, useRouter } from "vue-router";
 
-import {Item} from "../../types/item.ts";
+import { Item } from "../../types/item.ts";
 
-import {showConfirm, showError} from "../../utils/modals.ts";
-import decodeHtmlEntities from "../useDecodeHtmlEntities.ts";
+import { getAuthor, getItem, updateStatistics } from "../../api/posts/posts.ts";
+import { createItemInDB, checkPost } from "../../api/posts/postsDB.ts";
 
-import {getAuthor, getItem, updateStatistics} from "../../api/posts/posts.ts";
-import {checkPost, createItemInDB} from "../../api/posts/postsDB.ts";
+import { showConfirm, showError } from "../../utils/modals.ts";
+import {useSignal} from "../useSignal.ts";
 
-import useIdStore from "../../store/useIdStore.ts";
 import useItemMemoStore from "../../store/useItemMemoStore.ts";
-import useSettingsStore from "../../store/useSettingsStore.ts";
 import useUserStore from "../../store/useUserStore.ts";
-import useBlocksStore from "../../store/useBlocksStore.ts";
 import useMessageStore from "../../store/useMessageStore.ts";
 import useOnlineStore from "../../store/useOnlineStore.ts";
 import useScrollStore from "../../store/useScrollStore.ts";
 
 export const useItem = (
     name: string,
-    item: {value: Item},
-    index?: {value: number}
+    item: { value: Item },
+    index?: { value: number }
 ) => {
-    const idStore = useIdStore()
+    const route = useRoute();
+    const router = useRouter();
+
     const itemMemoStore = useItemMemoStore();
-    const settingsStore = useSettingsStore();
     const userStore = useUserStore();
-    const blocksStore = useBlocksStore();
     const messageStore = useMessageStore();
     const onlineStore = useOnlineStore();
     const scrollStore = useScrollStore();
 
+    const signal = useSignal()
+
+    const isLoading = ref(false)
+    const downloadVisible = ref(false)
+    const isDownload = ref(false)
+    const upBtnVisible = ref(false)
+    const commentsVisible = ref(false)
+
+    const scrollManager = scrollStore.useSaveScroll(name, 'item')
+
+    const author = ref<{ name: string; id: number; ava?: { url: string } }>({
+        name: "",
+        id: -1,
+    })
+
     let mainElement: HTMLElement | null = null
 
-    //=========================================================//
-    //-- запросы к апи --//
-    const getListItem = async () => {
-        if (!idStore.idValues[name]) return
+    const id = computed(() =>
+        route.params.id ? Number(route.params.id) : undefined
+    )
 
-        const response = await getItem(name, idStore.idValues[name])
-        if (response) {
-            item.value = response
-        }
+    const updateScrollBtnVisible = () => {
+        if (!mainElement) return
+        upBtnVisible.value = mainElement.scrollTop > 20
     }
-    //=========================================================//
 
+    const updateBlocksVisible = () => {
+        if (!mainElement || commentsVisible.value) return
 
-    //=========================================================//
-    //-- загрузка --//
-    // видимость анимации загрузки
-    const isLoading = ref<boolean>(true)
-    //=========================================================//
+        commentsVisible.value = mainElement.scrollHeight - mainElement.scrollTop - mainElement.clientHeight <= 100
+    }
 
+    const onScroll = () => {
+        updateScrollBtnVisible()
+        updateBlocksVisible()
+    }
 
-    //=========================================================//
-    //-- работа с текстом --//
-    const escapeHtml = (str: string) => {
-        return str
-            .replaceAll('&', "&amp;")
-            .replaceAll('<', "&lt;")
-            .replaceAll('>', "&gt;")
+    const attachScroll = () => {
+        if (!mainElement) return
+        mainElement.addEventListener("scroll", onScroll)
+    }
+
+    const detachScroll = () => {
+        if (!mainElement) return
+        mainElement.removeEventListener("scroll", onScroll)
+    }
+
+    const clickToUp = () => {
+        if (!mainElement) return
+
+        mainElement.scrollTo({ top: 0, behavior: "smooth" })
+        scrollStore.scrolls[name].item = 0
+    }
+
+    const escapeHtml = (str: string) =>
+        str
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
             .replaceAll('"', "&quot;")
-            .replaceAll('\'', "&#39;")
+            .replaceAll("'", "&#39;")
+
+    const decodeHtmlEntities = (str: string) => {
+        const textarea = document.createElement("textarea")
+        textarea.innerHTML = str
+        return textarea.value
     }
 
-    const highlightCodeComments = (code: string): string => {
-        const escaped = escapeHtml(code)
+    const highlightCodeComments = (code: string) =>
+        escapeHtml(code).replaceAll(
+            /(\/\/.*$)/gm,
+            '<span class="item__comment">$1</span>'
+        )
 
-        return escaped.replaceAll(/(\/\/.*$)/gm, '<span class="item__comment">$1</span>')
-    }
+    const preserveLineBreaks = (str: string) =>
+        str.replaceAll(/<br\s*\/?>/gi, "\n").replaceAll("&nbsp;", " ")
 
     const parsedText = computed(() => {
-        let text: string
-        if (index) {
-            text = Object.values(item.value.content!)[index.value]
-        } else {
-            text = item.value.text!
-        }
+        if (!item.value) return []
+
+        const text = index
+            ? Object.values(item.value.content ?? {})[index.value]
+            : item.value.text
 
         if (!text) return []
 
-        const result: Array<{ type: "title" | "text" | "code"; content: string }> = []
+        const regex =
+            /<pre><code>[\s\S]*?<\/code><\/pre>|<h3>[\s\S]*?<\/h3>|<p>[\s\S]*?<\/p>/gi
 
-        const decodeHtmlEntities = (str: string): string => {
-            const textarea = document.createElement('textarea')
-            textarea.innerHTML = str
-            return textarea.value
-        }
+        const blocks = text.match(regex) ?? []
 
-        const preserveLineBreaks = (str: string): string => {
-            return str
-                .replaceAll(/<br\s*\/?>/gi, "\n")
-                .replaceAll('&nbsp;', " ")
-        }
-
-        const regex = /<pre><code>[\s\S]*?<\/code><\/pre>|<h3>[\s\S]*?<\/h3>|<p>[\s\S]*?<\/p>/gi
-        const blocks = text.match(regex)
-
-        if (!blocks) return []
-
-        for (const block of blocks) {
+        return blocks.map((block) => {
             let type: "title" | "text" | "code"
-            let rawContent: string
+            let raw: string
 
-            if (/^<pre><code(?:\s[^>]*)?>/.exec(block)) {
+            if (block.startsWith("<pre")) {
                 type = "code"
-                rawContent = block.replaceAll(/(<pre><code(?:\s[^>]*)?>)|(<\/code><\/pre>)/g, "")
-            } else if (block.startsWith("<h3>")) {
+                raw = block.replaceAll(/<\/?pre>|<\/?code>/g, "")
+            } else if (block.startsWith("<h3")) {
                 type = "title"
-                rawContent = block.replaceAll(/<\/?h3>/g, "")
+                raw = block.replaceAll(/<\/?h3>/g, "")
             } else {
                 type = "text"
-                rawContent = block.replaceAll(/<\/?p>/g, "")
+                raw = block.replaceAll(/<\/?p>/g, "")
             }
 
-            // Сохраняем только явные переносы строк
-            const formattedContent = preserveLineBreaks(rawContent)
+            const content = decodeHtmlEntities(preserveLineBreaks(raw))
 
-            // Декодируем HTML-сущности
-            const decodedContent = decodeHtmlEntities(formattedContent)
-
-            result.push({
+            return {
                 type,
-                content: type === "code" ? highlightCodeComments(decodedContent) : decodedContent
-            })
+                content: type === "code" ? highlightCodeComments(content) : content,
+            }
+        })
+    })
+
+    const loadAuthor = async (userId: number) => {
+        const data = await getAuthor(userId, false, signal)
+        author.value = {
+            id: userId,
+            name: data.name,
+            ava: data.ava,
+        }
+    }
+
+    const loadItem = async () => {
+        if (!id.value) return
+
+        item.value = {} as Item
+        author.value = { name: "", id: -1 }
+        commentsVisible.value = false
+        upBtnVisible.value = false
+
+        detachScroll()
+
+        const cached = itemMemoStore.getItem(name, id.value)
+
+        try {
+            if (cached) {
+                item.value = cached
+            } else {
+                if (onlineStore.isOnlineMode) isLoading.value = true
+
+                const data = await getItem(name, id.value, signal)
+                item.value = data
+                itemMemoStore.setItem(name, id.value, data)
+
+                await updateStatistics(
+                    name,
+                    data.id!,
+                    "views",
+                    data.statistics ?? { views: 0, downloads: 0, likes: 0 },
+                    signal
+                )
+            }
+
+            if (onlineStore.isOnlineMode) {
+                downloadVisible.value = !(await checkPost(id.value, name))
+
+                if (item.value.user_id === userStore.user.id) {
+                    userStore.isUserPost[name] = true
+                } else {
+                    await loadAuthor(item.value.user_id)
+                }
+            }
+        } catch (err) {
+            console.error('Ошибка загрузки элемента', err)
+
+            await showError("Ошибка", "Не удалось загрузить элемент")
+            await router.push({name})
+            return
         }
 
-        return result
-    })
-    //=========================================================//
+        isLoading.value = false
 
+        await nextTick()
 
-    //=========================================================//
-    //-- блок с кодом --//
-    // копирование кода
+        mainElement ??= document.querySelector(".home__main")
+
+        if (mainElement) {
+            mainElement.scrollTop = 0
+            updateScrollBtnVisible()
+            updateBlocksVisible()
+            attachScroll()
+        }
+    }
+
     const handleCopy = async (code: string): Promise<void> => {
         try {
             await navigator.clipboard.writeText(decodeHtmlEntities(code))
@@ -148,237 +235,60 @@ export const useItem = (
             )
         }
     }
-    //=========================================================//
 
-
-    //=========================================================//
-    //-- скачивание --//
-    // видимость кнопки "Скачать"
-    const downloadVisible = ref<boolean>(false)
-
-    // видимость анимации скачивания
-    const isDownload =  ref<boolean>(false)
-
-
-    // клик по кнопке "Скачать"
     const handleDownload = async () => {
-        const check = await showConfirm(
-            'Скачивание материала',
-            'Вы действительно хотите скачать данный материал?'
+        const ok = await showConfirm(
+            "Скачивание материала",
+            "Вы действительно хотите скачать материал?"
         )
+        if (!ok) return
 
-        if (check) {
-            isDownload.value = true
+        isDownload.value = true
 
-            try {
-                await createItemInDB(name, item.value, item.value.id)
-
-                await updateStatistics(
-                    name,
-                    item.value.id!,
-                    'downloads',
-                    item.value.statistics
-                )
-
-                isDownload.value = false
-            } catch (err) {
-                console.error('ошибка скачивания', err)
-
-                messageStore.show('Не удалось скачать..', true)
-            } finally {
-                downloadVisible.value = false
-            }
-        }
-    }
-    //=========================================================//
-
-
-    //=========================================================//
-    //-- подъем наверх --//
-    // видимость кнопки подъема наверх
-    const upBtnVisible = ref<boolean>(true)
-
-
-    // кли по кнопке подъема
-    const clickToUp = () => {
-        if (mainElement) {
-            mainElement.scrollTo({
-                top: 0,
-                behavior: 'smooth',
-            })
-            scrollStore.scrolls[name].item = 0
-        }
-    }
-
-    // при scroll-е показываем кнопку поднятия наверх
-    const updateScrollBtnVisible = () => {
-        if (!mainElement) return
-
-        const topPosition: number = mainElement.scrollTop
-
-        upBtnVisible.value = topPosition > 0
-    }
-    //=========================================================//
-
-
-    //=========================================================//
-    //-- автор поста --//
-    type Author = {
-        name: string;
-        id: number;
-        ava?: {url: string}
-    }
-    const author = ref<Author>({name: '', id: -1})
-
-
-    // получение данных об авторе
-    const getAuthorInfo = async (id: number) => {
-        const data: {ava?: {url: string}, name: string} = await getAuthor(id)
-
-        author.value.name = data.name
-        author.value.id = id
-
-        if (data.ava) author.value.ava = data.ava
-    }
-    //=========================================================//
-
-
-    //=========================================================//
-    //-- статистика и комментарии --//
-    // видимость блока комментариев
-    const commentsVisible = ref<boolean>(false)
-
-
-    // добавление видимости блока, когда мы до-листали до низа
-    const updateBlocksVisible = () => {
-        if (!mainElement || commentsVisible.value) return
-
-        commentsVisible.value =
-            mainElement.scrollHeight - mainElement.scrollTop - mainElement.clientHeight <= 100
-    }
-    //=========================================================//
-
-
-    //=========================================================//
-    //-- хуки --//
-    onActivated(async () => {
-        isLoading.value = true
-        upBtnVisible.value = false
-        commentsVisible.value = false
-
-        const data = itemMemoStore.getItem(
-            name,
-            idStore.idValues[name]
-        )
-
-        settingsStore.settingsVisible[name] = 'item'
-
-        if (data) {
-            item.value = data
-        } else {
-            try {
-                await getListItem()
-            } catch (err) {
-                console.error('ошибка загрузки данных', err)
-
-                await showError(
-                    'Ошибка загрузки элемента',
-                    'Не удалось загрузить элемент'
-                )
-
-                blocksStore.activeBlock[name] = 'list'
-                settingsStore.settingsVisible[name] = 'list'
-
-                return
-            }
-
-            itemMemoStore.setItem(
+        try {
+            await createItemInDB(name, item.value, item.value.id)
+            await updateStatistics(
                 name,
-                idStore.idValues[name],
-                item.value
+                item.value.id!,
+                "downloads",
+                item.value.statistics,
+                signal
             )
-
-            const statistics = item.value.statistics ?? {
-                views: 0,
-                downloads: 0,
-                likes: 0,
-            }
-
-            try {
-                await updateStatistics(
-                    name,
-                    item.value.id!,
-                    'views',
-                    statistics
-                )
-            } catch (err) {
-                console.error('не удалось обновить статистику', err)
-            }
+            messageStore.show("Скачано")
+        } catch {
+            messageStore.show("Ошибка скачивания", true)
+        } finally {
+            isDownload.value = false
+            downloadVisible.value = false
         }
+    }
 
-        if (item.value.user_id === userStore.user.id) {
-            userStore.isUserPost[name] = true
-        } else {
-            try {
-                await getAuthorInfo(item.value.user_id)
-            } catch (err) {
-                console.error('не удалось получить автора', err)
-            }
-        }
-
-        isLoading.value = false
-
-        await nextTick()
-        updateBlocksVisible()
-
-        if (mainElement) {
-            mainElement.addEventListener('scroll', () => {
-                updateScrollBtnVisible()
-                updateBlocksVisible()
-            })
-        }
+    onMounted(async () => {
+        await loadItem()
+        scrollManager.setup()
+        await scrollManager.restoreScroll()
     })
 
-    onDeactivated(() => {
-        if (mainElement) {
-            mainElement.removeEventListener('scroll', () => {
-                updateScrollBtnVisible()
-                updateBlocksVisible()
-            })
-        }
-
-        author.value = {name: '', id: -1}
+    onBeforeUnmount(() => {
+        userStore.isUserPost[name] = false
+        detachScroll()
+        scrollManager.destroy()
     })
-
-    onMounted(() => {
-        mainElement = document.querySelector('.home__main')
-    })
-
-    // проверка наличие поста в бд
-    watchEffect(async () => {
-        if (!onlineStore.isOnlineMode) return
-
-        downloadVisible.value = !await checkPost(name)
-    })
-    //=========================================================//
-
 
     return {
         isLoading,
-
         parsedText,
 
         handleCopy,
 
-        downloadVisible,
-        isDownload,
         handleDownload,
+        isDownload,
+        downloadVisible,
 
         upBtnVisible,
         clickToUp,
 
         commentsVisible,
-        updateBlocksVisible,
 
         author,
     }

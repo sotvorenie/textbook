@@ -19,6 +19,11 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  // задать модальному окну повышенный z-index = 100.000, чтобы она отображалась поверх всего
+  isTop: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emits = defineEmits(['close'])
@@ -42,7 +47,10 @@ const close = () => {
 
   <Teleport to="body">
     <Transition name="fade">
-      <div class="modal position-absolute z-10000 flex-center" v-if="visible" @click="close">
+      <div :class="{
+              'modal position-absolute z-10000 flex-center': true,
+              'z-100000': isTop
+            }" v-if="visible" @click="close">
         <div class="modal__content position-relative" :style="{width: `${size}px`}" @click.stop>
           <button :class="['modal__close', 'position-absolute', ...roundedButtonStyle]"
                   @click="close"

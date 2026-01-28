@@ -1,7 +1,15 @@
 <script setup lang="ts">
-import {onMounted, onUnmounted} from "vue";
+import {onBeforeMount, onMounted, onUnmounted} from "vue";
 
-import {getTheme} from "./utils/theme.ts";
+import {useTheme} from "./utils/theme.ts";
+
+import SnowFall from "./components/ui/winter/SnowFall.vue";
+import Garland from "./components/ui/winter/Garland.vue";
+
+import useUIStore from "./store/useUIStore.ts";
+const uiStore = useUIStore();
+
+const {getTheme} = useTheme()
 
 const handleTab = (e: KeyboardEvent) => {
   if (e.key === 'Tab') {
@@ -23,6 +31,10 @@ const handleTab = (e: KeyboardEvent) => {
   }
 }
 
+onBeforeMount(() => {
+  uiStore.setWinterUiVisible()
+})
+
 onMounted(() => {
   document.addEventListener('keydown', handleTab)
 
@@ -35,5 +47,8 @@ onUnmounted(() => {
 </script>
 
 <template>
+  <SnowFall v-if="uiStore.winterUiVisible && uiStore.snowVisible"/>
+  <Garland v-if="uiStore.winterUiVisible && uiStore.garlandVisible"/>
+
   <router-view/>
 </template>

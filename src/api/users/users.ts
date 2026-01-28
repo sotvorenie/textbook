@@ -3,7 +3,7 @@ import {del, patch, post} from "../base.ts";
 import useUserStore from "../../store/useUserStore.ts";
 import {getCurrentDateTime} from "../../composables/useDate.ts";
 
-export const postFile = async (file: File): Promise<void> => {
+export const postFile = async (file: File, signal?: AbortSignal): Promise<void> => {
     const userStore = useUserStore();
 
     const formData = new FormData();
@@ -14,7 +14,7 @@ export const postFile = async (file: File): Promise<void> => {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
-        })
+        }, signal)
 
     if (response) {
         userStore.user.ava = {
@@ -24,19 +24,19 @@ export const postFile = async (file: File): Promise<void> => {
     }
 }
 
-export const postAva = async (): Promise<any> => {
+export const postAva = async (signal?: AbortSignal): Promise<any> => {
     const userStore = useUserStore();
 
     await patch(`/users/${userStore.user.id}`, {
         ava: userStore.user.ava
-    })
+    }, signal)
 }
 
-export const deletePredLastFile = async (id: number) => {
-    await del(`/uploads/${id}`)
+export const deletePredLastFile = async (id: number, signal?: AbortSignal) => {
+    await del(`/uploads/${id}`, signal)
 }
 
-export const setLastSession = async ():Promise<void> => {
+export const setLastSession = async (signal?: AbortSignal):Promise<void> => {
     const userStore = useUserStore();
 
     const dateTime = getCurrentDateTime()
@@ -45,5 +45,5 @@ export const setLastSession = async ():Promise<void> => {
 
     await patch(`users/${userStore.user.id}`, {
         last_session: dateTime.date
-    })
+    }, signal)
 }

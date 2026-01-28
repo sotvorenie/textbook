@@ -77,6 +77,12 @@ export const removeOffline = async (name: string, id: number, newItemId?: number
 
 export const initDB = async () => {
     await executeSQL(`
+        CREATE TABLE IF NOT EXISTS technologies (
+            technologies TEXT
+        )
+    `)
+
+    await executeSQL(`
     CREATE TABLE IF NOT EXISTS advices (
       id INTEGER,
       user_id INTEGER,

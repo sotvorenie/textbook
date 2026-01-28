@@ -5,7 +5,7 @@
   --padding: #{$container-padding-x};
 
   border-right: $border-light-alt;
-  padding-bottom: rem(10);
+  padding-bottom: fluid(20, 10);
 
   &.closed {
     --padding: 10px;
@@ -53,10 +53,13 @@
     transform-origin: left;
   }
 
+  ul {
+    flex-grow: 1;
+  }
+
   &__list {
     transition: padding-inline $transition-duration  ease;
     padding-inline: calc(#{var(--padding)} - rem(15));
-    flex-grow: 1;
   }
 
   &__item {

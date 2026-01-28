@@ -1,0 +1,29 @@
+@use '../../helpers/index' as *;
+@use '../../variables' as *;
+
+.winter {
+
+  &__btn {
+    scale: .8;
+    rotate: -30deg;
+    bottom: calc(100% - #{rem(135)});
+    left: rem(-141);
+    border-radius: 50%;
+
+    @include hover {
+      scale: 0.85;
+    }
+  }
+
+  &__title {
+    @include fluid-text(25, 20);
+  }
+
+  &__content {
+    gap: rem(10);
+  }
+
+  &__label {
+    gap: rem(10);
+  }
+}

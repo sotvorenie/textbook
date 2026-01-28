@@ -4,6 +4,10 @@
 .list {
   --gap: 30px;
 
+  @include tablet {
+    --gap: 20px;
+  }
+
   &-wrapper {
     width: 100%;
   }

@@ -1,28 +1,30 @@
-import {onMounted, ref} from "vue";
+import { onMounted, ref } from "vue";
 
-const theme = ref<string>('dark')
+export function useTheme() {
+    const theme = ref<string>('dark')
 
-const changeTheme = () => {
-    theme.value = theme.value === 'dark' ? 'light' : 'dark'
+    const setTheme = () => {
+        document.documentElement.dataset.theme = theme.value
+    }
 
-    setTheme()
+    const changeTheme = () => {
+        theme.value = theme.value === 'dark' ? 'light' : 'dark'
+        setTheme()
+        localStorage.setItem('theme', theme.value)
+    }
 
-    localStorage.setItem('theme', theme.value)
+    const getTheme = () => {
+        theme.value = localStorage.getItem('theme') ?? 'dark'
+        setTheme()
+    }
+
+    onMounted(() => {
+        getTheme()
+    })
+
+    return {
+        theme,
+        changeTheme,
+        getTheme
+    }
 }
-
-const setTheme = () => {
-    document.documentElement.dataset.theme = theme.value
-}
-
-const getTheme = () => {
-    theme.value = localStorage.getItem('theme') ?? ''
-
-    setTheme()
-}
-
-onMounted(() => {
-    getTheme()
-
-})
-
-export { changeTheme, theme, getTheme }

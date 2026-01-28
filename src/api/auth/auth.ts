@@ -12,24 +12,24 @@ const setToken = (response: AuthResponse): void => {
     }
 }
 
-export const register = async (data: RegisterData): Promise<AuthResponse> => {
-    const response: AuthResponse = await post<AuthResponse>('/register', data)
+export const register = async (data: RegisterData, signal?: AbortSignal): Promise<AuthResponse> => {
+    const response: AuthResponse = await post<AuthResponse>('/register', data, undefined, signal)
     setToken(response)
     return response
 }
 
-export const login = async (data: LoginData): Promise<AuthResponse> => {
-    const response: AuthResponse = await post<AuthResponse>('/auth', data)
+export const login = async (data: LoginData, signal?: AbortSignal): Promise<AuthResponse> => {
+    const response: AuthResponse = await post<AuthResponse>('/auth', data, undefined, signal)
     setToken(response)
     return response
 }
 
-export const check = async (): Promise<User | void> => {
+export const check = async (signal?: AbortSignal): Promise<User | void> => {
     const token = authToken.get();
     if (!token) throw new NoTokenError()
 
     try {
-        return await get('/auth_me')
+        return await get('/auth_me', undefined, signal)
     } catch (err: any) {
         if (isNetworkError(err)) {
             throw new OfflineError()

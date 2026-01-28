@@ -13,6 +13,7 @@ import useItemsStore from "../../store/useItemsStore.ts";
 export const handleLike = async (
     name: string,
     id: number,
+    signal?: AbortSignal,
     statistics?: Item['statistics']
 ): Promise<any> => {
     const userStore = useUserStore();
@@ -40,13 +41,13 @@ export const handleLike = async (
             isLike = true
         }
 
-        const response = await like(name)
+        const response = await like(name, signal)
 
-        if (isLike) await updateStatistics(name, id, 'likes', statistics!)
+        if (isLike && statistics) await updateStatistics(name, id, 'likes', statistics!, signal)
 
         if (response) {
-            isLike ? await sendToTelegram(TelegramEventType.LIKE, element.title)
-                : await sendToTelegram(TelegramEventType.UNLIKE, element.title)
+            isLike ? await sendToTelegram(TelegramEventType.LIKE, signal, element.title)
+                : await sendToTelegram(TelegramEventType.UNLIKE, signal, element.title)
 
             if (userStore.userLiked.id < 0) {
                 userStore.userLiked.id = response.id
@@ -68,21 +69,22 @@ export const handleLike = async (
     }
 }
 
-const like = async (name: string): Promise<any> => {
+const like = async (name: string, signal?: AbortSignal): Promise<any> => {
     const userStore = useUserStore();
 
     if (userStore.userLiked.id >= 0) {
         return await patch(`/user_liked/${userStore.userLiked.id}`, {
             items: {
                 ...userStore.userLiked.items
-            }
+            }, signal
         })
     } else {
         const response = await post(`/user_liked`, {
             user_id: userStore.user.id,
             items: {
                 [name]: userStore.userLiked.items[name]
-            }
+            },
+            signal
         })
 
         if (response) return response

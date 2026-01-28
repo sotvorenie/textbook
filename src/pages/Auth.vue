@@ -1,21 +1,21 @@
 <script setup lang="ts">
 import {reactive, ref, onUnmounted, onMounted, watch} from "vue";
-import router from "../router";
+import {useRouter} from "vue-router";
 import {Swiper, SwiperSlide} from "swiper/vue";
 import type {Swiper as ISwiper} from 'swiper/types'
 import 'swiper/css';
 
 import {classes} from "../data/classes.ts";
 
-import {showConfirm, showError, showWarning} from "../utils/modals.ts";
-import {resetAllStores} from "../utils/resetAllStores.ts";
-
-import {onBlur, onInput, onSubmit} from "../composables/useFormValidation.ts";
-import {addLabelText, removeLabelText} from "../composables/useLabelText.ts";
-
 import {login, register} from "../api/auth/auth.ts";
 import {AuthResponse, LoginData, RegisterData} from "../api/auth/types.ts";
 import {sendToTelegram, TelegramEventType} from "../api/telegram/telegram.ts";
+
+import {showConfirm, showError, showWarning} from "../utils/modals.ts";
+import {resetAllStores} from "../utils/resetAllStores.ts";
+import {onBlur, onInput, onSubmit} from "../composables/useFormValidation.ts";
+import {addLabelText, removeLabelText} from "../composables/useLabelText.ts";
+import {useSignal} from "../composables/useSignal.ts";
 
 import Btn from "../components/ui/Btn.vue";
 import Navigation from "../components/common/Navigation.vue";
@@ -28,6 +28,10 @@ import useMessageStore from "../store/useMessageStore.ts";
 const messageStore = useMessageStore();
 import useIpStore from "../store/useIpStore.ts";
 const ipStore = useIpStore();
+
+const router = useRouter();
+
+const signal = useSignal()
 
 //=========================================================//
 
@@ -47,12 +51,12 @@ const loginUser = async () => {
       password: loginForm.password,
     }
 
-    let response: AuthResponse = await login(data)
+    let response: AuthResponse = await login(data, signal)
 
     if (response.token) {
-      await ipStore.checkUserIp(response.data.id)
+      await ipStore.checkUserIp(response.data.id, signal)
 
-      await sendToTelegram(TelegramEventType.LOGIN, response.data.name)
+      await sendToTelegram(TelegramEventType.LOGIN, signal, response.data.name)
 
       await router.push('/main').catch(() => {})
     } else {
@@ -84,17 +88,17 @@ const registerUser = async () => {
       ip: [ipStore.userIp]
     }
 
-    let response: AuthResponse = await register(data)
+    let response: AuthResponse = await register(data, signal)
 
     if (response.token) {
-      await sendToTelegram(TelegramEventType.REGISTER, response.data.name)
+      await sendToTelegram(TelegramEventType.REGISTER, signal, response.data.name)
 
       successRegister()
     } else {
       await showWarning('Ошибка регистрации','Пользователь с таким email уже существует!!')
     }
   } catch (err) {
-    console.error('ошибка ругистрации', err)
+    console.error('ошибка регистрации', err)
 
     await showError(
         'Ошибка регистрации',
@@ -117,7 +121,12 @@ const successRegister = () => {
 
 // проверка ip-адреса
 const checkIP = async () => {
-  await ipStore.checkIP(skeletonVisible)
+  if (!onlineStore.isOnlineMode) {
+    skeletonVisible.value = false
+    return
+  }
+
+  await ipStore.checkIP(skeletonVisible, signal)
 }
 //=========================================================//
 

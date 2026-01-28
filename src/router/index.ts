@@ -1,6 +1,6 @@
 import {createRouter, createWebHistory} from 'vue-router'
 import { routes } from './router'
-import {authToken} from "../utils/auth.ts";
+import useRouterStore from "../store/useRouterStore.ts";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -14,25 +14,17 @@ const router = createRouter({
     }
 })
 
-router.beforeEach((to, from, next) => {
-    const isAuthenticated = authToken.hasToken()  // проверка авторизации
+router.beforeEach((to, from) => {
+    const routerStore = useRouterStore()
 
-    if (to.meta.requiresAuth && !isAuthenticated) {
-        next({ name: 'Auth' })
-        return
+    if (!from.name && to.name !== 'Auth' && to.name !== 'Main') {
+        return { name: 'Main' }
     }
 
-    if (to.name === 'User' && !from.name) {
-        next({ name: 'Main' })
-        return
+    const section = to.meta.section as string | undefined
+    if (section) {
+        routerStore.pushSectionRoute(section, to, from)
     }
-
-    if (to.name === 'Auth' && isAuthenticated) {
-        next({ name: 'Main' })
-        return
-    }
-
-    next()
 })
 
 

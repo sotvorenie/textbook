@@ -1,0 +1,236 @@
+<script setup lang="ts">
+import {computed, ref} from "vue";
+
+import {Item} from "../../../types/item.ts";
+
+import {useItem} from "../../../composables/item/useItem.ts";
+
+import ItemTextbookSkeleton from "./ItemTextbookSkeleton.vue";
+import ItemStatisticsSkeleton from "../user/UserStatisticsSkeleton.vue";
+import ItemStatistics from "./ItemStatistics.vue";
+import TextbookSlider from "../main/TextbookSlider.vue";
+import ItemCode from "./ItemCode.vue";
+import ItemComments from "./ItemComments.vue";
+import Modal from "../../common/Modal.vue";
+import Btn from "../../ui/Btn.vue";
+
+import SearchIcon from "../../../assets/icons/SearchIcon.vue";
+import Arrow from "../../../assets/icons/Arrow.vue";
+
+import useOnlineStore from "../../../store/useOnlineStore.ts";
+const onlineStore = useOnlineStore();
+
+const props = defineProps({
+  name: {
+    type: String,
+    required: true
+  }
+})
+
+//=========================================================//
+
+
+//=========================================================//
+//-- элемент списка --//
+// первоначальный вид элемента списка
+const item = ref<Item>({
+  user_id: -1,
+  title: '',
+  languages_and_technologies: [],
+  content: {},
+  date: '',
+  sort_date: '',
+  time: '',
+  statistics: {
+    views: 0,
+    downloads: 0,
+    likes: 0,
+  }
+})
+//=========================================================//
+
+
+//=========================================================//
+//-- tabs --//
+// активный индекс tab
+const activeIndex = ref<number>(0)
+
+// название активного tab
+const activeTabName = computed((): string => {
+  return allTabs.value[activeIndex.value] ?? ''
+})
+
+// массив tabs
+const allTabs = computed((): string[] => {
+  return Object.keys(item.value?.content ?? {}) ?? []
+})
+//=========================================================//
+
+
+//=========================================================//
+//-- модальное окно --//
+// название темы в поле ввода в модальном окне
+const searchNameInModal = ref<string>('')
+
+// отфильтрованный список tabs для модального окна
+const filteredTabsForModal = computed((): string[] => {
+  return allTabs.value?.filter((el: string) => el.toLowerCase().includes(searchNameInModal.value.toLowerCase())) ?? []
+})
+
+
+// выбор активного tab в модальном окне
+const handleTabInModal = (tabName: string): void => {
+  activeIndex.value = allTabs.value.indexOf(tabName)
+}
+//=========================================================//
+
+
+//=========================================================//
+//-- вызов composable-функции --//
+const {
+  isLoading,
+  parsedText: text,
+  handleCopy,
+  downloadVisible,
+  isDownload,
+  handleDownload,
+  upBtnVisible,
+  clickToUp,
+  commentsVisible,
+  author
+} = useItem(
+    props.name,
+    item,
+    activeIndex
+)
+//=========================================================//
+</script>
+
+<template>
+
+  <div class="item-root">
+    <ItemTextbookSkeleton v-if="isLoading"/>
+
+    <div class="textbook" v-else>
+      <Btn class="item__download button-small mb-10"
+           v-if="downloadVisible"
+           @click="handleDownload"
+           :is-loading="isDownload"
+      >
+        Скачать
+      </Btn>
+
+      <p class="textbook__title h2 mb-40-20">{{item.title}}</p>
+
+      <Modal :size="500">
+        <template #activator="{open}">
+          <Btn class="textbook__search-btn button-small recolor-svg m-auto flex mb-20"
+               @click="open"
+          >
+            <span>Найти тему</span>
+            <SearchIcon/>
+          </Btn>
+        </template>
+
+        <template #default="{close}">
+          <input class="textbook__search-input input mb-20"
+                 placeholder="Найти тему.."
+                 v-model="searchNameInModal"
+          >
+
+          <ul class="textbook__search-list">
+            <li v-for="tab in filteredTabsForModal"
+                :key="tab"
+                :class="{
+                  'textbook__search-item cursor-pointer mb-not-last-10': true,
+                  'is-active': tab === activeTabName
+                }"
+                @click="() => {
+                  handleTabInModal(tab)
+                  close()
+                }"
+            >
+              {{tab}}
+            </li>
+          </ul>
+        </template>
+      </Modal>
+
+      <TextbookSlider :items="allTabs"
+                          v-model:active-index="activeIndex"
+      />
+
+      <div class="textbook__content mb-30">
+        <template v-for="part in text">
+          <h4 class="item__pod-title text-w500 mb-10" v-if="part.type === 'title'">
+            {{ part.content }}
+          </h4>
+
+          <p class="item__text mb-not-last-20 w-100" v-else-if="part.type === 'text'">
+            {{ part.content }}
+          </p>
+
+          <ItemCode :text="part.content"
+                        @copy="handleCopy"
+                        v-else/>
+        </template>
+      </div>
+
+      <div class="item__author mb-15 flex flex-align-center" v-if="author.name">
+        <span>Автор:</span>
+        <RouterLink :to="{
+                      name: 'User',
+                      params: {id: author.id},
+                      query: {postId: item.id, name}
+                    }"
+                    class="item__author-info flex flex-align-center"
+        >
+          <div class="item__avatar img-container" v-if="author.ava">
+            <img :src="author?.ava?.url" :alt="author?.name">
+          </div>
+          <span>{{author?.name}}</span>
+        </RouterLink>
+      </div>
+
+      <ul class="item__date flex flex-align-center mb-10">
+        <li class="item__date-item flex flex-align-center">
+          <p class="h5">Дата создания:</p>
+          <p class="h6">{{item.date}}</p>
+          <p class="h6">{{item.time}}</p>
+        </li>
+        <li class="item__date-item flex flex-align-center" v-if="item.redacted">
+          <p class="h5">Редактировано:</p>
+          <p class="h6">{{item.redacted.date}}</p>
+          <p class="h6">{{item.redacted.time}}</p>
+        </li>
+      </ul>
+
+      <Suspense v-if="onlineStore.isOnlineMode">
+        <template #default>
+          <ItemStatistics :name="name"
+                              :statistics="item.statistics"
+          />
+        </template>
+
+        <template #fallback>
+          <ItemStatisticsSkeleton/>
+        </template>
+      </Suspense>
+
+      <ItemComments v-if="commentsVisible && onlineStore.isOnlineMode"
+                    :name="name"
+      />
+
+      <Transition name="scale" appear>
+        <button class="item__up flex-center button-width-svg recolor-svg position-fixed"
+                type="button"
+                @click="clickToUp"
+                v-if="upBtnVisible"
+        >
+          <Arrow/>
+        </button>
+      </Transition>
+    </div>
+  </div>
+
+</template>

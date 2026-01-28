@@ -15,7 +15,8 @@ type GetListParams = {
     user_id: number | null
     value?: string
     sortBy?: string
-    id?: number[]
+    id?: number[],
+    signal?: AbortSignal
 }
 export const getList = async ({
     name,
@@ -25,6 +26,7 @@ export const getList = async ({
     value = "",
     sortBy = "-sort_date",
     id = [],
+    signal
 }: GetListParams): Promise<{ meta: any; items: List[] }> => {
     const onlineStore = useOnlineStore();
     const homeStore = useHomeStore();
@@ -46,7 +48,7 @@ export const getList = async ({
     if (id?.length > 0) params["id[]"] = id
 
     try {
-        return await get(`/${name}`, params)
+        return await get(`/${name}`, params, signal)
     } catch (err: any) {
         if (isNetworkError(err))
             return getListFromDB({name, page, value, languages, user_id, sortBy, id})
@@ -55,35 +57,35 @@ export const getList = async ({
     }
 }
 
-export const getItem = async (name: string, id: number): Promise<Item> => {
+export const getItem = async (name: string, id: number, signal?: AbortSignal): Promise<Item> => {
     const onlineStore = useOnlineStore();
 
     if (!onlineStore.isOnlineMode)
         return getItemFromDB(name, id)
 
     try {
-        return await get(`/${name}/${id}`)
+        return await get(`/${name}/${id}`, undefined, signal)
     } catch (err: any) {
         if (isNetworkError(err))
             return await getItemFromDB(name, id)
 
         throw err
     }
-};
+}
 
 export const createItem = async (
     name: string,
     item: Item,
     createInDB: boolean = true,
-    createInAPI: boolean = true
+    signal?: AbortSignal,
 ): Promise<Item> => {
     const onlineStore = useOnlineStore();
 
-    if (!onlineStore.isOnlineMode && !createInAPI)
+    if (!onlineStore.isOnlineMode)
         return createItemInDB(name, item, -1, "create")
 
     try {
-        const createdItem: Item = await post(`/${name}`, item)
+        const createdItem: Item = await post(`/${name}`, item, signal)
 
         if (createInDB) {
             await createItemInDB(
@@ -100,13 +102,14 @@ export const createItem = async (
 
         throw err
     }
-};
+}
 
 export const redactItem = async (
     name: string,
     item: Item,
     id: number,
-    redactInDB: boolean = true
+    redactInDB: boolean = true,
+    signal?: AbortSignal
 ): Promise<any> => {
     const onlineStore = useOnlineStore();
 
@@ -114,7 +117,7 @@ export const redactItem = async (
         return redactItemInDB(name, item, id, "redact")
 
     try {
-        const redactedItem = await patch(`/${name}/${id}`, item)
+        const redactedItem = await patch(`/${name}/${id}`, item, signal)
 
         if (redactInDB) await redactItemInDB(name, item, id)
 
@@ -125,28 +128,61 @@ export const redactItem = async (
 
         throw err
     }
-};
+}
 
-export const removeItem = async (name: string, id: number): Promise<any> => {
+export const removeItem = async (
+    name: string,
+    id: number,
+    signal?: AbortSignal
+): Promise<any> => {
     const onlineStore = useOnlineStore();
 
     if (!onlineStore.isOnlineMode) return removeFromDB(name, id)
 
     try {
-        await del(`/${name}/${id}`)
+        await del(`/${name}/${id}`, signal)
     } catch (err: any) {
         if (isNetworkError(err))
             await removeFromDB(name, id)
 
         throw err
     }
-};
+}
+
+export const moveItem = async (
+    id: number,
+    sectionFrom: string,
+    sectionTo: string,
+    item: Item,
+    signal?: AbortSignal
+): Promise<number> => {
+    const onlineStore = useOnlineStore();
+
+    const moveInDB = async () => {
+        await createItemInDB(sectionTo, item)
+        await removeFromDB(sectionFrom, id)
+    }
+
+    if (!onlineStore.isOnlineMode) await moveInDB()
+
+    try {
+        const newItem = await createItem(sectionTo, item, true, signal)
+        await removeItem(sectionFrom, id, signal)
+
+        return newItem.id as number
+    } catch (err: any) {
+        if (isNetworkError(err)) await moveInDB()
+
+        throw err
+    }
+}
 
 export const updateStatistics = async (
     name: string,
     id: number,
     type: keyof Item['statistics'],
-    statistics: Item['statistics']
+    statistics: Item['statistics'],
+    signal?: AbortSignal
 ) => {
     const onlineStore = useOnlineStore();
 
@@ -154,7 +190,7 @@ export const updateStatistics = async (
 
     statistics[type] = (+statistics[type] || 0) + 1
 
-    await patch(`/${name}/${id}`, {statistics})
+    await patch(`/${name}/${id}`, {statistics}, signal)
 }
 
 export const getAuthor = async (id: number, getSessionAndEmail: boolean = false, signal?: AbortSignal):

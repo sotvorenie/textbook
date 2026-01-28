@@ -1,18 +1,19 @@
 import {defineStore} from "pinia";
 import {ref, watch} from "vue";
-import router from "../router";
+import {useRouter} from "vue-router";
 
 import {User} from "../types/user";
-
-import {getCurrentDateTime} from "../composables/useDate.ts";
-import {showError} from "../utils/modals.ts";
-import {userAva} from "../utils/ava.ts";
-import {resetAllStores} from "../utils/resetAllStores.ts";
 
 import {check} from "../api/auth/auth.ts";
 import {get} from "../api/base.ts";
 import {setLastSession} from "../api/users/users.ts";
 import {sendToTelegram, TelegramEventType} from "../api/telegram/telegram.ts";
+import {executeSQL, selectSQL} from "../api/database.ts";
+
+import {getCurrentDateTime} from "../composables/useDate.ts";
+import {showError} from "../utils/modals.ts";
+import {userAva} from "../utils/ava.ts";
+import {resetAllStores} from "../utils/resetAllStores.ts";
 
 import useOnlineStore from "./useOnlineStore.ts";
 import useUserStore from "./useUserStore.ts";
@@ -22,14 +23,13 @@ import useIpStore from "./useIpStore.ts";
 const useHomeStore = defineStore('homeStore', () => {
     const onlineStore = useOnlineStore();
 
-    // загрузился ли Home впервые (чтобы при возврате со страницы User не было обновления данных)
-    const firstLoading = ref(true)
+    const router = useRouter();
 
     // видимость анимации на HomePage
     const loadingVisible = ref<boolean>(true)
 
     // индекс активного aside-меню
-    const activeMenuIndex = ref<number>(0)
+    const activeMenuIndex = ref<number>(-1)
 
     // значение page для апи в зависимости от разрешения экрана при onMounted в Home Page
     const pageNumberForAPI = ref<number>(9)
@@ -40,13 +40,18 @@ const useHomeStore = defineStore('homeStore', () => {
         const technologiesStore = useTechnologiesStore()
         const ipStore = useIpStore()
 
+        if (!onlineStore.isOnline) return
+
+        loadingVisible.value = true
+
+        await router.push({name: 'Main'})
+
         const hideLoading = () => {
             onlineStore.modeLoadingVisible = false
             loadingVisible.value = false
         }
 
         onlineStore.modeLoadingVisible = true
-        activeMenuIndex.value = 0
 
         resetAllStores()
 
@@ -62,6 +67,20 @@ const useHomeStore = defineStore('homeStore', () => {
 
         if (!onlineStore.isOnlineMode) {
             userStore.user.ava = { url: '', id: -1 }
+
+            try {
+                const data = await selectSQL<any>(
+                    `SELECT * FROM technologies`
+                )
+
+                if (data) {
+                    technologiesStore.technologies = JSON.parse(data[0]?.technologies) || []
+                }
+            } catch (err) {
+                console.error('Не удалось загрузить список языков и технологий', err)
+                technologiesStore.technologies = []
+            }
+
             hideLoading()
             return
         }
@@ -70,6 +89,8 @@ const useHomeStore = defineStore('homeStore', () => {
 
         if (ipStore.inBlackList) {
             hideLoading()
+            onlineStore.isOnlineMode = false
+            onlineStore.isOnline = false
             return
         }
 
@@ -124,7 +145,7 @@ const useHomeStore = defineStore('homeStore', () => {
 
                 userStore.isAdmin = !!user
                 userStore.isFullAdmin = user?.full ?? false
-                userStore.isViewer = user?.viewer ?? false
+                userStore.isViewer = user?.viewer ?? true
             } catch (err) {
                 console.error('Ошибка получения администраторов', err)
 
@@ -153,6 +174,13 @@ const useHomeStore = defineStore('homeStore', () => {
             }
         }
         await getTechnologies()
+        try {
+            await executeSQL(
+                `INSERT INTO technologies (technologies) VALUES (?)`, [JSON.stringify(technologiesStore.technologies)]
+            )
+        } catch (err) {
+            console.error('Ошибка записи технологий в локальную базу данных', err)
+        }
 
         const getLiked = async () => {
             try {
@@ -246,8 +274,6 @@ const useHomeStore = defineStore('homeStore', () => {
     )
 
     return {
-        firstLoading,
-
         loadingVisible,
         activeMenuIndex,
         pageNumberForAPI,

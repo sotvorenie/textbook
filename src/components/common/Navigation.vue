@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {theme, changeTheme} from "../../utils/theme.ts";
+import {useTheme} from "../../utils/theme.ts";
 
 import ToggleButton from "../ui/ToggleButton.vue";
 
@@ -30,6 +30,8 @@ defineProps({
     default: false,
   },
 })
+
+const {theme, changeTheme} = useTheme();
 
 const locationReload = () => {
   globalThis.location.reload()

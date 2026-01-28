@@ -1,7 +1,7 @@
 @use '../../helpers/index' as *;
 @use '../../variables' as *;
 
-.settings {
+.header {
   column-gap: rem(10);
 
   &__btn-bar {

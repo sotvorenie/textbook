@@ -2,8 +2,6 @@
 @use '../../variables' as *;
 
 .user-page {
-  padding-inline: rem(20);
-  overflow-y: auto;
   padding-bottom: rem(20);
 
   &__header {

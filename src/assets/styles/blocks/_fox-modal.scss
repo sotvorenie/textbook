@@ -1,0 +1,9 @@
+@use '../helpers/index' as *;
+@use '../variables' as *;
+
+.fox-modal {
+
+  &__img {
+    height: rem(250);
+  }
+}

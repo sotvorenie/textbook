@@ -18,34 +18,38 @@ client.interceptors.request.use((config) => {
 })
 
 client.interceptors.response.use(
-    (response) => {
-        const onlineStore = useOnlineStore()
-
-        if (!onlineStore.isOnline) {
-            onlineStore.isOnline = true
+    response => response,
+    async error => {
+        if (axios.isCancel(error) || error.code === 'ERR_CANCELED') {
+            return {
+                data: [],
+                status: 0,
+                statusText: 'canceled',
+                headers: {},
+                config: error.config,
+            }
         }
-        return response
-    },
-    async (error) => {
+
         const onlineStore = useOnlineStore()
 
         const isNetworkError =
             error.code === 'ECONNABORTED' ||
             error.message === 'Network Error' ||
-            error.message.includes('network') ||
-            error.message.includes('ECONN') ||
+            error.message?.toLowerCase().includes('network') ||
+            error.message?.includes('ECONN') ||
             (error.request && !error.response)
 
         if (isNetworkError) {
             onlineStore.isOnline = false
             onlineStore.isOnlineMode = false
 
-            await showError('Нет подключения', 'Проверьте интернет-соединение')
-
-            throw error;
+            await showError(
+                'Нет подключения',
+                'Проверьте интернет-соединение'
+            )
         }
 
-        throw error;
+        throw error
     }
 )
 
@@ -54,23 +58,29 @@ export const get = async <T>(url: string, params?: any, signal?: AbortSignal): P
     return res.data as T
 }
 
-export const post = async <T>(url: string, data?: any, config?: any): Promise<T> => {
-    const res = await client.post(url, data, config)
+export const post = async <T>(
+    url: string,
+    data?: any,
+    config?: any,
+    signal?: AbortSignal
+): Promise<T> => {
+    const finalConfig = { ...config, signal }
+    const res = await client.post(url, data, finalConfig)
     return res.data as T
 }
 
-export const put = async <T>(url: string, data?: any): Promise<T> => {
-    const res = await client.put(url, data)
+export const put = async <T>(url: string, data?: any, signal?: AbortSignal): Promise<T> => {
+    const res = await client.put(url, data, { signal })
     return res.data as T
 }
 
-export const del = async <T>(url: string): Promise<T> => {
-    const res = await client.delete(url)
+export const del = async <T>(url: string, signal?: AbortSignal): Promise<T> => {
+    const res = await client.delete(url, { signal })
     return res.data as T
 }
 
-export const patch = async <T>(url: string, data?: any): Promise<T> => {
-    const res = await client.patch(url, data)
+export const patch = async <T>(url: string, data?: any, signal?: AbortSignal): Promise<T> => {
+    const res = await client.patch(url, data, { signal })
     return res.data as T
 }
 

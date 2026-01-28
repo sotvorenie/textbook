@@ -1,24 +1,26 @@
-import {onMounted, ref} from "vue";
+import {computed, onBeforeUnmount, onMounted, ref} from "vue";
+import {useRouter, useRoute} from "vue-router";
 
 import {Item} from "../../types/item.ts";
+
+import {sendToTelegram, TelegramEventType} from "../../api/telegram/telegram.ts";
+import {createItem, redactItem} from "../../api/posts/posts.ts";
+import {checkPost, createItemInDB, redactItemInDB} from "../../api/posts/postsDB.ts";
 
 import {showAsk, showConfirm, showError} from "../../utils/modals.ts";
 import {onBlur, onSubmit} from "../useFormValidation.ts";
 import {removeLabelText} from "../useLabelText.ts";
 import {getCurrentDateTime} from "../useDate.ts";
-
-import {sendToTelegram, TelegramEventType} from "../../api/telegram/telegram.ts";
-import {createItem, redactItem} from "../../api/posts/posts.ts";
-import {checkPost} from "../../api/posts/postsDB.ts";
+import toRouteName from "../useToRouteName.ts";
+import {useSignal} from "../useSignal.ts";
 
 import useCreateStore from "../../store/useCreateStore.ts";
 import useOnlineStore from "../../store/useOnlineStore.ts";
 import useItemsStore from "../../store/useItemsStore.ts";
-import useBlocksStore from "../../store/useBlocksStore.ts";
-import useSettingsStore from "../../store/useSettingsStore.ts";
 import useUserStore from "../../store/useUserStore.ts";
 import useTechnologiesStore from "../../store/useTechnologiesStore.ts";
 import useItemMemoStore from "../../store/useItemMemoStore.ts";
+import useScrollStore from "../../store/useScrollStore.ts";
 
 const names: Record<string, string> = {
     hints: 'подсказки',
@@ -57,23 +59,32 @@ export const textareaAttributesList: Record<string, { name: string, code: string
 }
 
 export const useCreate = (name: string) => {
-    const createStore = useCreateStore()
-    const onlineStore = useOnlineStore()
-    const itemsStore = useItemsStore()
-    const blocksStore = useBlocksStore()
-    const settingsStore = useSettingsStore()
-    const userStore = useUserStore()
-    const technologiesStore = useTechnologiesStore()
-    const itemMemoStore = useItemMemoStore()
+    const createStore = useCreateStore();
+    const onlineStore = useOnlineStore();
+    const itemsStore = useItemsStore();
+    const userStore = useUserStore();
+    const technologiesStore = useTechnologiesStore();
+    const itemMemoStore = useItemMemoStore();
+    const scrollStore = useScrollStore();
+
+    const router = useRouter();
+    const route = useRoute();
+
+    const signal = useSignal()
+
+    const scrollManager = scrollStore.useSaveScroll(name, 'create')
+
+    const id = computed(() =>
+        route.query.id ? Number(route.query.id) : undefined
+    )
 
     //=========================================================//
     //-- кнопки действий --//
-    const back = (
+    const back = async (
         name: string,
         type: string = 'no_textbooks'
     ) => {
-        blocksStore.activeBlock[name] = 'list'
-        settingsStore.settingsVisible[name] = 'list'
+        await router.push({name: toRouteName(name)})
 
         createStore.createData[name] = {
             title: '',
@@ -131,11 +142,11 @@ export const useCreate = (name: string) => {
     // клик по кнопке "Отмена"
     const handleBack = async (): Promise<void> => {
         if (userStore.isUserPost[name]
-            && blocksStore.activeBlock[name] === 'create'
+            && route.path.includes('/create')
             && createStore.isRedact[name]
         ) {
             await cancel(name, () => {
-                blocksStore.activeBlock[name] = 'item'
+                router.push({name: `${toRouteName(name)}/item`})
 
                 createStore.createData[name] = {
                     title: '',
@@ -159,10 +170,15 @@ export const useCreate = (name: string) => {
 
     //=========================================================//
     //-- асинхронные функции --//
+    // видимость анимации загрузки
+    const isLoading = ref<boolean>(false)
+
     const sendRequest = async (
         newItem: Item,
         tabs?: any
     ) => {
+        isLoading.value = true
+
         checkTabsLength(newItem, tabs)
 
         setLanguages(newItem)
@@ -190,19 +206,34 @@ export const useCreate = (name: string) => {
                 await redact(newItem)
             }
         } catch (err) {
-            console.error('Ошибка создания записи', err)
+            console.error('Ошибка создания/редактирования записи', err)
 
-            await showError(
-                isCreating ? 'Ошибка создания записи' : 'Ошибка редактирования записи',
-                isCreating ? 'Не удалось создать запись..' : 'Не удалось редактировать запись..'
-            )
+            if (isVisibleLocalHandler) {
+                const confirm = await showConfirm(
+                    `Ошибка ${isCreating ? 'создания' : 'редактирования'} записи`,
+                    `Возникла проблема с сервером.. Хотите ${isCreating ? 'создать' : 'редактировать'} запись локально на вашем ПК?`
+                )
+
+                if (confirm) {
+                    isCreating ?
+                        await createItemInDB(name, newItem, -1, 'create')
+                        : await redactItemInDB(name, newItem, createStore.createData[name].id, 'redact')
+                }
+            } else {
+                await showError(
+                    `Ошибка ${isCreating ? 'создания' : 'редактирования'} записи`,
+                    `Не удалось ${isCreating ? 'создать' : 'редактировать'} запись..`
+                )
+            }
+        } finally {
+            isLoading.value = false
         }
 
         await sendToTg(newItem)
 
         newItems.value = []
 
-        back(name, tabs ? 'textbooks' : undefined)
+        await back(name, tabs ? 'textbooks' : undefined)
     }
 
     // проверка наличия tab-ов
@@ -247,10 +278,10 @@ export const useCreate = (name: string) => {
             name,
             newItem,
             createInDB,
-            createStore.isCanCreateInAPI[name]
+            signal
         )
 
-        if (response?.id && (createStore.isCanCreateInAPI[name] || !onlineStore.isOnlineMode)) {
+        if (response?.id) {
             itemsStore.items[name].unshift({
                 id: response.id,
                 title: response.title,
@@ -273,7 +304,9 @@ export const useCreate = (name: string) => {
         const response = await redactItem(
             name,
             newItem,
-            createStore.createData[name].id
+            createStore.createData[name].id,
+            true,
+            signal
         )
 
         if (response?.id) {
@@ -295,7 +328,7 @@ export const useCreate = (name: string) => {
             advices: TelegramEventType.CREATE_ADVICES,
         }
 
-        await sendToTelegram(blockNameToEventType[name], newItem.title)
+        await sendToTelegram(blockNameToEventType[name], signal, newItem.title)
     }
     //=========================================================//
 
@@ -336,7 +369,7 @@ export const useCreate = (name: string) => {
 
 
     // создание нового поля ввода
-    const createTextarea = (type: string, tabId?: number): void => {
+    const createTextareaElement = (type: string, tabId?: number): void => {
         const item = {
             id: crypto.randomUUID(),
             type,
@@ -405,15 +438,13 @@ export const useCreate = (name: string) => {
     }
 
     // получаем список всевозможных языков и технологий, чтобы отобразить их с checkbox
-    const getTechnologies = (func: Function,) => {
+    const getTechnologies = () => {
         technologiesStore.technologies?.forEach(el => {
             technologies.value.push({
                 title: el,
                 checked: false
             })
         })
-
-        func()
 
         getSearchTechnologies()
     }
@@ -535,13 +566,22 @@ export const useCreate = (name: string) => {
     //-- хуки --//
     //проверка наличия поста в БД для редактирования (если данный пост в БД есть то показывать переключать сохранять/не сохранять запись локально при редактировании)
     onMounted(async () => {
-        if (!onlineStore.isOnlineMode || !createStore.isCanCreateInAPI[name]) {
+        if (!onlineStore.isOnlineMode) {
             isVisibleLocalHandler.value = false
-        } else if (createStore.isRedact[name]) {
-            isVisibleLocalHandler.value = await checkPost(name)
+        } else if (createStore.isRedact[name] && id.value) {
+            isVisibleLocalHandler.value = await checkPost(id.value, name)
         } else {
             isVisibleLocalHandler.value = true
         }
+
+        scrollManager.setup()
+        await scrollManager.restoreScroll()
+    })
+
+    onBeforeUnmount(() => {
+        newItems.value = []
+        newItemsTextbook.value = {}
+        scrollManager.destroy()
     })
     //=========================================================//
 
@@ -552,10 +592,12 @@ export const useCreate = (name: string) => {
         save,
         handleBack,
 
+        isLoading,
+
         newItems,
         newItemsTextbook,
         isVisibleCreateBtnBar,
-        createTextarea,
+        createTextareaElement,
         removeTextarea,
 
         technologies,
